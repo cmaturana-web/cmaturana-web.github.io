@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Importaciones China · Higuerillas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --orange:      #FF6A00;
+  --orange-lt:   #FF8C38;
+  --orange-glow: rgba(255,106,0,.35);
+  --bg:          #0E0E12;
+  --bg3:         #1E1E26;
+  --card:        #1A1A22;
+  --card2:       #22222C;
+  --text:        #F0F0F5;
+  --muted2:      #505060;
+  --border:      rgba(255,255,255,.07);
+  --font-h:      'Barlow Condensed', sans-serif;
+  --font-b:      'Barlow', sans-serif;
+  --radius:      16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; background: var(--bg);
+  font-family: var(--font-b); color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input  { font-family: inherit; outline: none; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 0%, rgba(255,106,0,.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 10% 80%, rgba(255,106,0,.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+#app {
+  display: flex; flex-direction: column;
+  min-height: 100dvh; max-width: 480px; margin: 0 auto;
+  position: relative; z-index: 1;
+}
+
+/* ── TOPBAR SINCRO ── */
+#topbar {
+  background: rgba(14,14,18,.95);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: 10px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+}
+.topbar-label-sm {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted2);
+}
+.topbar-label-sm span { color: var(--orange); }
+
+#btn-sync-top {
+  background: var(--orange); border-radius: 50px; padding: 8px 16px;
+  font-size: 12px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; gap: 6px;
+  letter-spacing: .8px; text-transform: uppercase;
+  transition: background .2s, transform .15s;
+  box-shadow: 0 4px 16px var(--orange-glow);
+}
+#btn-sync-top:hover  { background: var(--orange-lt); }
+#btn-sync-top:active { transform: scale(.95); }
+#btn-sync-top svg { width: 14px; height: 14px; }
+
+/* ── SEARCH ── */
+.search-wrap {
+  padding: 12px 14px 0;
+  position: sticky; top: 44px; z-index: 90;
+  background: var(--bg);
+}
+.search-inner {
+  background: var(--card); border-radius: 14px;
+  display: flex; align-items: center; padding: 0 14px;
+  border: 1.5px solid var(--border); transition: border-color .2s, box-shadow .2s;
+}
+.search-inner:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-glow); }
+.search-inner svg { width: 17px; height: 17px; color: var(--orange); flex-shrink: 0; }
+#search-input { flex: 1; border: none; background: transparent; padding: 12px 10px; font-size: 15px; color: var(--text); font-weight: 500; }
+#search-input::placeholder { color: var(--muted2); }
+#btn-clear { background: none; border: none; color: var(--muted2); padding: 4px; display: none; font-size: 16px; }
+
+/* ── STATS ── */
+.stats-row { display: flex; align-items: center; gap: 8px; padding: 10px 18px 4px; }
+#product-count { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted2); }
+#product-count strong { color: var(--orange); font-size: 14px; }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted2); display: inline-block; }
+.sync-dot.ok   { background: #22C55E; box-shadow: 0 0 6px rgba(34,197,94,.5); }
+.sync-dot.busy { background: var(--orange); animation: pulse 1s infinite; box-shadow: 0 0 6px var(--orange-glow); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ── LIST ── */
+#product-list { padding: 6px 14px 100px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ── CARD ── */
+.product-card {
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); display: flex; flex-direction: column;
+  overflow: hidden; animation: fadeUp .25s ease both;
+  transition: border-color .2s, box-shadow .2s;
+}
+.product-card:hover { border-color: rgba(255,106,0,.3); box-shadow: 0 4px 24px rgba(0,0,0,.4); }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+.card-top { display: flex; align-items: flex-start; gap: 12px; padding: 12px 12px 10px; }
+.prod-thumb {
+  width: 76px; height: 76px; border-radius: 12px;
+  object-fit: cover; flex-shrink: 0; background: var(--bg3);
+  border: 1px solid var(--border);
+}
+.prod-thumb-placeholder {
+  width: 76px; height: 76px; border-radius: 12px;
+  background: var(--bg3); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; border: 1px solid var(--border);
+}
+.prod-thumb-placeholder svg { width: 26px; height: 26px; color: var(--muted2); }
+.prod-info { flex: 1; min-width: 0; padding-top: 2px; }
+.prod-code { font-family: var(--font-h); font-size: 18px; font-weight: 900; color: var(--orange); letter-spacing: .5px; line-height: 1; }
+.prod-name { font-size: 13px; color: rgba(240,240,245,.75); margin-top: 6px; line-height: 1.55; word-break: break-word; white-space: normal; font-weight: 400; }
+.card-footer { border-top: 1px solid var(--border); padding: 10px 12px; display: flex; justify-content: flex-end; background: rgba(0,0,0,.15); }
+.btn-ver {
+  background: transparent; border: 1.5px solid var(--orange); color: var(--orange);
+  border-radius: 50px; padding: 7px 18px; font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .2s, color .2s, transform .15s, box-shadow .2s;
+}
+.btn-ver:hover { background: var(--orange); color: #fff; box-shadow: 0 4px 14px var(--orange-glow); }
+.btn-ver:active { transform: scale(.95); }
+.btn-ver svg { width: 13px; height: 13px; }
+
+/* ── EMPTY ── */
+#empty-state {
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; padding: 70px 32px; gap: 14px;
+  color: var(--muted2); text-align: center;
+}
+#empty-state svg { width: 60px; height: 60px; opacity: .25; }
+#empty-state p { font-size: 14px; line-height: 1.7; font-weight: 500; }
+
+/* ── LOADER ── */
+#loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 70px 32px; gap: 16px; color: var(--muted2); }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--bg3); border-top-color: var(--orange); border-radius: 50%; animation: spin .7s linear infinite; box-shadow: 0 0 12px var(--orange-glow); }
+@keyframes spin { to { transform: rotate(360deg); } }
+#loader span { font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── BOTÓN VOLVER AL INICIO ── */
+#btn-top {
+  position: fixed; right: 16px; bottom: 32px; z-index: 150;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--orange); color: #fff; border: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(255,106,0,.5), 0 2px 8px rgba(0,0,0,.4);
+  cursor: pointer; opacity: 0; pointer-events: none;
+  transform: translateY(12px) scale(.85);
+  transition: opacity .3s, transform .3s, background .2s;
+}
+#btn-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+#btn-top:hover  { background: var(--orange-lt); }
+#btn-top:active { transform: scale(.92); }
+#btn-top svg { width: 20px; height: 20px; }
+
+/* ── MODAL 9:16 ── */
+#modal-view {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.96);
+  align-items: center; justify-content: center; padding: 16px;
+  backdrop-filter: blur(8px);
+}
+#modal-view.open { display: flex; }
+.modal-card {
+  border-radius: 28px; overflow: hidden;
+  animation: scaleIn .22s cubic-bezier(.34,1.56,.64,1);
+  display: flex; flex-direction: column;
+  box-shadow: 0 0 0 1px rgba(255,106,0,.25), 0 0 0 3px rgba(255,106,0,.08), 0 32px 80px rgba(0,0,0,.85);
+  width: min(340px, calc(100vw - 32px));
+  height: min(605px, calc(100dvh - 32px));
+  background: #0a0a0f;
+}
+@keyframes scaleIn { from { opacity:0; transform:scale(.88); } to { opacity:1; transform:scale(1); } }
+.modal-img-wrap {
+  flex: 1; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(255,106,0,.12) 0%, rgba(14,14,18,1) 40%, rgba(14,14,18,1) 60%, rgba(255,106,0,.06) 100%), #0d0d12;
+}
+.modal-img-wrap::before {
+  content: ''; position: absolute; inset: 10px; z-index: 3;
+  border-radius: 12px; pointer-events: none;
+  background:
+    linear-gradient(var(--orange), var(--orange)) top left / 24px 2px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) top left / 2px 24px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) top right / 24px 2px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) top right / 2px 24px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) bottom left / 24px 2px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) bottom left / 2px 24px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) bottom right / 24px 2px no-repeat,
+    linear-gradient(var(--orange), var(--orange)) bottom right / 2px 24px no-repeat;
+  opacity: .7;
+}
+#modal-img {
+  max-width: calc(100% - 32px); max-height: calc(100% - 32px);
+  width: auto; height: auto; object-fit: contain;
+  display: none; position: relative; z-index: 2;
+  border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,.6);
+}
+.modal-img-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; z-index: 4;
+  background: linear-gradient(to top, #0a0a0f, transparent); pointer-events: none;
+}
+.modal-badge {
+  position: absolute; top: 16px; left: 16px; z-index: 5;
+  background: var(--orange); color: #fff;
+  font-family: var(--font-h); font-size: 15px; font-weight: 900;
+  padding: 5px 16px; border-radius: 50px; letter-spacing: .5px;
+  box-shadow: 0 4px 14px rgba(255,106,0,.55);
+}
+.modal-img-error {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: var(--muted2); font-size: 13px; text-align: center; padding: 20px;
+  z-index: 2; position: relative;
+}
+.modal-img-error svg { width: 48px; height: 48px; opacity: .25; }
+.modal-body { padding: 14px 18px 18px; background: var(--card); flex-shrink: 0; border-top: 2px solid rgba(255,106,0,.3); }
+.modal-name { font-size: 14px; color: rgba(240,240,245,.8); line-height: 1.6; word-break: break-word; margin-bottom: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: .5px; }
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+#btn-modal-close {
+  flex: 1; padding: 13px; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--muted2); border-radius: 14px; font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; transition: background .2s, color .2s;
+}
+#btn-modal-close:hover { background: var(--card2); color: var(--text); }
+#btn-download {
+  flex: 1; padding: 13px; background: var(--orange); border: none;
+  color: #fff; border-radius: 14px; font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  box-shadow: 0 4px 14px var(--orange-glow);
+  transition: background .2s, transform .15s;
+}
+#btn-download:hover  { background: var(--orange-lt); }
+#btn-download:active { transform: scale(.96); }
+#btn-download svg { width: 15px; height: 15px; flex-shrink: 0; }
+#btn-download.loading { opacity: .6; pointer-events: none; }
+#btn-whatsapp {
+  width: 100%; padding: 13px; background: #25D366; border: none;
+  color: #fff; border-radius: 14px; font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 14px rgba(37,211,102,.35);
+  transition: background .2s, transform .15s;
+}
+#btn-whatsapp:hover  { background: #1ebe5d; }
+#btn-whatsapp:active { transform: scale(.96); }
+#btn-whatsapp svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 50px;
+  padding: 10px 22px; font-size: 13px; font-weight: 600;
+  opacity: 0; transition: all .3s; pointer-events: none; z-index: 300;
+  white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header id="topbar">
+    <div class="topbar-label-sm">IMPORTACIONES CHINA <span>· !LWii</span></div>
+    <button id="btn-sync-top" onclick="syncDrive()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      SINCRO
+    </button>
+  </header>
+
+  <div class="search-wrap">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="search-input" type="search" placeholder="Buscar código o nombre…"
+             oninput="filterProducts()" autocomplete="off"/>
+      <button id="btn-clear" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <span id="product-count">
+      <strong>—</strong> productos
+      <span class="sync-dot busy" id="sync-dot"></span>
+    </span>
+  </div>
+
+  <div id="loader"><div class="spinner"></div><span>Cargando inventario…</span></div>
+  <div id="product-list" style="display:none"></div>
+  <div id="empty-state" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="2" y="7" width="20" height="14" rx="2"/>
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+    </svg>
+    <p>No se encontraron productos.</p>
+  </div>
+
+</div>
+
+<button id="btn-top" onclick="scrollToTop()" title="Volver al inicio">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<div id="modal-view" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <div class="modal-img-wrap" id="modal-img-wrap">
+      <img id="modal-img" src="" alt=""/>
+      <div class="modal-badge" id="modal-code"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-actions">
+        <button id="btn-modal-close" onclick="closeModal()">✕ CERRAR</button>
+        <button id="btn-download" onclick="downloadImage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          DESCARGAR
+        </button>
+        <button id="btn-whatsapp" onclick="shareWhatsapp()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+          </svg>
+          COMPARTIR
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API_KEY   = 'AIzaSyAAHwo4KFYUkRDUQHPqY0pzjmv0BKrjtw8';
+const FOLDER_ID = '1iezyx2NVafqz4qH7PbMqX7E_1tsFqUXU';
+const DISCOVERY = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+const IMG_EXTS  = /\.(jpg|jpeg|png|gif|webp)$/i;
+
+let gapiReady      = false;
+let allProducts    = [];
+let currentProduct = null;
+
+async function downloadImage() {
+  if (!currentProduct) return;
+  const btn = document.getElementById('btn-download');
+  btn.classList.add('loading');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> DESCARGANDO…';
+  try {
+    const resp = await fetch(currentProduct.full);
+    if (!resp.ok) throw new Error('fetch fail');
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = '#' + currentProduct.code + '_' + currentProduct.name.replace(/ /g,'-') + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+    toast('✓ Imagen descargada');
+  } catch(e) {
+    window.open(currentProduct.full, '_blank');
+    toast('Abriendo en nueva pestaña…');
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> DESCARGAR';
+  }
+}
+
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('btn-top');
+  if (window.scrollY > 300) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+}, { passive: true });
+
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+function gapiLoaded() {
+  gapi.load('client', () => {
+    gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY] })
+      .then(() => { gapiReady = true; syncDrive(); })
+      .catch(e => showError('Error al cargar: ' + (e.message || e)));
+  });
+}
+
+async function syncDrive() {
+  if (!gapiReady) { toast('Cargando…'); return; }
+  setSyncDot('busy'); showLoader(true); toast('Sincronizando…');
+  try {
+    let all = [], pageToken = null;
+    do {
+      const params = {
+        q: "'" + FOLDER_ID + "' in parents and trashed=false and (mimeType contains 'image/')",
+        fields: 'nextPageToken,files(id,name,mimeType,thumbnailLink)',
+        pageSize: 100, spaces: 'drive',
+      };
+      if (pageToken) params.pageToken = pageToken;
+      const r = await gapi.client.drive.files.list(params);
+      all.push(...(r.result.files || []));
+      pageToken = r.result.nextPageToken;
+    } while (pageToken);
+
+    const filtered = all.filter(f => IMG_EXTS.test(f.name));
+    allProducts = filtered.map(f => {
+      const base  = f.name.replace(/\.[^.]+$/, '');
+      const parts = base.split('_');
+      const id    = f.id;
+      const thumb = f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+/, '=s400') : null;
+      const full  = 'https://lh3.googleusercontent.com/d/' + id + '=s1200';
+      return { id, thumb, full, code: parts[0] || '?', name: parts.slice(1).join(' ') || 'SN' };
+    }).sort((a, b) => b.code.localeCompare(a.code, undefined, { numeric: true }));
+
+    showLoader(false);
+    renderProducts(allProducts);
+    setSyncDot('ok');
+    toast('✓ ' + allProducts.length + ' productos');
+  } catch (e) {
+    console.error(e);
+    showError('Error al conectar con Drive.<br>Verifica que la carpeta sea pública.');
+    setSyncDot('');
+  }
+}
+
+function renderProducts(list) {
+  const container = document.getElementById('product-list');
+  const empty     = document.getElementById('empty-state');
+  updateCount(list.length);
+  if (!list.length) { container.style.display = 'none'; empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+  container.style.display = 'flex';
+  container.innerHTML = list.map((p, i) => {
+    const nombre = p.name === 'SN'
+      ? '<em style="opacity:.4">Sin nombre</em>'
+      : p.name.replace(/-/g, ' ');
+    const imgHtml = p.thumb
+      ? '<img class="prod-thumb" src="' + p.thumb + '" alt="#' + p.code + '" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+        + '<div class="prod-thumb-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>'
+      : '<div class="prod-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+    return '<div class="product-card" style="animation-delay:' + Math.min(i*25,400) + 'ms">'
+      + '<div class="card-top">' + imgHtml
+      + '<div class="prod-info"><div class="prod-code">#' + p.code + '</div>'
+      + '<div class="prod-name">' + nombre + '</div></div></div>'
+      + '<div class="card-footer"><button class="btn-ver" onclick="viewProduct(' + i + ')">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+      + 'VER PRODUCTO</button></div></div>';
+  }).join('');
+}
+
+function getFiltered() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  return q ? allProducts.filter(p =>
+    p.code.toLowerCase().includes(q) ||
+    p.name.toLowerCase().replace(/-/g,' ').includes(q)) : allProducts;
+}
+function filterProducts() {
+  const q = document.getElementById('search-input').value.trim();
+  document.getElementById('btn-clear').style.display = q ? 'block' : 'none';
+  renderProducts(getFiltered());
+}
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('btn-clear').style.display = 'none';
+  renderProducts(allProducts);
+}
+
+function viewProduct(idx) {
+  const p = getFiltered()[idx]; if (!p) return;
+  currentProduct = p;
+  const wrap = document.getElementById('modal-img-wrap');
+  const img  = document.getElementById('modal-img');
+  img.style.display = 'none'; img.src = '';
+  const prev = wrap.querySelector('.modal-img-error');
+  if (prev) prev.remove();
+  document.getElementById('modal-code').textContent = '#' + p.code;
+  document.getElementById('modal-name').textContent =
+    p.name === 'SN' ? 'Sin nombre' : p.name.replace(/-/g, ' ');
+  img.onload  = () => { img.style.display = 'block'; };
+  img.onerror = () => {
+    if (p.thumb && !img.src.includes('thumbnailLink')) {
+      img.src = p.thumb.replace(/=s\d+/, '=s1200');
+    } else {
+      img.style.display = 'none';
+      const err = document.createElement('div');
+      err.className = 'modal-img-error';
+      err.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Imagen no disponible</span>';
+      wrap.insertBefore(err, document.getElementById('modal-code'));
+    }
+  };
+  img.src = p.full;
+  document.getElementById('modal-view').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function shareWhatsapp() {
+  if (!currentProduct) return;
+  const nombre = currentProduct.name === 'SN' ? 'Sin nombre' : currentProduct.name.replace(/-/g, ' ');
+  const texto  = '*#' + currentProduct.code + '* — ' + nombre + '\n' + currentProduct.full;
+  const url    = 'https://wa.me/?text=' + encodeURIComponent(texto);
+  window.open(url, '_blank');
+}
+  document.getElementById('modal-view').classList.remove('open');
+  const img = document.getElementById('modal-img');
+  img.src = ''; img.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function showLoader(on) {
+  document.getElementById('loader').style.display = on ? 'flex' : 'none';
+  if (on) {
+    document.getElementById('product-list').style.display = 'none';
+    document.getElementById('empty-state').style.display  = 'none';
+  }
+}
+function showError(msg) {
+  showLoader(false);
+  const el = document.getElementById('empty-state');
+  el.querySelector('p').innerHTML = msg;
+  el.style.display = 'flex';
+  document.getElementById('product-list').style.display = 'none';
+}
+function updateCount(n) {
+  const dot = document.getElementById('sync-dot');
+  const cls = dot ? dot.className : 'sync-dot';
+  document.getElementById('product-count').innerHTML =
+    '<strong>' + n + '</strong> producto' + (n!==1?'s':'') + ' <span class="' + cls + '" id="sync-dot"></span>';
+}
+function setSyncDot(s) {
+  const d = document.getElementById('sync-dot');
+  if (d) d.className = 'sync-dot' + (s?' '+s:'');
+}
+let _tt;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+<script src="https://apis.google.com/js/api.js?onload=gapiLoaded" async defer></script>
+</body>
+</html>
