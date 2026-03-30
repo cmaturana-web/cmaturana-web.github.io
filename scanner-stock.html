@@ -17,6 +17,11 @@
         .check-item input:checked + div { background-color: #dcfce7; border-color: #22c55e; }
         .check-item input:checked + div i { color: #16a34a; opacity: 1; }
         .check-item input:checked + div span { color: #166534; text-decoration: line-through; opacity: 0.7; }
+        
+        /* Check especial para "OTRA" */
+        #checkOtra:checked + div { background-color: #eff6ff; border-color: #3b82f6; }
+        #checkOtra:checked + div i { color: #3b82f6; opacity: 1; }
+        #checkOtra:checked + div span { text-decoration: none; color: #1e40af; opacity: 1; }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen pb-10">
@@ -26,10 +31,10 @@
         <div class="flex justify-between items-center mb-6 px-2">
             <div>
                 <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic">ULTRON <span class="text-blue-500">GESTIÓN</span></h1>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Checklist de Pasillo v3.0</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Herramienta de Pasillo v4.0</p>
             </div>
             <div class="bg-blue-600 text-white p-2 rounded-2xl w-10 h-10 flex items-center justify-center shadow-lg shadow-blue-200">
-                <i class="fas fa-clipboard-check"></i>
+                <i class="fas fa-tasks"></i>
             </div>
         </div>
 
@@ -38,11 +43,9 @@
             <input id="codigoInput" type="number" inputmode="numeric" placeholder="Código..." 
                    class="flex-grow p-4 text-lg font-bold bg-transparent text-gray-700 outline-none w-full"
                    onkeypress="if(event.key === 'Enter') buscarStock()">
-            
             <button onclick="abrirEscanner()" class="bg-slate-100 text-slate-500 w-12 h-12 rounded-2xl flex items-center justify-center mr-2 active:scale-90 transition-all">
                 <i class="fas fa-camera text-xl"></i>
             </button>
-
             <button onclick="buscarStock()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-90 transition-all shadow-lg">
                 <i class="fas fa-search text-sm"></i>
             </button>
@@ -50,9 +53,9 @@
 
         <!-- Escáner -->
         <div id="scannerWrapper" class="hidden mb-6 fade-in">
-            <div class="bg-black rounded-[2.5rem] overflow-hidden relative shadow-2xl border-4 border-white">
+            <div class="bg-black rounded-[2.5rem] overflow-hidden relative shadow-2xl border-4 border-white text-white">
                 <div id="reader"></div>
-                <button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white w-10 h-10 rounded-full z-50 flex items-center justify-center">
+                <button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 backdrop-blur-md w-10 h-10 rounded-full z-50 flex items-center justify-center">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -61,15 +64,14 @@
         <!-- Loader -->
         <div id="loader" class="hidden flex flex-col items-center justify-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-[6px] border-blue-50 border-t-blue-600 mb-4"></div>
-            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest animate-pulse">Sincronizando...</p>
+            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest animate-pulse tracking-[0.3em]">Cargando Datos...</p>
         </div>
 
-        <!-- RESULTADO CON CHECKLIST -->
+        <!-- RESULTADO CON CHECKLIST DINÁMICO -->
         <div id="resultado" class="hidden fade-in space-y-4">
             <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-50">
-                <!-- Info Producto -->
                 <div class="bg-blue-600 p-3 text-white text-center">
-                    <span id="resCodigo" class="text-[9px] font-black tracking-[0.4em] opacity-80 uppercase leading-none">CARGANDO...</span>
+                    <span id="resCodigo" class="text-[9px] font-black tracking-[0.4em] opacity-80 uppercase leading-none italic">CARGANDO...</span>
                 </div>
                 
                 <div class="p-6">
@@ -77,21 +79,20 @@
                     
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-center">
-                            <span class="text-blue-500 text-[9px] font-black uppercase block mb-1 tracking-widest">NETO</span>
+                            <span class="text-blue-500 text-[9px] font-black uppercase block mb-1 tracking-widest">PRECIO NETO</span>
                             <span id="resPrecio" class="text-xl font-black text-blue-800">$0</span>
                         </div>
                         <div id="stockBox" class="p-4 rounded-2xl border text-center">
-                            <span id="stockLabel" class="text-[9px] font-black uppercase block mb-1 tracking-widest">EXISTENCIA</span>
+                            <span id="stockLabel" class="text-[9px] font-black uppercase block mb-1 tracking-widest">STOCK ACTUAL</span>
                             <span id="resStock" class="text-xl font-black">0</span>
                         </div>
                     </div>
 
                     <!-- SECCIÓN CHECKLIST -->
-                    <div class="bg-slate-50 p-5 rounded-[2rem] border border-slate-100">
-                        <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 text-center">Tareas Pendientes</h3>
+                    <div class="bg-slate-50 p-4 rounded-[2rem] border border-slate-100">
+                        <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 text-center">Gestión de Pasillo</h3>
                         <div id="checklistArea" class="grid grid-cols-2 gap-3">
                             
-                            <!-- ITEM: PRECIO -->
                             <label class="check-item relative">
                                 <input type="checkbox" class="hidden peer">
                                 <div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm transition-all active:scale-95">
@@ -100,7 +101,6 @@
                                 </div>
                             </label>
 
-                            <!-- ITEM: LIMPIEZA -->
                             <label class="check-item relative">
                                 <input type="checkbox" class="hidden peer">
                                 <div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm transition-all active:scale-95">
@@ -109,7 +109,6 @@
                                 </div>
                             </label>
 
-                            <!-- ITEM: REPOSICIÓN -->
                             <label class="check-item relative">
                                 <input type="checkbox" class="hidden peer">
                                 <div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm transition-all active:scale-95">
@@ -118,7 +117,6 @@
                                 </div>
                             </label>
 
-                            <!-- ITEM: ORDEN -->
                             <label class="check-item relative">
                                 <input type="checkbox" class="hidden peer">
                                 <div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm transition-all active:scale-95">
@@ -127,27 +125,41 @@
                                 </div>
                             </label>
 
+                            <!-- BOTÓN OTRA (OCUPA 2 COLUMNAS) -->
+                            <label class="check-item relative col-span-2">
+                                <input type="checkbox" id="checkOtra" class="hidden peer" onchange="toggleNota()">
+                                <div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm transition-all active:scale-95">
+                                    <i class="fas fa-edit opacity-0 transition-opacity"></i>
+                                    <span class="text-xs font-black text-slate-600 uppercase tracking-tighter italic">¿Otra Necesidad?</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- CUADRO DE TEXTO PARA "OTRA" -->
+                        <div id="notaContainer" class="hidden mt-3 fade-in">
+                            <textarea id="inputNota" rows="2" placeholder="Describe qué se necesita..." 
+                                      class="w-full p-4 bg-white rounded-2xl border-2 border-blue-200 text-sm font-bold text-blue-900 shadow-inner outline-none"></textarea>
                         </div>
                     </div>
                 </div>
             </div>
             
             <button onclick="nuevaBusqueda()" class="w-full bg-white text-slate-400 font-black py-5 rounded-[1.5rem] shadow-lg border border-slate-100 flex items-center justify-center gap-3 active:scale-95 uppercase text-[9px] tracking-[0.3em]">
-                <i class="fas fa-plus-circle text-blue-500"></i> Nueva Consulta
+                <i class="fas fa-plus-circle text-blue-500"></i> Siguiente Producto
             </button>
         </div>
 
-        <!-- Historial Recientes -->
+        <!-- Historial -->
         <div id="historialSection" class="mt-8 px-2">
-            <h3 class="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em] mb-4">Últimas Consultas</h3>
+            <h3 class="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em] mb-4 italic text-center">Búsquedas Recientes</h3>
             <div id="listaHistorial" class="space-y-2"></div>
         </div>
 
         <!-- Error -->
         <div id="errorMsg" class="hidden fade-in bg-white p-10 rounded-[2.5rem] text-center mt-4 border border-red-50 shadow-2xl">
-            <i class="fas fa-search text-red-100 text-6xl mb-4"></i>
-            <p class="font-black text-slate-800">Código no encontrado</p>
-            <button onclick="nuevaBusqueda()" class="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-8 py-4 rounded-full">Reintentar</button>
+            <i class="fas fa-ghost text-red-100 text-6xl mb-4"></i>
+            <p class="font-black text-slate-800 uppercase tracking-tighter">Sin información</p>
+            <button onclick="nuevaBusqueda()" class="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-8 py-4 rounded-full">Volver</button>
         </div>
     </div>
 
@@ -170,7 +182,7 @@
 
             cerrarEscanner();
             input.blur();
-            resetChecklist(); // LIMPIAR EL CHECKLIST PARA EL NUEVO PRODUCTO
+            limpiarControles(); // RESETEAR TODO ANTES DE BUSCAR
             mostrarVista('loader');
 
             try {
@@ -192,11 +204,11 @@
 
                 if (data.stock <= 0) {
                     sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600";
-                    sLab.innerText = "AGOTADO";
+                    sLab.innerText = "SIN STOCK";
                     sVal.className = "text-xl font-black text-red-700";
                 } else {
                     sBox.className = "p-4 rounded-2xl border border-green-100 bg-green-50 text-green-600";
-                    sLab.innerText = "DISPONIBLE";
+                    sLab.innerText = "EN STOCK";
                     sVal.className = "text-xl font-black text-green-700";
                 }
 
@@ -206,16 +218,32 @@
             }
         }
 
-        function resetChecklist() {
-            // Desmarca todos los checkboxes del checklist
-            const checks = document.querySelectorAll('#checklistArea input');
-            checks.forEach(c => c.checked = false);
+        function toggleNota() {
+            const container = document.getElementById('notaContainer');
+            const input = document.getElementById('inputNota');
+            const isChecked = document.getElementById('checkOtra').checked;
+            
+            if (isChecked) {
+                container.classList.remove('hidden');
+                input.focus(); // Abrir teclado al marcar
+            } else {
+                container.classList.add('hidden');
+                input.value = ""; // Limpiar si se desmarca
+            }
+        }
+
+        function limpiarControles() {
+            // Desmarcar todos los checks
+            document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false);
+            // Ocultar y vaciar cuadro de texto
+            document.getElementById('notaContainer').classList.add('hidden');
+            document.getElementById('inputNota').value = "";
         }
 
         function abrirEscanner() {
             mostrarVista('scannerWrapper');
             html5QrCode = new Html5Qrcode("reader");
-            const config = { fps: 15, qrbox: { width: 250, height: 180 } };
+            const config = { fps: 20, qrbox: { width: 250, height: 180 } };
             html5QrCode.start({ facingMode: "environment" }, config, (text) => buscarStock(text));
         }
 
@@ -254,14 +282,14 @@
         function actualizarHistorial() {
             const lista = document.getElementById('listaHistorial');
             if (historial.length === 0) {
-                lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4">Sin registros recientes</p>';
+                lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4">No hay historial disponible</p>';
                 return;
             }
             lista.innerHTML = historial.map(h => `
                 <div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-50 active:scale-95 transition-all">
                     <div class="overflow-hidden">
                         <p class="font-bold text-slate-700 text-sm truncate pr-4">${h.nombre}</p>
-                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">${h.codigo}</p>
+                        <p class="text-[9px] text-slate-400 font-black tracking-widest">${h.codigo}</p>
                     </div>
                     <div class="text-blue-600 font-black text-sm">$${h.precio ? h.precio.toLocaleString('es-CL') : '---'}</div>
                 </div>
