@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultron Auditor PRO - v11.0</title>
+    <title>Ultron Auditor PRO - v12.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -27,7 +27,7 @@
         <div class="flex justify-between items-center mb-6 px-2">
             <div>
                 <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic uppercase">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Auditoría de Pasillo v11.0</p>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Auditoría de Pasillo v12.0</p>
             </div>
             <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white p-2 rounded-2xl w-12 h-12 flex items-center justify-center shadow-xl active:scale-90 transition-all">
                 <i class="fas fa-clipboard-list text-lg"></i>
@@ -76,10 +76,13 @@
                     <div class="bg-slate-50 p-4 rounded-[2rem] border border-slate-100">
                         <div id="checklistArea" class="grid grid-cols-2 gap-3">
                             <label class="check-item"><input type="checkbox" data-tarea="Falta Precio" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-tag opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Precio</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Falta Reposición" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-boxes opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Reponer</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Falta Limpieza" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-broom opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Limpiar</span></div></label>
                             
-                            <!-- CAMBIO SOLICITADO: REVISAR EXISTENCIA -->
+                            <!-- CAMBIO: REPOSICIÓN -->
+                            <label class="check-item"><input type="checkbox" data-tarea="Falta Reposición" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-boxes opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Reposición</span></div></label>
+                            
+                            <!-- CAMBIO: LIMPIEZA -->
+                            <label class="check-item"><input type="checkbox" data-tarea="Falta Limpieza" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-broom opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Limpieza</span></div></label>
+                            
                             <label class="check-item"><input type="checkbox" data-tarea="Revisar Existencia" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-clipboard-check opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase text-center leading-none">Revisar Existencia</span></div></label>
                             
                             <label class="check-item col-span-2">
