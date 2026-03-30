@@ -25,7 +25,7 @@
         <div class="flex justify-between items-center mb-6 px-2">
             <div>
                 <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic uppercase">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Auditoría de Pasillo v8.0</p>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Auditoría de Pasillo v9.0</p>
             </div>
             <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white p-2 rounded-2xl w-12 h-12 flex items-center justify-center shadow-xl active:scale-90 transition-all">
                 <i class="fas fa-clipboard-list text-lg"></i>
@@ -33,11 +33,17 @@
             </button>
         </div>
 
-        <!-- Buscador -->
+        <!-- Buscador con botón de borrar texto -->
         <div id="searchContainer" class="bg-white p-2 rounded-3xl shadow-xl flex items-center mb-4 border border-gray-100 transition-all">
             <input id="codigoInput" type="number" inputmode="numeric" placeholder="Código..." 
                    class="flex-grow p-4 text-lg font-bold bg-transparent text-gray-700 outline-none w-full"
                    onkeypress="if(event.key === 'Enter') buscarStock()">
+            
+            <!-- Botón para borrar el texto escrito -->
+            <button onclick="limpiarInput()" class="text-slate-300 w-10 h-10 flex items-center justify-center active:text-red-500 transition-all">
+                <i class="fas fa-times-circle text-lg"></i>
+            </button>
+
             <button onclick="abrirEscanner()" class="bg-slate-100 text-slate-500 w-12 h-12 rounded-2xl flex items-center justify-center mr-2 active:scale-90">
                 <i class="fas fa-camera text-xl"></i>
             </button>
@@ -58,28 +64,22 @@
         <!-- RESULTADO -->
         <div id="resultado" class="hidden fade-in space-y-4 pb-20">
             <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-50">
-                <!-- BANNER DINÁMICO -->
                 <div id="resBanner" class="bg-blue-600 p-3 text-white text-center transition-all duration-300">
                     <span id="resCodigoLabel" class="text-[11px] font-black tracking-[0.2em] uppercase leading-none italic">CÓDIGO: ---</span>
                 </div>
 
                 <div class="p-6">
                     <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 leading-tight text-center px-2">Nombre</h2>
-                    
                     <div class="grid grid-cols-2 gap-3 mb-6">
-                        <!-- PVP -->
                         <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex flex-col items-center justify-center text-center">
                             <span class="text-blue-500 text-[9px] font-black uppercase block mb-1 tracking-widest">PVP</span>
                             <span id="resPrecio" class="text-xl font-black text-blue-800">$0</span>
                         </div>
-                        <!-- STOCK (Siempre dice STOCK) -->
                         <div id="stockBox" class="p-4 rounded-2xl border flex flex-col items-center justify-center text-center transition-all">
                             <span id="stockLabel" class="text-[9px] font-black uppercase block mb-1 tracking-widest">STOCK</span>
                             <span id="resStock" class="text-xl font-black">0</span>
                         </div>
                     </div>
-
-                    <!-- Checklist -->
                     <div class="bg-slate-50 p-4 rounded-[2rem] border border-slate-100">
                         <div id="checklistArea" class="grid grid-cols-2 gap-3">
                             <label class="check-item"><input type="checkbox" data-tarea="Falta Precio" class="hidden"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-tag opacity-0"></i><span class="text-xs font-black text-slate-500 uppercase tracking-tighter">Precio</span></div></label>
@@ -90,13 +90,24 @@
                     </div>
                 </div>
             </div>
-            <button onclick="guardarYGestionar()" class="w-full bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl flex items-center justify-center gap-3 active:scale-95 uppercase text-[10px] tracking-[0.3em] italic">
-                <i class="fas fa-save"></i> Guardar y Siguiente
-            </button>
+            <div class="flex gap-2">
+                <button onclick="nuevaBusqueda()" class="w-1/3 bg-slate-200 text-slate-500 font-black py-5 rounded-[1.5rem] uppercase text-[10px] tracking-widest active:scale-95">Descartar</button>
+                <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl flex items-center justify-center gap-3 active:scale-95 uppercase text-[10px] tracking-[0.3em] italic">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
         </div>
 
-        <!-- Historial -->
-        <div id="historialSection" class="mt-8 px-2"><div id="listaHistorial" class="space-y-2"></div></div>
+        <!-- Historial con botón Limpiar -->
+        <div id="historialSection" class="mt-8 px-2">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h3 class="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em] italic">Búsquedas Recientes</h3>
+                <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase tracking-widest active:scale-90 transition-all">
+                    <i class="fas fa-trash mr-1"></i> Limpiar
+                </button>
+            </div>
+            <div id="listaHistorial" class="space-y-2"></div>
+        </div>
     </div>
 
     <!-- MODAL ALERTAS -->
@@ -107,8 +118,8 @@
         </div>
         <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-24"></div>
         <div class="fixed bottom-6 left-6 right-6 flex gap-3">
-            <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase text-xs">Enviar</button>
-            <button onclick="vaciarReporte()" class="bg-red-500 text-white p-4 rounded-2xl shadow-xl"><i class="fas fa-trash-alt"></i></button>
+            <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase text-xs italic tracking-widest">Enviar Alertas</button>
+            <button onclick="vaciarReporte()" class="bg-red-500 text-white p-4 rounded-2xl shadow-xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
         </div>
     </div>
 
@@ -120,6 +131,16 @@
         let currentProduct = null;
 
         window.onload = () => { actualizarHistorial(); actualizarBadge(); };
+
+        function limpiarInput() { document.getElementById('codigoInput').value = ''; document.getElementById('codigoInput').focus(); }
+
+        function limpiarHistorial() {
+            if (confirm("¿Borrar historial de búsquedas recientes?")) {
+                historial = [];
+                localStorage.setItem('ultron_history', JSON.stringify(historial));
+                actualizarHistorial();
+            }
+        }
 
         async function buscarStock(codigoForzado = null) {
             const input = document.getElementById('codigoInput');
@@ -141,12 +162,10 @@
                 const sBox = document.getElementById('stockBox');
                 const sLabel = document.getElementById('stockLabel');
 
-                // RESETEAR ETIQUETA SIEMPRE A STOCK
                 sLabel.innerText = "STOCK";
 
                 if (data.descontinuado === true) {
                     banner.classList.add('bg-descontinuado');
-                    // MOSTRAR AMBOS: AVISO Y CÓDIGO
                     resLabel.innerHTML = `<i class="fas fa-ban mr-1"></i> DESCONTINUADO: ${data.codigo}`;
                     resNombre.classList.add('text-red-600');
                     sBox.className = "p-4 rounded-2xl border border-red-200 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center";
@@ -154,18 +173,13 @@
                     banner.classList.remove('bg-descontinuado');
                     resLabel.innerText = "CÓDIGO: " + data.codigo;
                     resNombre.classList.remove('text-red-600');
-                    
-                    if (parseInt(data.stock) <= 0) {
-                        sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center";
-                    } else {
-                        sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center flex flex-col items-center justify-center";
-                    }
+                    if (parseInt(data.stock) <= 0) sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center";
+                    else sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center flex flex-col items-center justify-center";
                 }
 
                 document.getElementById('resNombre').innerText = data.nombre;
                 document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---";
                 document.getElementById('resStock').innerText = data.stock ?? 0;
-                
                 mostrarVista('resultado');
             } catch (error) { mostrarVista('errorMsg'); }
         }
@@ -180,18 +194,18 @@
             nuevaBusqueda();
         }
 
-        function mostrarVista(id) { document.querySelectorAll('#loader, #resultado, #errorMsg, #scannerWrapper, #historialSection').forEach(el => el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id === 'resultado') document.getElementById('historialSection').classList.add('hidden'); else document.getElementById('historialSection').classList.remove('hidden');}
+        function mostrarVista(id) { document.querySelectorAll('#loader, #resultado, #errorMsg, #scannerWrapper, #historialSection').forEach(el => el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id !== 'resultado') document.getElementById('historialSection').classList.remove('hidden'); }
         function abrirEscanner() { mostrarVista('scannerWrapper'); html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => buscarStock(text)); }
         function cerrarEscanner() { if (html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerWrapper').classList.add('hidden')); }
-        function nuevaBusqueda() { document.getElementById('codigoInput').value = ''; mostrarVista('historialSection'); document.getElementById('codigoInput').focus(); }
+        function nuevaBusqueda() { limpiarInput(); mostrarVista('historialSection'); }
         function actualizarBadge() { const b = document.getElementById('badgeGestion'); b.innerText = gestionados.length; b.classList.toggle('hidden', gestionados.length === 0); }
         function limpiarChecks() { document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false); }
-        function abrirModalGestion() { document.getElementById('modalGestion').classList.remove('hidden'); const lista = document.getElementById('listaReporte'); lista.innerHTML = gestionados.map(g => `<div class="bg-white p-4 rounded-2xl mb-2"><p class="font-black text-xs uppercase">${g.nombre}</p><p class="text-[9px] text-slate-400">#${g.codigo} | ${g.time}</p><div class="mt-2 flex flex-wrap gap-1">${g.tareas.map(t => `<span class="bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full border border-red-100">${t}</span>`).join('')}</div></div>`).join(''); }
+        function abrirModalGestion() { document.getElementById('modalGestion').classList.remove('hidden'); const lista = document.getElementById('listaReporte'); lista.innerHTML = gestionados.map(g => `<div class="bg-white p-4 rounded-2xl mb-2 shadow-sm border border-slate-100"><p class="font-black text-xs uppercase">${g.nombre}</p><p class="text-[9px] text-slate-400">#${g.codigo} | ${g.time}</p><div class="mt-2 flex flex-wrap gap-1">${g.tareas.map(t => `<span class="bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full border border-red-100">${t}</span>`).join('')}</div></div>`).join(''); }
         function cerrarModalGestion() { document.getElementById('modalGestion').classList.add('hidden'); }
-        function vaciarReporte() { if (confirm("¿Borrar todo?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
-        function compartirReporte() { const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n🚨 ${g.tareas.join(', ')}`).join('\n\n'); navigator.clipboard.writeText(t).then(() => alert("Copiado")); }
-        function guardarEnHistorial(item) { historial = historial.filter(h => h.codigo !== item.codigo); historial.unshift(item); historial = historial.slice(0, 5); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); }
-        function actualizarHistorial() { const lista = document.getElementById('listaHistorial'); lista.innerHTML = historial.map(h => `<div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm text-[10px] uppercase font-black"><div>${h.nombre}<p class="text-[8px] font-normal text-slate-400">#${h.codigo}</p></div><div class="text-blue-600">$${h.precio.toLocaleString('es-CL')}</div></div>`).join(''); }
+        function vaciarReporte() { if (confirm("¿Borrar todas las alertas?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        function compartirReporte() { const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n🚨 PROBLEMAS: ${g.tareas.join(', ')}`).join('\n\n'); navigator.clipboard.writeText("ALERTAS ULTRON:\n\n"+t).then(() => alert("Copiado al portapapeles")); }
+        function guardarEnHistorial(item) { historial = historial.filter(h => h.codigo !== item.codigo); historial.unshift(item); historial = historial.slice(0, 10); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); }
+        function actualizarHistorial() { const lista = document.getElementById('listaHistorial'); if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4 uppercase font-black tracking-widest">Sin historial</p>'; return; } lista.innerHTML = historial.map(h => `<div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-50 text-[10px] uppercase font-black active:scale-95 transition-all"><div>${h.nombre}<p class="text-[8px] font-normal text-slate-400">#${h.codigo}</p></div><div class="text-blue-600 font-black">$${h.precio.toLocaleString('es-CL')}</div></div>`).join(''); }
     </script>
 </body>
 </html>
