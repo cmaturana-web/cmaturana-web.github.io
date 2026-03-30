@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultron Auditor PRO - v20.0</title>
+    <title>Ultron Auditor PRO - v21.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -38,48 +38,52 @@
             body { background-color: #f8fafc; }
         }
 
-        .content-scroll {
-            flex-grow: 1;
+        /* Contenedores de Pantalla */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8fafc;
             overflow-y: auto;
-            padding: 1.2rem;
-            scroll-behavior: smooth;
+            scrollbar-width: none;
         }
-        .content-scroll::-webkit-scrollbar { width: 0; background: transparent; }
+        .screen::-webkit-scrollbar { display: none; }
 
         .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
         #reader { width: 100% !important; border: none !important; border-radius: 2rem; overflow: hidden; }
         
-        /* ESTILO DE ICONOS EN CHECKLIST */
-        .check-item div i { color: #94a3b8; font-size: 1.4rem; transition: all 0.2s; }
+        /* Checkbox Styles */
+        .check-item div i { color: #94a3b8; font-size: 1.2rem; }
         .check-item input:checked + div { border-color: #2563eb; background-color: #eff6ff; }
-        .check-item input:checked + div i { color: #2563eb; transform: scale(1.1); }
+        .check-item input:checked + div i { color: #2563eb; }
         .check-item input:checked + div span { color: #1e40af; }
         
         .bg-descontinuado { background-color: #dc2626 !important; }
-        .intro-overlay { position: absolute; inset: 0; z-index: 200; background-color: white; display: flex; flex-direction: column; justify-content: center; padding: 2rem; text-align: center; }
+        .intro-overlay { z-index: 500; background-color: white; text-align: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div class="app-frame">
         
-        <!-- PANTALLA INICIAL (INTRO) -->
-        <div id="introScreen" class="intro-overlay hidden fade-in">
+        <!-- 1. PANTALLA INICIAL (INTRO/LOGIN) -->
+        <div id="introScreen" class="screen intro-overlay hidden fade-in px-8">
             <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl font-black italic">U</div>
             <h2 class="text-3xl font-black text-slate-800 tracking-tighter italic uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">v20.0 - Calibración Visual</p>
-            <div class="px-4 mt-12">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">v21.0 - Full Screen Results</p>
+            <div class="mt-12">
                 <input id="auditorNameInput" type="text" placeholder="Nombre del Auditor..." class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-blue-500 font-bold text-center mb-4 shadow-inner">
                 <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-lg active:scale-95 transition-all uppercase text-xs tracking-widest italic">Acceder</button>
             </div>
         </div>
 
-        <div class="content-scroll" id="mainScroll">
-            
-            <!-- Header -->
-            <div class="flex justify-between items-start mb-6">
+        <!-- 2. PANTALLA PRINCIPAL (BUSCADOR E HISTORIAL) -->
+        <div id="homeScreen" class="screen p-6 hidden fade-in">
+            <!-- Header Home -->
+            <div class="flex justify-between items-start mb-8">
                 <div>
                     <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic uppercase leading-none">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
                     <div class="flex items-center gap-2 mt-2">
@@ -93,113 +97,81 @@
                 </button>
             </div>
 
-            <!-- Buscador -->
-            <div id="searchContainer" class="bg-white p-2 rounded-[2.5rem] shadow-sm flex items-center mb-6 border border-slate-200">
+            <!-- Buscador Home -->
+            <div class="bg-white p-2 rounded-[2.5rem] shadow-sm flex items-center mb-8 border border-slate-200">
                 <input id="codigoInput" type="number" inputmode="numeric" placeholder="Escanear Código..." class="flex-grow p-4 text-lg font-bold bg-transparent outline-none w-full" onkeypress="if(event.key === 'Enter') buscarStock()">
-                <button onclick="limpiarInput()" class="text-slate-300 w-10 h-10 flex items-center justify-center mr-1"><i class="fas fa-times-circle text-lg"></i></button>
                 <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-12 h-12 rounded-2xl flex items-center justify-center mr-2"><i class="fas fa-camera"></i></button>
                 <button onclick="buscarStock()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fas fa-search"></i></button>
             </div>
 
-            <div id="mainContentArea">
-                <div id="scannerWrapper" class="hidden mb-6 fade-in"><div class="bg-black rounded-[2rem] overflow-hidden relative border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 w-8 h-8 rounded-full z-50 text-white"><i class="fas fa-times text-xs"></i></button></div></div>
+            <!-- Escáner Home -->
+            <div id="scannerWrapper" class="hidden mb-6 fade-in"><div class="bg-black rounded-[2rem] overflow-hidden relative border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 w-8 h-8 rounded-full z-50 text-white"><i class="fas fa-times text-xs"></i></button></div></div>
 
-                <div id="loader" class="hidden flex flex-col items-center justify-center py-10">
-                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-4"></div>
-                    <p class="text-blue-900 font-black text-[9px] uppercase tracking-widest animate-pulse italic">Localizando Producto...</p>
+            <!-- Historial Home -->
+            <div class="flex-grow">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] italic">HISTORIAL RECIENTE</h3>
+                    <button onclick="limpiarHistorial()" class="text-red-400 text-[10px] font-black uppercase tracking-widest active:scale-75">LIMPIAR</button>
                 </div>
+                <div id="listaHistorial" class="space-y-3"></div>
+            </div>
+        </div>
 
-                <!-- Resultado Principal (Basado en la Imagen) -->
-                <div id="resultado" class="hidden fade-in space-y-6">
-                    <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-50">
-                        <div id="resBanner" class="bg-blue-600 p-4 text-white text-center font-black italic text-[11px] tracking-widest uppercase">
-                            <span id="resCodigoLabel">CÓDIGO: ---</span>
-                        </div>
-                        <div class="p-6">
-                            <h2 id="resNombre" class="text-[1.3rem] font-black text-slate-800 mb-8 text-center leading-tight tracking-tight uppercase px-2">Nombre</h2>
-                            
-                            <!-- Cards PVP y STOCK -->
-                            <div class="grid grid-cols-2 gap-4 mb-8 text-center px-2">
-                                <div class="bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">PVP</span>
-                                    <p id="resPrecio" class="text-2xl font-black text-slate-800">$0</p>
-                                </div>
-                                <div id="stockBox" class="p-6 rounded-[2rem] border font-black shadow-sm flex flex-col justify-center">
-                                    <span id="stockLabel" class="text-[10px] uppercase tracking-widest mb-2 block">STOCK</span>
-                                    <p id="resStock" class="text-2xl">0</p>
-                                </div>
-                            </div>
-                            
-                            <!-- PANEL DE GESTIÓN (RECUADRO GRIS) -->
-                            <div class="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-100/50 space-y-4">
-                                <div id="checklistArea" class="grid grid-cols-2 gap-3">
-                                    <label class="check-item cursor-pointer">
-                                        <input type="checkbox" data-tarea="PRECIO" class="hidden">
-                                        <div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2">
-                                            <i class="fas fa-tag"></i><span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter">PRECIO</span>
-                                        </div>
-                                    </label>
-                                    <label class="check-item cursor-pointer">
-                                        <input type="checkbox" data-tarea="REPOSICIÓN" class="hidden">
-                                        <div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2">
-                                            <i class="fas fa-boxes"></i><span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter">REPOSICIÓN</span>
-                                        </div>
-                                    </label>
-                                    <label class="check-item cursor-pointer">
-                                        <input type="checkbox" data-tarea="LIMPIEZA" class="hidden">
-                                        <div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2">
-                                            <i class="fas fa-broom"></i><span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter">LIMPIEZA</span>
-                                        </div>
-                                    </label>
-                                    <label class="check-item cursor-pointer">
-                                        <input type="checkbox" data-tarea="EXISTENCIA" class="hidden">
-                                        <div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2">
-                                            <i class="fas fa-clipboard-check"></i><span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter">EXISTENCIA</span>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <label class="check-item cursor-pointer block">
-                                    <input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()">
-                                    <div class="p-5 bg-white rounded-[1.5rem] border border-slate-100 text-center shadow-sm flex items-center justify-center gap-4">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">UBICACIÓN MANUAL</span>
-                                    </div>
-                                </label>
-                                <input id="inputUbi" type="text" placeholder="Ingresa pasillo o lugar..." class="hidden w-full p-5 bg-white rounded-[1.5rem] border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
-                            </div>
-                        </div>
+        <!-- 3. PANTALLA DE RESULTADO (DETALLE) -->
+        <div id="resultScreen" class="screen hidden fade-in">
+            <div id="resBanner" class="bg-blue-600 p-5 text-white text-center font-black italic text-[12px] tracking-widest uppercase">
+                <span id="resCodigoLabel">CÓDIGO: ---</span>
+            </div>
+            
+            <div class="p-6 flex-grow flex flex-col">
+                <h2 id="resNombre" class="text-[1.4rem] font-black text-slate-800 mb-8 text-center leading-tight tracking-tight uppercase px-2">Nombre</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8 text-center">
+                    <div class="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">PVP</span>
+                        <p id="resPrecio" class="text-2xl font-black text-slate-800">$0</p>
                     </div>
-                    
-                    <!-- BOTONES INFERIORES -->
-                    <div class="flex gap-3 pt-2 pb-10">
-                        <button onclick="nuevaBusqueda()" class="w-[40%] bg-slate-200 text-slate-600 font-black py-6 rounded-[2rem] uppercase text-[11px] active:scale-95 transition-all tracking-widest">CERRAR</button>
-                        <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-6 rounded-[2rem] shadow-xl shadow-blue-200 uppercase text-[11px] italic flex items-center justify-center gap-3 active:scale-95 transition-all tracking-wider">
-                            <i class="fas fa-save"></i> GUARDAR ALERTA
-                        </button>
+                    <div id="stockBox" class="p-6 rounded-[2.5rem] border font-black shadow-sm flex flex-col justify-center">
+                        <span id="stockLabel" class="text-[10px] uppercase tracking-widest mb-1 block">STOCK</span>
+                        <p id="resStock" class="text-2xl">0</p>
                     </div>
                 </div>
 
-                <!-- Historial -->
-                <div id="historialSection">
-                    <div class="flex justify-between items-center mb-6 px-4 mt-6">
-                        <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] italic">RECIENTES</h3>
-                        <button onclick="limpiarHistorial()" class="text-red-400 text-[10px] font-black uppercase tracking-widest active:scale-75">LIMPIAR</button>
+                <div class="bg-slate-50/80 p-6 rounded-[3rem] border border-slate-100/50 flex-grow mb-6 space-y-4">
+                    <div id="checklistArea" class="grid grid-cols-2 gap-3">
+                        <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="PRECIO" class="hidden"><div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2"><i class="fas fa-tag"></i><span class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">PRECIO</span></div></label>
+                        <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="REPOSICIÓN" class="hidden"><div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2"><i class="fas fa-boxes"></i><span class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">REPOSICIÓN</span></div></label>
+                        <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="LIMPIEZA" class="hidden"><div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2"><i class="fas fa-broom"></i><span class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">LIMPIEZA</span></div></label>
+                        <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="EXISTENCIA" class="hidden"><div class="p-5 bg-white rounded-3xl border border-slate-100 text-center shadow-sm flex flex-col items-center gap-2"><i class="fas fa-clipboard-check"></i><span class="text-[9px] font-black text-slate-500 uppercase tracking-tighter">EXISTENCIA</span></div></label>
                     </div>
-                    <div id="listaHistorial" class="space-y-3 px-1"></div>
+                    <label class="check-item cursor-pointer block"><input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()"><div class="p-5 bg-white rounded-[2rem] border border-slate-100 text-center shadow-sm flex items-center justify-center gap-4"><i class="fas fa-map-marker-alt"></i><span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">UBICACIÓN MANUAL</span></div></label>
+                    <input id="inputUbi" type="text" placeholder="Ingresa lugar..." class="hidden w-full p-5 bg-white rounded-[1.5rem] border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
                 </div>
 
-                <!-- Error -->
-                <div id="errorMsg" class="hidden fade-in bg-white p-12 rounded-[3rem] text-center border shadow-xl">
-                    <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-ghost text-2xl"></i></div>
-                    <p class="font-black text-slate-800 uppercase text-xs mb-8 tracking-widest">Código inexistente</p>
-                    <button onclick="nuevaBusqueda()" class="w-full text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] bg-blue-50 py-5 rounded-3xl">VOLVER A BUSCAR</button>
+                <div class="flex gap-4 mb-4">
+                    <button onclick="irAHome()" class="w-[40%] bg-slate-200 text-slate-600 font-black py-6 rounded-[2rem] uppercase text-[11px] active:scale-95 transition-all tracking-widest">CERRAR</button>
+                    <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-6 rounded-[2rem] shadow-xl uppercase text-[11px] italic flex items-center justify-center gap-3 active:scale-95 transition-all tracking-wider">
+                        <i class="fas fa-save"></i> GUARDAR ALERTA
+                    </button>
                 </div>
             </div>
         </div>
 
+        <!-- LOADER OVERLAY -->
+        <div id="loader" class="screen hidden intro-overlay">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-100 border-t-blue-600 mx-auto mb-4"></div>
+            <p class="text-blue-900 font-black text-[10px] uppercase tracking-[0.3em] animate-pulse italic">Consultando...</p>
+        </div>
+
+        <!-- ERROR OVERLAY -->
+        <div id="errorMsg" class="screen hidden intro-overlay px-10">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-ghost text-2xl"></i></div>
+            <p class="font-black text-slate-800 uppercase text-xs mb-8 tracking-widest">Código inexistente</p>
+            <button onclick="irAHome()" class="w-full text-[11px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 py-5 rounded-3xl">VOLVER A BUSCAR</button>
+        </div>
+
         <!-- MODAL REPORTES -->
-        <div id="modalGestion" class="hidden absolute inset-0 z-[300] bg-slate-900/98 backdrop-blur-md p-8 flex flex-col text-white">
+        <div id="modalGestion" class="hidden absolute inset-0 z-[600] bg-slate-900/98 backdrop-blur-md p-8 flex flex-col text-white">
             <div class="flex justify-between items-center mb-10">
                 <h2 class="text-2xl font-black italic uppercase tracking-tighter">LISTADO ALERTAS</h2>
                 <button onclick="cerrarModalGestion()" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
@@ -220,21 +192,34 @@
         let gestionados = JSON.parse(localStorage.getItem('ultron_gestionados') || '[]');
         let auditorName = localStorage.getItem('ultron_auditor_name') || "";
 
-        const scrollToTop = () => { document.getElementById('mainScroll').scrollTo({ top: 0, behavior: 'smooth' }); };
-
         window.onload = () => { 
-            if (!auditorName) { document.getElementById('introScreen').classList.remove('hidden'); } 
-            else { actualizarAuditorDisplay(); }
+            if (!auditorName) { mostrarPantalla('introScreen'); } 
+            else { 
+                actualizarAuditorDisplay();
+                mostrarPantalla('homeScreen');
+            }
             actualizarHistorial(); actualizarBadge(); 
         };
+
+        // --- NAVEGACIÓN ENTRE PANTALLAS ---
+        function mostrarPantalla(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function irAHome() { 
+            document.getElementById('codigoInput').value = '';
+            limpiarChecks();
+            mostrarPantalla('homeScreen'); 
+        }
 
         function registrarAuditor() {
             const name = document.getElementById('auditorNameInput').value.trim();
             if (name.length < 3) { alert("Ingresa tu nombre"); return; }
             auditorName = name;
             localStorage.setItem('ultron_auditor_name', auditorName);
-            document.getElementById('introScreen').classList.add('hidden');
             actualizarAuditorDisplay();
+            mostrarPantalla('homeScreen');
         }
 
         function cerrarSesion() { if (confirm("¿Cerrar sesión?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
@@ -248,9 +233,8 @@
             const codigo = codigoForzado || input.value.trim();
             if (!codigo) return;
             
-            input.blur(); // Oculta teclado
-            cerrarEscanner(); limpiarChecks(); mostrarVista('loader');
-            scrollToTop(); 
+            input.blur();
+            mostrarPantalla('loader');
 
             try {
                 const response = await fetch(API_URL + codigo);
@@ -264,19 +248,20 @@
                 sLabel.innerText = "STOCK";
 
                 if (data.descontinuado === true) {
-                    banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-2"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-6 rounded-[2rem] border border-red-200 bg-red-50 text-red-600 text-center font-bold shadow-sm";
+                    banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-2"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-6 rounded-[2.5rem] border border-red-200 bg-red-50 text-red-600 text-center font-bold shadow-sm";
                 } else {
                     banner.classList.remove('bg-descontinuado'); resLabel.innerText = "CÓDIGO: " + data.codigo; resNombre.classList.remove('text-red-600');
-                    if (parseInt(data.stock) <= 0) sBox.className = "p-6 rounded-[2rem] border border-red-100 bg-red-50 text-red-600 text-center font-bold shadow-sm";
-                    else sBox.className = "p-6 rounded-[2rem] border border-green-100 bg-green-50 text-green-600 text-center font-bold shadow-sm";
+                    if (parseInt(data.stock) <= 0) sBox.className = "p-6 rounded-[2.5rem] border border-red-100 bg-red-50 text-red-600 text-center font-bold shadow-sm";
+                    else sBox.className = "p-6 rounded-[2.5rem] border border-green-100 bg-green-50 text-green-600 text-center font-bold shadow-sm";
                 }
                 
-                document.getElementById('resNombre').innerText = data.nombre; document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; document.getElementById('resStock').innerText = data.stock ?? 0; 
+                document.getElementById('resNombre').innerText = data.nombre; 
+                document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; 
+                document.getElementById('resStock').innerText = data.stock ?? 0; 
                 
-                mostrarVista('resultado');
-                setTimeout(scrollToTop, 200);
+                mostrarPantalla('resultScreen');
 
-            } catch (error) { mostrarVista('errorMsg'); }
+            } catch (error) { mostrarPantalla('errorMsg'); }
         }
 
         function guardarYGestionar() {
@@ -286,44 +271,39 @@
                 const item = { ...currentProduct, tareas, ubicacion: ubiManual, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
                 gestionados.unshift(item); localStorage.setItem('ultron_gestionados', JSON.stringify(gestionados)); actualizarBadge();
             }
-            nuevaBusqueda();
+            irAHome();
         }
 
-        function mostrarVista(id) { document.querySelectorAll('#loader, #resultado, #errorMsg, #scannerWrapper, #historialSection').forEach(el => el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id !== 'resultado') document.getElementById('historialSection').classList.remove('hidden'); }
-        function abrirEscanner() { mostrarVista('scannerWrapper'); html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => buscarStock(text)); }
+        function abrirEscanner() { 
+            document.getElementById('scannerWrapper').classList.remove('hidden'); 
+            html5QrCode = new Html5Qrcode("reader"); 
+            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => {
+                cerrarEscanner();
+                buscarStock(text);
+            }); 
+        }
         function cerrarEscanner() { if (html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerWrapper').classList.add('hidden')); }
-        function nuevaBusqueda() { limpiarInput(); mostrarVista('historialSection'); scrollToTop(); }
         function actualizarBadge() { const b = document.getElementById('badgeGestion'); b.innerText = gestionados.length; b.classList.toggle('hidden', gestionados.length === 0); }
         function limpiarChecks() { document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false); document.getElementById('inputUbi').classList.add('hidden'); document.getElementById('inputUbi').value = ""; }
-        
-        function abrirModalGestion() { 
-            document.getElementById('modalGestion').classList.remove('hidden'); 
-            const lista = document.getElementById('listaReporte'); 
-            lista.innerHTML = gestionados.map(g => {
-                const isDesc = g.descontinuado === true;
-                return `
-                <div class="${isDesc ? 'bg-red-50/10 border-red-500/30' : 'bg-white/10 border-white/10'} p-5 rounded-[2rem] border shadow-sm">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="font-black text-[12px] uppercase w-4/5 leading-tight ${isDesc ? 'text-red-400' : 'text-white'}">${g.nombre}</p>
-                        <span class="text-[10px] font-black ${isDesc ? 'text-red-400' : 'text-blue-400'}">STK: ${g.stock}</span>
-                    </div>
-                    <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest">#${g.codigo} | ${g.time}</p>
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        ${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase italic tracking-wider shadow-lg">${t}</span>`).join('')}
-                        ${g.ubicacion ? `<span class="bg-white/10 text-white text-[8px] font-black px-3 py-1 rounded-full border border-white/20 tracking-wider"><i class="fas fa-map-marker-alt mr-1"></i>${g.ubicacion}</span>` : ''}
-                    </div>
-                </div>`;
-            }).join(''); 
-        }
-
+        function abrirModalGestion() { document.getElementById('modalGestion').classList.remove('hidden'); const lista = document.getElementById('listaReporte'); lista.innerHTML = gestionados.map(g => `
+            <div class="${g.descontinuado ? 'bg-red-50/10 border-red-500/30' : 'bg-white/10 border-white/10'} p-5 rounded-[2rem] border shadow-sm">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="font-black text-[12px] uppercase w-4/5 leading-tight ${g.descontinuado ? 'text-red-400' : 'text-white'}">${g.nombre}</p>
+                    <span class="text-[10px] font-black ${g.descontinuado ? 'text-red-400' : 'text-blue-400'}">STK: ${g.stock}</span>
+                </div>
+                <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest">#${g.codigo} | ${g.time}</p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    ${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase italic tracking-wider shadow-lg">${t}</span>`).join('')}
+                    ${g.ubicacion ? `<span class="bg-white/10 text-white text-[8px] font-black px-3 py-1 rounded-full border border-white/20 tracking-wider"><i class="fas fa-map-marker-alt mr-1"></i>${g.ubicacion}</span>` : ''}
+                </div>
+            </div>`).join(''); }
         function cerrarModalGestion() { document.getElementById('modalGestion').classList.add('hidden'); }
-        function vaciarReporte() { if (confirm("¿Borrar todos los reportes acumulados?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        function vaciarReporte() { if (confirm("¿Borrar todos los reportes?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
         function compartirReporte() { 
             const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n📦 STOCK: ${g.stock}\n🚨 TAREAS: ${g.tareas.join(', ')}\n📍 UBICACIÓN: ${g.ubicacion || 'N/A'}`).join('\n\n'); 
             const finalReport = `REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Listado copiado al portapapeles.")); 
+            navigator.clipboard.writeText(finalReport).then(() => alert("Copiado al portapapeles.")); 
         }
-
         function guardarEnHistorial(item) { 
             historial = historial.filter(h => h.codigo !== item.codigo); 
             historial.unshift({ codigo: item.codigo, nombre: item.nombre, precio: item.precio, stock: item.stock, descontinuado: item.descontinuado }); 
