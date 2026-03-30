@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultron Auditor PRO - v18.0</title>
+    <title>Ultron Auditor PRO - v19.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -52,7 +52,7 @@
         #reader { width: 100% !important; border: none !important; border-radius: 2rem; overflow: hidden; }
         
         /* ESTILO DE ICONOS EN CHECKLIST */
-        .check-item div i { color: #94a3b8; opacity: 0.5; transition: all 0.2s; }
+        .check-item div i { color: #94a3b8; opacity: 0.6; transition: all 0.2s; }
         .check-item input:checked + div { background-color: #fef2f2; border-color: #ef4444; }
         .check-item input:checked + div i { color: #dc2626; opacity: 1; transform: scale(1.1); }
         .check-item input:checked + div span { color: #991b1b; font-weight: 900; }
@@ -69,12 +69,12 @@
         <div id="introScreen" class="intro-overlay hidden fade-in">
             <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl font-black italic">U</div>
             <h2 class="text-3xl font-black text-slate-800 tracking-tighter italic uppercase leading-none text-center">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">v18.0 - Stock & Alert Memory</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">v19.0 - Smart Focus & Keyboard Control</p>
             
             <div class="space-y-4 text-slate-600 text-sm leading-snug my-10 px-4 text-left">
-                <p class="flex items-start gap-4"><i class="fas fa-history text-blue-500 mt-1"></i> <span>Historial detallado con <b>Stock</b>.</span></p>
-                <p class="flex items-start gap-4"><i class="fas fa-exclamation-triangle text-blue-500 mt-1"></i> <span>Alerta visual para <b>Descontinuados</b>.</span></p>
-                <p class="flex items-start gap-4"><i class="fas fa-user-check text-blue-500 mt-1"></i> <span>Firma de Reportes Personalizada.</span></p>
+                <p class="flex items-start gap-4"><i class="fas fa-keyboard text-blue-500 mt-1"></i> <span>Auto-ocultar teclado al buscar.</span></p>
+                <p class="flex items-start gap-4"><i class="fas fa-arrows-alt-v text-blue-500 mt-1"></i> <span>Centrado automático de resultados.</span></p>
+                <p class="flex items-start gap-4"><i class="fas fa-ban text-blue-500 mt-1"></i> <span>Alertas de Descontinuado en tiempo real.</span></p>
             </div>
 
             <div class="px-4">
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <div class="content-scroll">
+        <div class="content-scroll" id="mainScroll">
             
             <!-- Header -->
             <div class="flex justify-between items-start mb-8">
@@ -94,7 +94,7 @@
                         <button onclick="cerrarSesion()" class="text-red-400 active:scale-75"><i class="fas fa-power-off text-[10px]"></i></button>
                     </div>
                 </div>
-                <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl active:scale-90">
+                <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl active:scale-90 transition-all">
                     <i class="fas fa-clipboard-list text-xl"></i>
                     <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white hidden">0</span>
                 </button>
@@ -102,13 +102,13 @@
 
             <!-- Buscador -->
             <div id="searchContainer" class="bg-white p-2 rounded-[2rem] shadow-md flex items-center mb-6 border border-slate-100">
-                <input id="codigoInput" type="number" inputmode="numeric" placeholder="Escanear..." class="flex-grow p-4 text-lg font-bold bg-transparent outline-none w-full" onkeypress="if(event.key === 'Enter') buscarStock()">
+                <input id="codigoInput" type="number" inputmode="numeric" placeholder="Escanear Código..." class="flex-grow p-4 text-lg font-bold bg-transparent outline-none w-full" onkeypress="if(event.key === 'Enter') buscarStock()">
                 <button onclick="limpiarInput()" class="text-slate-300 w-10 h-10 flex items-center justify-center"><i class="fas fa-times"></i></button>
                 <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-12 h-12 rounded-2xl flex items-center justify-center mr-2"><i class="fas fa-camera"></i></button>
                 <button onclick="buscarStock()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fas fa-search"></i></button>
             </div>
 
-            <div id="mainContent">
+            <div id="mainContentArea">
                 <div id="scannerWrapper" class="hidden mb-6 fade-in"><div class="bg-black rounded-[2rem] overflow-hidden relative border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 w-8 h-8 rounded-full z-50 text-white"><i class="fas fa-times text-xs"></i></button></div></div>
 
                 <div id="loader" class="hidden flex flex-col items-center justify-center py-10">
@@ -123,33 +123,34 @@
                             <span id="resCodigoLabel">CÓDIGO: ---</span>
                         </div>
                         <div class="p-6">
-                            <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 text-center leading-tight">Nombre</h2>
+                            <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 text-center leading-tight">Nombre del Producto</h2>
                             <div class="grid grid-cols-2 gap-3 mb-6 text-center">
-                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center py-6">
                                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">PVP</span>
                                     <p id="resPrecio" class="text-xl font-black text-slate-800">$0</p>
                                 </div>
-                                <div id="stockBox" class="p-4 rounded-2xl border font-black flex flex-col justify-center">
+                                <div id="stockBox" class="p-4 rounded-2xl border font-black flex flex-col justify-center py-6">
                                     <span id="stockLabel" class="text-[9px] uppercase tracking-widest mb-1">STOCK</span>
                                     <p id="resStock" class="text-xl">0</p>
                                 </div>
                             </div>
                             
+                            <!-- CHECKLIST -->
                             <div class="bg-slate-50 p-4 rounded-[2rem] space-y-3">
                                 <div id="checklistArea" class="grid grid-cols-2 gap-2">
-                                    <label class="check-item"><input type="checkbox" data-tarea="Falta Precio" class="hidden"><div class="p-3 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-tag"></i><span class="text-[9px] font-black text-slate-500 uppercase">Precio</span></div></label>
-                                    <label class="check-item"><input type="checkbox" data-tarea="Reposición" class="hidden"><div class="p-3 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-boxes"></i><span class="text-[9px] font-black text-slate-500 uppercase">Reposición</span></div></label>
-                                    <label class="check-item"><input type="checkbox" data-tarea="Limpieza" class="hidden"><div class="p-3 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-broom"></i><span class="text-[9px] font-black text-slate-500 uppercase">Limpieza</span></div></label>
-                                    <label class="check-item"><input type="checkbox" data-tarea="Existencia" class="hidden"><div class="p-3 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-clipboard-check"></i><span class="text-[9px] font-black text-slate-500 uppercase text-center leading-none">Existencia</span></div></label>
-                                    <label class="check-item col-span-2"><input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()"><div class="p-3 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex items-center justify-center gap-3"><i class="fas fa-map-marker-alt"></i><span class="text-[9px] font-black text-slate-500 uppercase">Ubicación Manual</span></div></label>
+                                    <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="Precio" class="hidden"><div class="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-tag"></i><span class="text-[9px] font-black text-slate-500 uppercase">Precio</span></div></label>
+                                    <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="Reposición" class="hidden"><div class="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-boxes"></i><span class="text-[9px] font-black text-slate-500 uppercase">Reposición</span></div></label>
+                                    <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="Limpieza" class="hidden"><div class="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-broom"></i><span class="text-[9px] font-black text-slate-500 uppercase">Limpieza</span></div></label>
+                                    <label class="check-item cursor-pointer"><input type="checkbox" data-tarea="Existencia" class="hidden"><div class="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex flex-col items-center gap-1"><i class="fas fa-clipboard-check"></i><span class="text-[9px] font-black text-slate-500 uppercase text-center leading-none">Existencia</span></div></label>
+                                    <label class="check-item col-span-2 cursor-pointer"><input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()"><div class="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm flex items-center justify-center gap-3"><i class="fas fa-map-marker-alt"></i><span class="text-[9px] font-black text-slate-500 uppercase">Ubicación Manual</span></div></label>
                                 </div>
-                                <input id="inputUbi" type="text" placeholder="Ej: Pasillo 5..." class="hidden w-full p-4 bg-white rounded-xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none">
+                                <input id="inputUbi" type="text" placeholder="Pasillo / Rack..." class="hidden w-full p-4 bg-white rounded-xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none transition-all">
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="nuevaBusqueda()" class="w-1/3 bg-slate-200 text-slate-500 font-black py-5 rounded-[1.5rem] uppercase text-[10px]">Cerrar</button>
-                        <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-lg uppercase text-[10px] italic"><i class="fas fa-save mr-2"></i> Guardar Alerta</button>
+                    <div class="flex gap-2 pb-6">
+                        <button onclick="nuevaBusqueda()" class="w-1/3 bg-slate-200 text-slate-600 font-black py-5 rounded-3xl uppercase text-[10px] active:scale-95 transition-all">Cerrar</button>
+                        <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95 transition-all"><i class="fas fa-save"></i> Guardar Alerta</button>
                     </div>
                 </div>
 
@@ -170,7 +171,7 @@
             </div>
         </div>
 
-        <!-- MODAL REPORTES / ALERTAS -->
+        <!-- MODAL REPORTES -->
         <div id="modalGestion" class="hidden absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-md p-6 flex flex-col text-white">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-black italic uppercase">REPORTES</h2>
@@ -178,7 +179,7 @@
             </div>
             <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-20"></div>
             <div class="flex gap-3">
-                <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-xs italic">Enviar WhatsApp</button>
+                <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-xs italic tracking-widest">Enviar WhatsApp</button>
                 <button onclick="vaciarReporte()" class="bg-red-500 text-white p-5 rounded-2xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>
@@ -192,7 +193,11 @@
         let gestionados = JSON.parse(localStorage.getItem('ultron_gestionados') || '[]');
         let auditorName = localStorage.getItem('ultron_auditor_name') || "";
 
-        const scrollToTop = () => { document.querySelector('.content-scroll').scrollTop = 0; };
+        // Función para centrar la vista al principio del contenedor
+        const focusOnTop = () => {
+            const scrollContainer = document.getElementById('mainScroll');
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
         window.onload = () => { 
             if (!auditorName) { document.getElementById('introScreen').classList.remove('hidden'); } 
@@ -220,9 +225,12 @@
             const codigo = codigoForzado || input.value.trim();
             if (!codigo) return;
             
-            if(codigoForzado) scrollToTop();
+            // 1. Ocultar teclado (blur)
+            input.blur();
 
             cerrarEscanner(); limpiarChecks(); mostrarVista('loader');
+            focusOnTop(); // Subir vista al empezar búsqueda
+
             try {
                 const response = await fetch(API_URL + codigo);
                 const data = await response.json();
@@ -238,10 +246,17 @@
                     banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-1"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-4 rounded-2xl border border-red-200 bg-red-50 text-red-600 text-center font-bold";
                 } else {
                     banner.classList.remove('bg-descontinuado'); resLabel.innerText = "CÓDIGO: " + data.codigo; resNombre.classList.remove('text-red-600');
-                    if (parseInt(data.stock) <= 0) sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center font-bold";
-                    else sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center font-bold";
+                    if (parseInt(data.stock) <= 0) sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center font-bold py-6";
+                    else sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center font-bold py-6";
                 }
-                document.getElementById('resNombre').innerText = data.nombre; document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; document.getElementById('resStock').innerText = data.stock ?? 0; mostrarVista('resultado');
+                
+                document.getElementById('resNombre').innerText = data.nombre; document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; document.getElementById('resStock').innerText = data.stock ?? 0; 
+                
+                mostrarVista('resultado');
+                
+                // Asegurar que la vista se centre en el resultado recién mostrado
+                setTimeout(focusOnTop, 150);
+
             } catch (error) { mostrarVista('errorMsg'); }
         }
 
@@ -253,13 +268,12 @@
                 gestionados.unshift(item); localStorage.setItem('ultron_gestionados', JSON.stringify(gestionados)); actualizarBadge();
             }
             nuevaBusqueda();
-            scrollToTop();
         }
 
         function mostrarVista(id) { document.querySelectorAll('#loader, #resultado, #errorMsg, #scannerWrapper, #historialSection').forEach(el => el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id !== 'resultado') document.getElementById('historialSection').classList.remove('hidden'); }
         function abrirEscanner() { mostrarVista('scannerWrapper'); html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => buscarStock(text)); }
         function cerrarEscanner() { if (html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerWrapper').classList.add('hidden')); }
-        function nuevaBusqueda() { limpiarInput(); mostrarVista('historialSection'); scrollToTop(); }
+        function nuevaBusqueda() { limpiarInput(); mostrarVista('historialSection'); focusOnTop(); }
         function actualizarBadge() { const b = document.getElementById('badgeGestion'); b.innerText = gestionados.length; b.classList.toggle('hidden', gestionados.length === 0); }
         function limpiarChecks() { document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false); document.getElementById('inputUbi').classList.add('hidden'); document.getElementById('inputUbi').value = ""; }
         
@@ -288,16 +302,13 @@
 
         function cerrarModalGestion() { document.getElementById('modalGestion').classList.add('hidden'); }
         function vaciarReporte() { if (confirm("¿Borrar todos los reportes?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
-        
         function compartirReporte() { 
             const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n📦 STOCK: ${g.stock}\n🚨 TAREAS: ${g.tareas.join(', ')}\n📍 UBICACIÓN: ${g.ubicacion || 'N/A'}`).join('\n\n'); 
             const finalReport = `REPORTES ULTRON\nAuditado por: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte copiado.")); 
+            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte copiado al portapapeles.")); 
         }
-
         function guardarEnHistorial(item) { 
             historial = historial.filter(h => h.codigo !== item.codigo); 
-            // Guardamos stock y descontinuado en el objeto historial
             historial.unshift({
                 codigo: item.codigo, 
                 nombre: item.nombre, 
@@ -309,18 +320,15 @@
             localStorage.setItem('ultron_history', JSON.stringify(historial)); 
             actualizarHistorial(); 
         }
-
         function actualizarHistorial() { 
             const lista = document.getElementById('listaHistorial'); 
             if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4 uppercase font-black tracking-widest">Sin registros</p>'; return; } 
-            
             lista.innerHTML = historial.map(h => {
                 const isDesc = h.descontinuado === true;
                 const cardClass = isDesc ? "bg-red-50 border-red-200" : "bg-white border-slate-50";
                 const textClass = isDesc ? "text-red-700" : "text-slate-700";
                 const priceClass = isDesc ? "text-red-600" : "text-blue-600";
                 const stockColor = isDesc || parseInt(h.stock) <= 0 ? "text-red-500" : "text-slate-400";
-
                 return `
                 <div onclick="buscarStock('${h.codigo}')" class="${cardClass} p-4 rounded-2xl flex justify-between items-center shadow-sm text-[10px] uppercase font-black active:scale-95 transition-all border">
                     <div class="w-2/3">
