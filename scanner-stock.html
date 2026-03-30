@@ -12,12 +12,14 @@
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         #reader { width: 100% !important; border: none !important; border-radius: 2rem; overflow: hidden; }
-        .check-item input:checked + div { background-color: #dcfce7; border-color: #22c55e; }
-        .check-item input:checked + div i { color: #16a34a; opacity: 1; }
-        .check-item input:checked + div span { color: #166534; text-decoration: line-through; opacity: 0.7; }
-        #checkOtra:checked + div { background-color: #eff6ff; border-color: #3b82f6; }
+        
+        /* ESTILO ROJO PARA ALERTAS (CUANDO FALTA ALGO) */
+        .check-item input:checked + div { background-color: #fef2f2; border-color: #ef4444; }
+        .check-item input:checked + div i { color: #dc2626; opacity: 1; }
+        .check-item input:checked + div span { color: #991b1b; opacity: 1; }
+        
+        #checkOtra:checked + div { background-color: #f0f9ff; border-color: #3b82f6; }
         #checkOtra:checked + div i { color: #3b82f6; opacity: 1; }
-        #checkOtra:checked + div span { text-decoration: none; color: #1e40af; opacity: 1; }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen pb-10">
@@ -26,12 +28,11 @@
         <!-- Header -->
         <div class="flex justify-between items-center mb-6 px-2">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic">ULTRON <span class="text-blue-500">AUDITOR</span></h1>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Gestión de Pasillo v5.0</p>
+                <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic uppercase">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Auditoría de Pasillo v6.0</p>
             </div>
-            <!-- BOTÓN REPORTE -->
             <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white p-2 rounded-2xl w-12 h-12 flex items-center justify-center shadow-xl shadow-blue-200 active:scale-90 transition-all">
-                <i class="fas fa-clipboard-list text-lg"></i>
+                <i class="fas fa-clipboard-list text-lg text-white"></i>
                 <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white hidden">0</span>
             </button>
         </div>
@@ -50,12 +51,12 @@
         </div>
 
         <!-- Escáner -->
-        <div id="scannerWrapper" class="hidden mb-6 fade-in"><div class="bg-black rounded-[2.5rem] overflow-hidden relative shadow-2xl border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 backdrop-blur-md w-10 h-10 rounded-full z-50 flex items-center justify-center text-white"><i class="fas fa-times"></i></button></div></div>
+        <div id="scannerWrapper" class="hidden mb-6 fade-in text-white"><div class="bg-black rounded-[2.5rem] overflow-hidden relative shadow-2xl border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 backdrop-blur-md w-10 h-10 rounded-full z-50 flex items-center justify-center"><i class="fas fa-times"></i></button></div></div>
 
         <!-- Loader -->
         <div id="loader" class="hidden flex flex-col items-center justify-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-[6px] border-blue-50 border-t-blue-600 mb-4"></div>
-            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest animate-pulse tracking-[0.3em]">Auditoría en curso...</p>
+            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest animate-pulse tracking-[0.3em]">Cargando...</p>
         </div>
 
         <!-- RESULTADO -->
@@ -63,53 +64,54 @@
             <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-50">
                 <div class="bg-blue-600 p-3 text-white text-center"><span id="resCodigo" class="text-[9px] font-black tracking-[0.4em] uppercase leading-none italic">CARGANDO...</span></div>
                 <div class="p-6">
-                    <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 leading-tight truncate">Nombre</h2>
+                    <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 leading-tight text-center px-2">Nombre del producto</h2>
+                    
                     <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-center"><span class="text-blue-500 text-[9px] font-black uppercase block mb-1 tracking-widest">NETO</span><span id="resPrecio" class="text-xl font-black text-blue-800">$0</span></div>
-                        <div id="stockBox" class="p-4 rounded-2xl border text-center"><span id="stockLabel" class="text-[9px] font-black uppercase block mb-1 tracking-widest">EXISTENCIA</span><span id="resStock" class="text-xl font-black">0</span></div>
+                        <!-- PVP Centrado -->
+                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex flex-col items-center justify-center text-center">
+                            <span class="text-blue-500 text-[9px] font-black uppercase block mb-1 tracking-widest">PVP</span>
+                            <span id="resPrecio" class="text-xl font-black text-blue-800">$0</span>
+                        </div>
+                        <!-- STOCK Centrado -->
+                        <div id="stockBox" class="p-4 rounded-2xl border flex flex-col items-center justify-center text-center">
+                            <span id="stockLabel" class="text-[9px] font-black uppercase block mb-1 tracking-widest">EN STOCK</span>
+                            <span id="resStock" class="text-xl font-black">0</span>
+                        </div>
                     </div>
 
+                    <!-- Checklist Alerta Roja -->
                     <div class="bg-slate-50 p-4 rounded-[2rem] border border-slate-100">
                         <div id="checklistArea" class="grid grid-cols-2 gap-3">
-                            <label class="check-item"><input type="checkbox" data-tarea="Precio" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all"><i class="fas fa-check-circle opacity-0"></i><span class="text-xs font-black text-slate-600 uppercase">Precio</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Limpieza" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all"><i class="fas fa-check-circle opacity-0"></i><span class="text-xs font-black text-slate-600 uppercase">Limpieza</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Stock" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all"><i class="fas fa-check-circle opacity-0"></i><span class="text-xs font-black text-slate-600 uppercase">Stock</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Orden" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all"><i class="fas fa-check-circle opacity-0"></i><span class="text-xs font-black text-slate-600 uppercase">Orden</span></div></label>
-                            <label class="check-item col-span-2"><input type="checkbox" id="checkOtra" class="hidden peer" onchange="toggleNota()"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all"><i class="fas fa-edit opacity-0 text-blue-500"></i><span class="text-xs font-black text-slate-600 uppercase italic">¿Otra Gestión?</span></div></label>
+                            <label class="check-item"><input type="checkbox" data-tarea="Falta Precio" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-exclamation-circle opacity-0 transition-opacity"></i><span class="text-xs font-black text-slate-500 uppercase tracking-tighter">Precio</span></div></label>
+                            <label class="check-item"><input type="checkbox" data-tarea="Falta Limpieza" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-exclamation-circle opacity-0 transition-opacity"></i><span class="text-xs font-black text-slate-500 uppercase tracking-tighter">Limpieza</span></div></label>
+                            <label class="check-item"><input type="checkbox" data-tarea="Falta Reposición" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-exclamation-circle opacity-0 transition-opacity"></i><span class="text-xs font-black text-slate-500 uppercase tracking-tighter">Reposición</span></div></label>
+                            <label class="check-item"><input type="checkbox" data-tarea="Falta Orden" class="hidden peer"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-exclamation-circle opacity-0 transition-opacity"></i><span class="text-xs font-black text-slate-500 uppercase tracking-tighter">Orden</span></div></label>
+                            <label class="check-item col-span-2"><input type="checkbox" id="checkOtra" class="hidden peer" onchange="toggleNota()"><div class="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-edit opacity-0 transition-opacity"></i><span class="text-xs font-black text-slate-500 uppercase italic">¿Otra Gestión?</span></div></label>
                         </div>
-                        <div id="notaContainer" class="hidden mt-3 fade-in"><textarea id="inputNota" rows="2" placeholder="Describe aquí..." class="w-full p-4 bg-white rounded-2xl border-2 border-blue-200 text-sm font-bold text-blue-900 shadow-inner outline-none"></textarea></div>
+                        <div id="notaContainer" class="hidden mt-3 fade-in"><textarea id="inputNota" rows="2" placeholder="Nota de auditoría..." class="w-full p-4 bg-white rounded-2xl border-2 border-blue-200 text-sm font-bold text-blue-900 shadow-inner outline-none"></textarea></div>
                     </div>
                 </div>
             </div>
-            <!-- BOTÓN GUARDAR Y SIGUIENTE -->
-            <button onclick="guardarYGestionar()" class="w-full bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl border border-blue-700 flex items-center justify-center gap-3 active:scale-95 uppercase text-[10px] tracking-[0.3em]">
-                <i class="fas fa-save"></i> Finalizar y Siguiente
+            <button onclick="guardarYGestionar()" class="w-full bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl border border-blue-700 flex items-center justify-center gap-3 active:scale-95 uppercase text-[10px] tracking-[0.3em] italic">
+                <i class="fas fa-save"></i> Guardar y Siguiente
             </button>
         </div>
 
-        <!-- MODAL GESTIÓN REVISADOS -->
-        <div id="modalGestion" class="hidden fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-sm p-4 flex flex-col fade-in">
-            <div class="flex justify-between items-center text-white mb-6 pt-4">
-                <h2 class="text-xl font-black italic">REPORTE <span class="text-blue-400 font-bold">DE GESTIÓN</span></h2>
+        <!-- REPORTE MODAL -->
+        <div id="modalGestion" class="hidden fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md p-4 flex flex-col fade-in">
+            <div class="flex justify-between items-center text-white mb-6 pt-4 px-2">
+                <h2 class="text-xl font-black italic">ALERTAS <span class="text-blue-400">PASILLO</span></h2>
                 <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl"><i class="fas fa-times"></i></button>
             </div>
-            
-            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-24">
-                <!-- Se llena con productos gestionados -->
-            </div>
-
+            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-24 px-1"></div>
             <div class="fixed bottom-6 left-6 right-6 flex gap-3">
-                <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 uppercase text-xs">
-                    <i class="fas fa-share-alt"></i> Copiar Reporte
-                </button>
-                <button onclick="vaciarReporte()" class="bg-red-500 text-white p-4 rounded-2xl shadow-xl active:scale-90 transition-all">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 uppercase text-xs tracking-widest"><i class="fas fa-share-alt"></i> Enviar Alertas</button>
+                <button onclick="vaciarReporte()" class="bg-red-500 text-white p-4 rounded-2xl shadow-xl active:scale-90 transition-all"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>
 
-        <!-- Historial -->
-        <div id="historialSection" class="mt-8 px-2"><h3 class="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em] mb-4 italic text-center">Recientes</h3><div id="listaHistorial" class="space-y-2"></div></div>
+        <!-- Recientes -->
+        <div id="historialSection" class="mt-8 px-2"><h3 class="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em] mb-4 italic text-center">Búsquedas Recientes</h3><div id="listaHistorial" class="space-y-2"></div></div>
 
         <!-- Error -->
         <div id="errorMsg" class="hidden fade-in bg-white p-10 rounded-[2.5rem] text-center mt-4 border border-red-50 shadow-2xl"><i class="fas fa-ghost text-red-100 text-6xl mb-4"></i><p class="font-black text-slate-800 uppercase">Sin información</p><button onclick="nuevaBusqueda()" class="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-8 py-4 rounded-full italic">Volver</button></div>
@@ -135,7 +137,7 @@
                 const response = await fetch(API_URL + codigo);
                 const data = await response.json();
                 if (data.error || !data.nombre || data.nombre === "No detectado") throw new Error();
-                currentProduct = data; // Guardar producto actual para la gestión
+                currentProduct = data;
                 guardarEnHistorial(data);
                 document.getElementById('resCodigo').innerText = "CÓDIGO: " + data.codigo;
                 document.getElementById('resNombre').innerText = data.nombre;
@@ -144,25 +146,17 @@
                 
                 const sBox = document.getElementById('stockBox');
                 const sVal = document.getElementById('resStock');
-                if (data.stock <= 0) { sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center"; sVal.className = "text-xl font-black text-red-700"; document.getElementById('stockLabel').innerText = "SIN STOCK"; } 
-                else { sBox.className = "p-4 rounded-2xl border border-green-100 bg-green-50 text-green-600 text-center"; sVal.className = "text-xl font-black text-green-700"; document.getElementById('stockLabel').innerText = "EN STOCK"; }
+                if (data.stock <= 0) { sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center"; sVal.className = "text-xl font-black text-red-700"; document.getElementById('stockLabel').innerText = "SIN STOCK"; } 
+                else { sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center flex flex-col items-center justify-center"; sVal.className = "text-xl font-black text-green-700"; document.getElementById('stockLabel').innerText = "EN STOCK"; }
                 mostrarVista('resultado');
             } catch (error) { mostrarVista('errorMsg'); }
         }
 
         function guardarYGestionar() {
-            // Verificar qué tareas se marcaron
             const tareas = Array.from(document.querySelectorAll('#checklistArea input[data-tarea]:checked')).map(c => c.getAttribute('data-tarea'));
             const nota = document.getElementById('inputNota').value.trim();
-            
-            // Solo guardar si hay algo marcado o escrito
             if (tareas.length > 0 || nota !== "") {
-                const itemGestion = {
-                    ...currentProduct,
-                    tareas,
-                    nota,
-                    timestamp: new Date().toLocaleTimeString()
-                };
+                const itemGestion = { ...currentProduct, tareas, nota, timestamp: new Date().toLocaleTimeString() };
                 gestionados.unshift(itemGestion);
                 localStorage.setItem('ultron_gestionados', JSON.stringify(gestionados));
                 actualizarBadge();
@@ -181,15 +175,14 @@
             const lista = document.getElementById('listaReporte');
             modal.classList.remove('hidden');
             if (gestionados.length === 0) {
-                lista.innerHTML = '<div class="text-slate-500 text-center py-20 italic">No hay productos gestionados aún</div>';
+                lista.innerHTML = '<div class="text-slate-500 text-center py-20 italic">No hay alertas registradas</div>';
             } else {
                 lista.innerHTML = gestionados.map((g, i) => `
                     <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-100 relative">
-                        <span class="absolute top-4 right-4 text-[9px] font-black text-blue-400">${g.timestamp}</span>
-                        <p class="font-black text-slate-800 text-sm truncate pr-16 mb-1">${g.nombre}</p>
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">${g.codigo}</p>
+                        <p class="font-black text-slate-800 text-sm truncate pr-16 mb-1 uppercase tracking-tight">${g.nombre}</p>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">${g.codigo} @ ${g.timestamp}</p>
                         <div class="flex flex-wrap gap-1 mb-2">
-                            ${g.tareas.map(t => `<span class="bg-green-100 text-green-700 text-[8px] font-black px-2 py-0.5 rounded-full uppercase italic">${t} OK</span>`).join('')}
+                            ${g.tareas.map(t => `<span class="bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase border border-red-100">⚠️ ${t}</span>`).join('')}
                         </div>
                         ${g.nota ? `<div class="bg-blue-50 p-3 rounded-xl border border-blue-100 text-[10px] font-bold text-blue-900 leading-tight italic">"${g.nota}"</div>` : ''}
                     </div>
@@ -198,40 +191,20 @@
         }
 
         function cerrarModalGestion() { document.getElementById('modalGestion').classList.add('hidden'); }
-
         function compartirReporte() {
             if (gestionados.length === 0) return;
-            const texto = gestionados.map(g => {
-                return `📍 PRODUCTO: ${g.nombre}\n🔢 COD: ${g.codigo}\n✅ GESTION: ${g.tareas.join(', ')}\n📝 NOTA: ${g.nota || 'Ninguna'}\n-----------------`;
-            }).join('\n');
-            
-            navigator.clipboard.writeText("REPORTE DE AUDITORÍA ULTRON:\n\n" + texto).then(() => {
-                alert("¡Reporte copiado! Puedes pegarlo en WhatsApp.");
-            });
+            const texto = gestionados.map(g => `⚠️ PRODUCTO: ${g.nombre}\n🔢 COD: ${g.codigo}\n🚨 PROBLEMAS: ${g.tareas.join(', ')}\n📝 NOTA: ${g.nota || '---'}\n-----------------`).join('\n');
+            navigator.clipboard.writeText("ALERTAS DE PASILLO ULTRON:\n\n" + texto).then(() => alert("¡Alertas copiadas al portapapeles!"));
         }
-
-        function vaciarReporte() {
-            if (confirm("¿Seguro quieres borrar todo el reporte actual?")) {
-                gestionados = [];
-                localStorage.setItem('ultron_gestionados', '[]');
-                actualizarBadge();
-                abrirModalGestion();
-            }
-        }
-
-        function actualizarBadge() {
-            const badge = document.getElementById('badgeGestion');
-            if (gestionados.length > 0) { badge.innerText = gestionados.length; badge.classList.remove('hidden'); }
-            else { badge.classList.add('hidden'); }
-        }
-
+        function vaciarReporte() { if (confirm("¿Borrar todas las alertas?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); abrirModalGestion(); } }
+        function actualizarBadge() { const badge = document.getElementById('badgeGestion'); if (gestionados.length > 0) { badge.innerText = gestionados.length; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } }
         function limpiarChecks() { document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false); document.getElementById('notaContainer').classList.add('hidden'); document.getElementById('inputNota').value = ""; }
         function abrirEscanner() { mostrarVista('scannerWrapper'); html5QrCode = new Html5Qrcode("reader"); const config = { fps: 20, qrbox: { width: 250, height: 180 } }; html5QrCode.start({ facingMode: "environment" }, config, (text) => buscarStock(text)); }
         function cerrarEscanner() { if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().then(() => document.getElementById('scannerWrapper').classList.add('hidden')); }
         function mostrarVista(id) { ['loader', 'resultado', 'errorMsg', 'scannerWrapper', 'historialSection'].forEach(v => { const el = document.getElementById(v); if (v === id) el.classList.remove('hidden'); else if (v === 'historialSection' && (id === 'loader' || id === 'resultado')) el.classList.add('hidden'); else if (v === 'historialSection') el.classList.remove('hidden'); else el.classList.add('hidden'); }); }
         function nuevaBusqueda() { document.getElementById('codigoInput').value = ''; mostrarVista('historialSection'); document.getElementById('codigoInput').focus(); }
         function guardarEnHistorial(item) { historial = historial.filter(h => h.codigo !== item.codigo); historial.unshift({codigo: item.codigo, nombre: item.nombre, precio: item.precio}); historial = historial.slice(0, 5); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); }
-        function actualizarHistorial() { const lista = document.getElementById('listaHistorial'); if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4 uppercase font-black">Historial Vacío</p>'; return; } lista.innerHTML = historial.map(h => `<div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-50 active:scale-95 transition-all text-xs"><div class="overflow-hidden"><p class="font-bold text-slate-700 truncate pr-4 uppercase tracking-tighter">${h.nombre}</p><p class="text-[8px] text-slate-400 font-black tracking-widest">${h.codigo}</p></div><div class="text-blue-600 font-black">$${h.precio ? h.precio.toLocaleString('es-CL') : '---'}</div></div>`).join(''); }
+        function actualizarHistorial() { const lista = document.getElementById('listaHistorial'); if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4 uppercase font-black tracking-widest">Sin historial</p>'; return; } lista.innerHTML = historial.map(h => `<div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-50 active:scale-95 transition-all text-xs"><div class="overflow-hidden flex flex-col items-start"><p class="font-black text-slate-700 truncate pr-4 tracking-tighter uppercase">${h.nombre}</p><p class="text-[8px] text-slate-400 font-black tracking-widest italic">${h.codigo}</p></div><div class="text-blue-600 font-black">$${h.precio ? h.precio.toLocaleString('es-CL') : '---'}</div></div>`).join(''); }
     </script>
 </body>
 </html>
