@@ -3,188 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultron Auditor PRO - v14.0</title>
+    <title>Ultron Auditor PRO - v15.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #e2e8f0; -webkit-tap-highlight-color: transparent; font-family: system-ui, -apple-system, sans-serif; }
+        
+        /* EL MARCO MAESTRO AZUL */
+        .app-container {
+            border: 4px solid #2563eb;
+            box-shadow: 0 20px 50px -12px rgba(37, 99, 235, 0.3);
+            border-radius: 2.5rem;
+            background-color: #f8fafc;
+            min-height: calc(100vh - 2rem);
+            margin: 1rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
         #reader { width: 100% !important; border: none !important; border-radius: 2rem; overflow: hidden; }
+        
         .check-item input:checked + div { background-color: #fef2f2; border-color: #ef4444; }
         .check-item input:checked + div i { color: #dc2626; opacity: 1; }
         .check-item input:checked + div span { color: #991b1b; }
+        
         #checkUbi:checked + div { background-color: #f0f9ff; border-color: #3b82f6; }
         .bg-descontinuado { background-color: #dc2626 !important; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        /* Estilo para la intro integrada */
+        .intro-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 200;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+        }
     </style>
 </head>
-<body class="p-4 flex flex-col min-h-screen pb-10">
+<body class="flex flex-col min-h-screen">
 
-    <!-- PANTALLA DE INTRODUCCIÓN / REGISTRO -->
-    <div id="introScreen" class="fixed inset-0 z-[200] glass flex items-center justify-center p-6 hidden">
-        <div class="max-w-sm w-full bg-white rounded-[2.5rem] shadow-2xl p-8 border border-slate-100 fade-in">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4 shadow-lg shadow-blue-200 italic font-black">U</div>
-                <h2 class="text-2xl font-black text-slate-800 tracking-tighter italic uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Gestión de Pasillo v14.0</p>
+    <div class="app-container">
+        
+        <!-- PANTALLA DE INTRODUCCIÓN INTEGRADA -->
+        <div id="introScreen" class="intro-overlay hidden fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl shadow-blue-200 italic font-black">U</div>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tighter italic uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">Gestión de Pasillo v15.0</p>
             </div>
             
-            <div class="space-y-3 text-slate-600 text-[13px] leading-snug mb-8">
-                <p class="flex items-start gap-3"><i class="fas fa-barcode text-blue-500 mt-1"></i> <span>Escaneo y búsqueda de <b>Precios/Stock</b>.</span></p>
-                <p class="flex items-start gap-3"><i class="fas fa-exclamation-triangle text-blue-500 mt-1"></i> <span>Reporte de <b>Limpieza y Reposición</b>.</span></p>
-                <p class="flex items-start gap-3"><i class="fas fa-map-marker-alt text-blue-500 mt-1"></i> <span>Ajuste de <b>Ubicación</b> manual.</span></p>
+            <div class="space-y-4 text-slate-600 text-sm leading-snug mb-10 px-4">
+                <p class="flex items-start gap-4"><i class="fas fa-barcode text-blue-500 mt-1"></i> <span>Escaneo inteligente de <b>Stock y Precios</b>.</span></p>
+                <p class="flex items-start gap-4"><i class="fas fa-broom text-blue-500 mt-1"></i> <span>Reporte de <b>Limpieza y Reposición</b>.</span></p>
+                <p class="flex items-start gap-4"><i class="fas fa-map-marked-alt text-blue-500 mt-1"></i> <span>Ajuste de <b>Ubicaciones</b> manual.</span></p>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-4 px-4">
                 <label class="block text-[10px] font-black text-slate-400 uppercase ml-2">Nombre del Auditor</label>
-                <input id="auditorNameInput" type="text" placeholder="Tu nombre..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-slate-700">
-                <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase text-xs tracking-widest italic">Comenzar Auditoría</button>
+                <input id="auditorNameInput" type="text" placeholder="Tu nombre..." class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 transition-all font-bold text-slate-700 shadow-inner text-center">
+                <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase text-xs tracking-widest italic">Iniciar Auditoría</button>
             </div>
         </div>
-    </div>
 
-    <div class="max-w-md mx-auto w-full">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6 px-2">
-            <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic uppercase">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
-                <div class="flex items-center gap-2">
-                    <p id="auditorDisplay" class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Cargando...</p>
-                    <!-- BOTÓN CERRAR SESIÓN -->
-                    <button onclick="cerrarSesion()" class="text-red-400 hover:text-red-600 transition-colors text-[10px]">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </div>
-            </div>
-            <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white p-2 rounded-2xl w-12 h-12 flex items-center justify-center shadow-xl active:scale-90 transition-all">
-                <i class="fas fa-clipboard-list text-lg"></i>
-                <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white hidden">0</span>
-            </button>
-        </div>
-
-        <!-- Buscador -->
-        <div id="searchContainer" class="bg-white p-2 rounded-3xl shadow-xl flex items-center mb-4 border border-gray-100">
-            <input id="codigoInput" type="number" inputmode="numeric" placeholder="Código..." class="flex-grow p-4 text-lg font-bold bg-transparent text-gray-700 outline-none w-full" onkeypress="if(event.key === 'Enter') buscarStock()">
-            <button onclick="limpiarInput()" class="text-slate-300 w-10 h-10 flex items-center justify-center active:text-red-500"><i class="fas fa-times-circle text-lg"></i></button>
-            <button onclick="abrirEscanner()" class="bg-slate-100 text-slate-500 w-12 h-12 rounded-2xl flex items-center justify-center mr-2"><i class="fas fa-camera text-xl"></i></button>
-            <button onclick="buscarStock()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-90 shadow-lg"><i class="fas fa-search text-sm"></i></button>
-        </div>
-
-        <!-- Escáner -->
-        <div id="scannerWrapper" class="hidden mb-6 fade-in"><div class="bg-black rounded-[2.5rem] overflow-hidden relative border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 backdrop-blur-md w-10 h-10 rounded-full z-50 flex items-center justify-center text-white"><i class="fas fa-times"></i></button></div></div>
-
-        <!-- Loader -->
-        <div id="loader" class="hidden flex flex-col items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-[6px] border-blue-50 border-t-blue-600 mb-4"></div>
-            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest animate-pulse">Sincronizando datos...</p>
-        </div>
-
-        <!-- RESULTADO -->
-        <div id="resultado" class="hidden fade-in space-y-4 pb-20">
-            <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
-                <div id="resBanner" class="bg-blue-600 p-3 text-white text-center transition-all duration-300">
-                    <span id="resCodigoLabel" class="text-[11px] font-black tracking-[0.2em] uppercase leading-none italic">CÓDIGO: ---</span>
-                </div>
-
-                <div class="p-6">
-                    <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 leading-tight text-center px-2">Nombre</h2>
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex flex-col items-center justify-center text-center">
-                            <span class="text-blue-500 text-[9px] font-black uppercase block mb-1 tracking-widest">PVP</span>
-                            <span id="resPrecio" class="text-xl font-black text-blue-800">$0</span>
-                        </div>
-                        <div id="stockBox" class="p-4 rounded-2xl border flex flex-col items-center justify-center text-center transition-all">
-                            <span id="stockLabel" class="text-[9px] font-black uppercase block mb-1 tracking-widest">STOCK</span>
-                            <span id="resStock" class="text-xl font-black">0</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 p-4 rounded-[2rem] border border-slate-100">
-                        <div id="checklistArea" class="grid grid-cols-2 gap-3">
-                            <label class="check-item"><input type="checkbox" data-tarea="Falta Precio" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-tag opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Precio</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Reposición" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-boxes opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Reposición</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Limpieza" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-broom opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Limpieza</span></div></label>
-                            <label class="check-item"><input type="checkbox" data-tarea="Revisar Existencia" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-clipboard-check opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase text-center leading-none">Revisar Existencia</span></div></label>
-                            <label class="check-item col-span-2"><input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-map-marker-alt opacity-0 transition-opacity"></i><span class="text-[10px] font-black text-slate-500 uppercase">Definir Ubicación</span></div></label>
-                        </div>
-                        <div id="ubiContainer" class="hidden mt-3 fade-in">
-                            <input id="inputUbi" type="text" placeholder="Ej: Pasillo 5, Rack B..." class="w-full p-4 bg-white rounded-xl border-2 border-blue-100 text-sm font-bold text-blue-900 shadow-inner outline-none">
-                        </div>
+        <!-- APP CONTENT -->
+        <div class="flex-grow p-5 flex flex-col">
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-2xl font-black text-blue-900 tracking-tighter italic uppercase leading-none">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
+                    <div class="flex items-center gap-2 mt-2">
+                        <p id="auditorDisplay" class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Cargando...</p>
+                        <button onclick="cerrarSesion()" class="text-red-400 hover:text-red-600 transition-colors text-[10px]"><i class="fas fa-power-off"></i></button>
                     </div>
                 </div>
+                <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-100 active:scale-90 transition-all">
+                    <i class="fas fa-clipboard-list text-xl"></i>
+                    <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white hidden">0</span>
+                </button>
             </div>
-            <div class="flex gap-2">
-                <button onclick="nuevaBusqueda()" class="w-1/3 bg-slate-200 text-slate-500 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95">Cerrar</button>
-                <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl flex items-center justify-center gap-3 active:scale-95 uppercase text-[10px] italic"><i class="fas fa-save"></i> Guardar Alerta</button>
+
+            <!-- Buscador -->
+            <div id="searchContainer" class="bg-white p-2 rounded-[2rem] shadow-lg flex items-center mb-6 border border-slate-100">
+                <input id="codigoInput" type="number" inputmode="numeric" placeholder="Escanear Código..." class="flex-grow p-4 text-lg font-bold bg-transparent text-slate-700 outline-none w-full" onkeypress="if(event.key === 'Enter') buscarStock()">
+                <button onclick="limpiarInput()" class="text-slate-300 w-10 h-10 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-12 h-12 rounded-2xl flex items-center justify-center mr-2"><i class="fas fa-camera"></i></button>
+                <button onclick="buscarStock()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fas fa-search"></i></button>
+            </div>
+
+            <!-- Contenedor Dinámico -->
+            <div class="flex-grow">
+                <!-- Escáner -->
+                <div id="scannerWrapper" class="hidden mb-6 fade-in"><div class="bg-black rounded-[2rem] overflow-hidden relative border-4 border-white"><div id="reader"></div><button onclick="cerrarEscanner()" class="absolute top-4 right-4 bg-white/20 w-10 h-10 rounded-full z-50 text-white"><i class="fas fa-times"></i></button></div></div>
+
+                <!-- Loader -->
+                <div id="loader" class="hidden flex flex-col items-center justify-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-100 border-t-blue-600 mb-4"></div>
+                    <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest animate-pulse italic">Consultando Pasillo...</p>
+                </div>
+
+                <!-- RESULTADO -->
+                <div id="resultado" class="hidden fade-in space-y-4 pb-10">
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-50">
+                        <div id="resBanner" class="bg-blue-600 p-3 text-white text-center transition-all duration-300">
+                            <span id="resCodigoLabel" class="text-[11px] font-black tracking-[0.2em] uppercase leading-none italic">CÓDIGO: ---</span>
+                        </div>
+                        <div class="p-6">
+                            <h2 id="resNombre" class="text-lg font-black text-slate-800 mb-6 leading-tight text-center">Nombre</h2>
+                            <div class="grid grid-cols-2 gap-3 mb-6">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center">
+                                    <span class="text-slate-400 text-[9px] font-black uppercase mb-1 tracking-widest">PVP</span>
+                                    <span id="resPrecio" class="text-xl font-black text-slate-800">$0</span>
+                                </div>
+                                <div id="stockBox" class="p-4 rounded-2xl border flex flex-col items-center justify-center text-center transition-all">
+                                    <span id="stockLabel" class="text-[9px] font-black uppercase mb-1 tracking-widest text-inherit">STOCK</span>
+                                    <span id="resStock" class="text-xl font-black text-inherit">0</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-[2rem] border border-slate-100">
+                                <div id="checklistArea" class="grid grid-cols-2 gap-3">
+                                    <label class="check-item"><input type="checkbox" data-tarea="Falta Precio" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-tag opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Precio</span></div></label>
+                                    <label class="check-item"><input type="checkbox" data-tarea="Reposición" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-boxes opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Reposición</span></div></label>
+                                    <label class="check-item"><input type="checkbox" data-tarea="Limpieza" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-broom opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase">Limpieza</span></div></label>
+                                    <label class="check-item"><input type="checkbox" data-tarea="Revisar Existencia" class="hidden"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-clipboard-check opacity-0"></i><span class="text-[10px] font-black text-slate-500 uppercase text-center leading-none">Revisar Existencia</span></div></label>
+                                    <label class="check-item col-span-2"><input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()"><div class="flex items-center justify-center gap-2 p-3 bg-white rounded-xl border border-slate-200 transition-all shadow-sm"><i class="fas fa-map-marker-alt opacity-0 transition-opacity"></i><span class="text-[10px] font-black text-slate-500 uppercase">Definir Ubicación</span></div></label>
+                                </div>
+                                <div id="ubiContainer" class="hidden mt-3 fade-in"><input id="inputUbi" type="text" placeholder="Ej: Pasillo 5, Rack B..." class="w-full p-4 bg-white rounded-xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="nuevaBusqueda()" class="w-1/3 bg-slate-200 text-slate-500 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95 transition-all">Cerrar</button>
+                        <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl flex items-center justify-center gap-3 active:scale-95 uppercase text-[10px] italic transition-all"><i class="fas fa-save"></i> Guardar Alerta</button>
+                    </div>
+                </div>
+
+                <!-- Historial -->
+                <div id="historialSection" class="fade-in">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <h3 class="text-slate-400 text-[9px] font-black uppercase tracking-widest italic">Historial Reciente</h3>
+                        <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase"><i class="fas fa-trash-alt mr-1"></i> Limpiar</button>
+                    </div>
+                    <div id="listaHistorial" class="space-y-2"></div>
+                </div>
+
+                <!-- Error -->
+                <div id="errorMsg" class="hidden fade-in bg-white p-10 rounded-[2rem] text-center border border-red-50 shadow-xl">
+                    <i class="fas fa-exclamation-circle text-red-500 text-5xl mb-4"></i>
+                    <p class="font-black text-slate-800 uppercase text-sm">Sin datos</p>
+                    <button onclick="nuevaBusqueda()" class="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-8 py-4 rounded-full">Reintentar</button>
+                </div>
             </div>
         </div>
 
-        <div id="historialSection" class="mt-8 px-2">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <h3 class="text-slate-400 text-[9px] font-black uppercase tracking-widest italic">Historial Reciente</h3>
-                <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase active:scale-90">Limpiar</button>
+        <!-- MODAL REPORTES -->
+        <div id="modalGestion" class="hidden fixed inset-0 z-[300] p-4 flex flex-col fade-in">
+            <div class="absolute inset-0 bg-slate-900/95 backdrop-blur-md rounded-[2.5rem] m-2 border-4 border-blue-600"></div>
+            <div class="relative flex-grow flex flex-col p-6 text-white">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-black italic uppercase italic">REPORTES</h2>
+                    <button onclick="cerrarModalGestion()" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-24"></div>
+                <div class="flex gap-3">
+                    <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-xs italic tracking-widest">Enviar WhatsApp</button>
+                    <button onclick="vaciarReporte()" class="bg-red-500 text-white p-5 rounded-2xl"><i class="fas fa-trash-alt"></i></button>
+                </div>
             </div>
-            <div id="listaHistorial" class="space-y-2"></div>
-        </div>
-    </div>
-
-    <!-- MODAL ALERTAS -->
-    <div id="modalGestion" class="hidden fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md p-4 flex flex-col fade-in">
-        <div class="flex justify-between items-center text-white mb-6 pt-4 px-2">
-            <h2 class="text-xl font-black italic uppercase italic">REPORTES</h2>
-            <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-24"></div>
-        <div class="fixed bottom-6 left-6 right-6 flex gap-3">
-            <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase text-xs italic tracking-widest">Enviar Alertas</button>
-            <button onclick="vaciarReporte()" class="bg-red-500 text-white p-4 rounded-2xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
         </div>
     </div>
 
     <script>
         const API_URL = "https://round-sound-c782.cmaturana.workers.dev/?codigo=";
-        let html5QrCode;
+        let html5QrCode, currentProduct = null;
         let historial = JSON.parse(localStorage.getItem('ultron_history') || '[]');
         let gestionados = JSON.parse(localStorage.getItem('ultron_gestionados') || '[]');
-        let currentProduct = null;
         let auditorName = localStorage.getItem('ultron_auditor_name') || "";
 
         window.onload = () => { 
-            if (!auditorName) {
-                document.getElementById('introScreen').classList.remove('hidden');
-            } else {
-                actualizarAuditorDisplay();
-            }
-            actualizarHistorial(); 
-            actualizarBadge(); 
+            if (!auditorName) { document.getElementById('introScreen').classList.remove('hidden'); } 
+            else { actualizarAuditorDisplay(); }
+            actualizarHistorial(); actualizarBadge(); 
         };
 
         function registrarAuditor() {
             const name = document.getElementById('auditorNameInput').value.trim();
-            if (name.length < 3) { alert("Ingresa un nombre válido"); return; }
+            if (name.length < 3) { alert("Ingresa tu nombre"); return; }
             auditorName = name;
             localStorage.setItem('ultron_auditor_name', auditorName);
             document.getElementById('introScreen').classList.add('hidden');
             actualizarAuditorDisplay();
         }
 
-        function actualizarAuditorDisplay() {
-            document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase();
-        }
-
-        // NUEVA FUNCIÓN: CERRAR SESIÓN
-        function cerrarSesion() {
-            if (confirm("¿Quieres cambiar de auditor? Se guardará el historial pero se pedirá un nuevo nombre.")) {
-                localStorage.removeItem('ultron_auditor_name');
-                location.reload(); // Recarga la app para mostrar la intro
-            }
-        }
-
+        function cerrarSesion() { if (confirm("¿Cerrar sesión del auditor?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
+        function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase(); }
         function limpiarInput() { document.getElementById('codigoInput').value = ''; document.getElementById('codigoInput').focus(); }
         function toggleUbi() { const c = document.getElementById('ubiContainer'); if(document.getElementById('checkUbi').checked){ c.classList.remove('hidden'); document.getElementById('inputUbi').focus(); } else { c.classList.add('hidden'); } }
-        function limpiarHistorial() { if (confirm("¿Borrar historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
+        function limpiarHistorial() { if (confirm("¿Limpiar historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
 
         async function buscarStock(codigoForzado = null) {
             const input = document.getElementById('codigoInput');
@@ -195,16 +218,15 @@
                 const response = await fetch(API_URL + codigo);
                 const data = await response.json();
                 if (data.error || !data.nombre || data.nombre === "No detectado") throw new Error();
-                currentProduct = data;
-                guardarEnHistorial(data);
+                currentProduct = data; guardarEnHistorial(data);
                 const banner = document.getElementById('resBanner'), resLabel = document.getElementById('resCodigoLabel'), resNombre = document.getElementById('resNombre'), sBox = document.getElementById('stockBox'), sLabel = document.getElementById('stockLabel');
                 sLabel.innerText = "STOCK";
                 if (data.descontinuado === true) {
-                    banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-1"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-4 rounded-2xl border border-red-200 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center";
+                    banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-1"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-4 rounded-2xl border border-red-200 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center font-bold";
                 } else {
                     banner.classList.remove('bg-descontinuado'); resLabel.innerText = "CÓDIGO: " + data.codigo; resNombre.classList.remove('text-red-600');
-                    if (parseInt(data.stock) <= 0) sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center";
-                    else sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center flex flex-col items-center justify-center";
+                    if (parseInt(data.stock) <= 0) sBox.className = "p-4 rounded-2xl border border-red-100 bg-red-50 text-red-600 text-center flex flex-col items-center justify-center font-bold";
+                    else sBox.className = "p-4 rounded-2xl border border-green-50 bg-green-50 text-green-600 text-center flex flex-col items-center justify-center font-bold";
                 }
                 document.getElementById('resNombre').innerText = data.nombre; document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; document.getElementById('resStock').innerText = data.stock ?? 0; mostrarVista('resultado');
             } catch (error) { mostrarVista('errorMsg'); }
@@ -226,16 +248,16 @@
         function nuevaBusqueda() { limpiarInput(); mostrarVista('historialSection'); }
         function actualizarBadge() { const b = document.getElementById('badgeGestion'); b.innerText = gestionados.length; b.classList.toggle('hidden', gestionados.length === 0); }
         function limpiarChecks() { document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false); document.getElementById('ubiContainer').classList.add('hidden'); document.getElementById('inputUbi').value = ""; }
-        function abrirModalGestion() { document.getElementById('modalGestion').classList.remove('hidden'); const lista = document.getElementById('listaReporte'); lista.innerHTML = gestionados.map(g => `<div class="bg-white p-4 rounded-2xl mb-2 shadow-sm border border-slate-100"><p class="font-black text-xs uppercase">${g.nombre}</p><p class="text-[9px] text-slate-400">#${g.codigo} | ${g.time}</p><div class="mt-2 flex flex-wrap gap-1">${g.tareas.map(t => `<span class="bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full border border-red-100">${t}</span>`).join('')}${g.ubicacion ? `<span class="bg-blue-50 text-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full border border-blue-100"><i class="fas fa-map-marker-alt mr-1"></i>${g.ubicacion}</span>` : ''}</div></div>`).join(''); }
+        function abrirModalGestion() { document.getElementById('modalGestion').classList.remove('hidden'); const lista = document.getElementById('listaReporte'); lista.innerHTML = gestionados.map(g => `<div class="bg-white p-4 rounded-2xl mb-2 text-slate-800"><p class="font-black text-xs uppercase">${g.nombre}</p><p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase">#${g.codigo} | ${g.time}</p><div class="mt-3 flex flex-wrap gap-1">${g.tareas.map(t => `<span class="bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full border border-red-100">${t}</span>`).join('')}${g.ubicacion ? `<span class="bg-blue-50 text-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full border border-blue-100"><i class="fas fa-map-marker-alt mr-1"></i>${g.ubicacion}</span>` : ''}</div></div>`).join(''); }
         function cerrarModalGestion() { document.getElementById('modalGestion').classList.add('hidden'); }
-        function vaciarReporte() { if (confirm("¿Borrar todo?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        function vaciarReporte() { if (confirm("¿Borrar todos los reportes?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
         function compartirReporte() { 
             const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n🚨 TAREAS: ${g.tareas.join(', ')}\n📍 UBICACIÓN: ${g.ubicacion || 'No definida'}`).join('\n\n'); 
             const finalReport = `REPORTES ULTRON\nAuditado por: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte firmado y copiado. ¡Listo para enviar!")); 
+            navigator.clipboard.writeText(finalReport).then(() => alert("Copiado al portapapeles.")); 
         }
         function guardarEnHistorial(item) { historial = historial.filter(h => h.codigo !== item.codigo); historial.unshift(item); historial = historial.slice(0, 10); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); }
-        function actualizarHistorial() { const lista = document.getElementById('listaHistorial'); if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4 uppercase font-black">Sin historial</p>'; return; } lista.innerHTML = historial.map(h => `<div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm text-[10px] uppercase font-black active:scale-95 transition-all"><div>${h.nombre}<p class="text-[8px] font-normal text-slate-400">#${h.codigo}</p></div><div class="text-blue-600">$${h.precio.toLocaleString('es-CL')}</div></div>`).join(''); }
+        function actualizarHistorial() { const lista = document.getElementById('listaHistorial'); if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-4 uppercase font-black">Sin registros</p>'; return; } lista.innerHTML = historial.map(h => `<div onclick="buscarStock('${h.codigo}')" class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm text-[10px] uppercase font-black active:scale-95 transition-all"><div>${h.nombre}<p class="text-[8px] font-normal text-slate-400 italic">#${h.codigo}</p></div><div class="text-blue-600 font-black tracking-tighter">$${h.precio.toLocaleString('es-CL')}</div></div>`).join(''); }
     </script>
 </body>
 </html>
