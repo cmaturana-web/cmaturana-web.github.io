@@ -1,0 +1,39 @@
+const STOCK = 'http://net.fh.cl:82/ultron_stock.asp';
+const CORS = {'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
+
+export default {
+  async fetch(req) {
+    const codigo = new URL(req.url).searchParams.get('codigo') || '';
+    if (!codigo) return new Response(JSON.stringify({error:'falta codigo'}),{headers:CORS});
+
+    try {
+      const urlFinal = STOCK + '?busca=' + encodeURIComponent(codigo);
+      const r = await fetch(urlFinal, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0' }
+      });
+      const html = await r.text();
+      
+      let decodificado = html.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec)).replace(/&nbsp;/g, ' ');
+      let limpio = decodificado.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+      const txt = limpio.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+      
+      const ms = txt.match(/Stock\s*[:\-]?\s*(-?\d+)/i); // Permite stock negativo
+      const mn = txt.match(/PRECIOS\s+(.*?)\s+Codigo/i);
+      const mp = txt.match(/\$\s*([\d.,]+)/) || txt.match(/([\d.,]+)\s*c\/u/i);
+
+      // NUEVO: Detectar si aparece la palabra DESCONTINUADO en el texto
+      const isDescontinuado = txt.toUpperCase().includes('DESCONTINUADO');
+
+      return new Response(JSON.stringify({
+        codigo,
+        nombre: mn ? mn[1].trim() : 'No detectado',
+        precio: mp ? parseInt(mp[1].replace(/[.,\s]/g,'')) : null,
+        stock: ms ? parseInt(ms[1]) : null,
+        descontinuado: isDescontinuado
+      }), {headers:CORS});
+
+    } catch(e) {
+      return new Response(JSON.stringify({error: e.message}),{status:503,headers:CORS});
+    }
+  }
+};
