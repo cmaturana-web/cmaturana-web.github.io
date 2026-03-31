@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ultron Auditor PRO - v35.0</title>
+    <title>Ultron Auditor PRO - v36.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -55,8 +55,8 @@
         .fade-in { animation: fadeIn 0.2s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CHECKLIST */
-        .check-item div { padding: 0.6rem 0.2rem; border-width: 2px; border-radius: 1.2rem; transition: all 0.2s; border-color: #f1f5f9; background-color: #fff; }
+        /* CHECKLIST ESTILOS */
+        .check-item div { padding: 0.6rem 0.2rem; border-width: 2px; border-radius: 1rem; transition: all 0.2s; border-color: #f1f5f9; background-color: #fff; }
         .check-item div i { font-size: 1rem; margin-bottom: 2px; color: #94a3b8; }
         .check-item span { font-size: 8px; font-weight: 900; color: #64748b; }
         
@@ -71,6 +71,7 @@
         #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; }
         .bg-descontinuado { background-color: #dc2626 !important; }
 
+        /* MODAL REPORTES SÓLIDO */
         #modalGestion {
             position: absolute;
             inset: 0;
@@ -100,13 +101,15 @@
 
         <!-- PANTALLA 2: HOME -->
         <div id="homeScreen" class="screen hidden fade-in">
-            <div class="flex justify-between items-center mb-4 text-left">
-                <div>
-                    <h1 class="text-xl font-black text-blue-900 italic uppercase">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
-                    <div class="flex items-center gap-2">
-                        <p id="auditorDisplay" class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">AUDITOR: ---</p>
-                        <!-- ICONO DE PUERTA PARA CERRAR SESIÓN -->
-                        <button onclick="cerrarSesion()" class="text-red-400 active:scale-75"><i class="fas fa-door-open text-[11px]"></i></button>
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-left">
+                    <h1 class="text-xl font-black text-blue-900 italic uppercase leading-none">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p id="auditorDisplay" class="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[120px]">---</p>
+                        <!-- BOTÓN SALIR DE LA SESIÓN -->
+                        <button onclick="cerrarSesion()" class="bg-red-50 text-red-500 border border-red-100 px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-tighter flex items-center gap-1 active:bg-red-500 active:text-white transition-all">
+                            <i class="fas fa-door-open"></i> SALIR
+                        </button>
                     </div>
                 </div>
                 <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all">
@@ -130,7 +133,7 @@
                 </div>
             </div>
 
-            <div class="flex-grow overflow-y-auto pr-1">
+            <div class="flex-grow overflow-y-auto">
                 <div class="flex justify-between items-center mb-2 px-1">
                     <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL</h3>
                     <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase">Limpiar</button>
@@ -145,8 +148,8 @@
                 <span id="resCodigoLabel">CÓDIGO: ---</span>
             </div>
             
-            <div class="p-4 flex-grow flex flex-col justify-start">
-                <h2 id="resNombre" class="text-[1.1rem] font-black text-slate-800 text-center leading-tight tracking-tight uppercase mb-4">PRODUCTO</h2>
+            <div class="p-5 flex-grow flex flex-col justify-start">
+                <h2 id="resNombre" class="text-[1.1rem] font-black text-slate-800 text-center leading-tight tracking-tight uppercase mb-4 px-2">NOMBRE PRODUCTO</h2>
                 
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-slate-50 p-4 rounded-[1.8rem] border border-slate-100 text-center shadow-sm">
@@ -194,7 +197,7 @@
                             <span class="uppercase tracking-widest text-[9px]">UBICACIÓN MANUAL</span>
                         </div>
                     </label>
-                    <input id="inputUbi" type="text" placeholder="¿Dónde está?" class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
+                    <input id="inputUbi" type="text" placeholder="Escribir lugar..." class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
                 </div>
 
                 <div class="flex gap-3 mt-auto mb-4">
@@ -221,13 +224,13 @@
 
         <!-- OVERLAYS -->
         <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/90">
-            <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-3"></div>
-            <p class="text-blue-900 font-black text-[9px] uppercase tracking-widest italic text-center">Consultando...</p>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-100 border-t-blue-600 mb-4 text-blue-600"></div>
+            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest italic">Cargando datos...</p>
         </div>
 
         <div id="errorMsg" class="screen z-[1000] hidden items-center justify-center text-center px-8 bg-white">
             <i class="fas fa-ghost text-4xl text-red-500 mb-6"></i>
-            <p class="font-black text-slate-800 uppercase text-xs mb-8">Código no existe</p>
+            <p class="font-black text-slate-800 uppercase text-xs mb-8">El código no existe</p>
             <button onclick="irAHome()" class="w-full text-[10px] font-black text-blue-600 uppercase bg-blue-50 py-5 rounded-[2rem]">Volver</button>
         </div>
 
@@ -260,7 +263,7 @@
             mostrarPantalla('homeScreen');
         }
 
-        function cerrarSesion() { if (confirm("¿Cerrar sesión del auditor?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
+        function cerrarSesion() { if (confirm("¿Cerrar sesión del auditor actual?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
         function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase(); }
         function limpiarInput() { document.getElementById('codigoInput').value = ''; document.getElementById('codigoInput').focus(); }
         function toggleUbi() { const i = document.getElementById('inputUbi'); if(document.getElementById('checkUbi').checked){ i.classList.remove('hidden'); i.focus(); } else { i.classList.add('hidden'); i.value = ""; } }
@@ -312,8 +315,7 @@
             document.getElementById('scannerWrapper').classList.remove('hidden'); 
             html5QrCode = new Html5Qrcode("reader"); 
             html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 200 }, (text) => {
-                cerrarEscanner();
-                buscarStock(text);
+                cerrarEscanner(); buscarStock(text);
             }).catch(() => { cerrarEscanner(); }); 
         }
 
@@ -336,20 +338,20 @@
                     <span class="text-[10px] font-black ${g.descontinuado ? 'text-red-400' : 'text-blue-400'}">STK: ${g.stock}</span>
                 </div>
                 <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest mb-2">#${g.codigo} | ${g.time}</p>
-                <div class="flex flex-wrap gap-2">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase">⚠️ FALTA ${t}</span>`).join('')}</div>
+                <div class="flex flex-wrap gap-2">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase shadow-md">⚠️ FALTA ${t}</span>`).join('')}</div>
             </div>`).join(''); 
         }
 
         function cerrarModalGestion() { document.getElementById('modalGestion').style.display = 'none'; }
-        function vaciarReporte() { if (confirm("¿Borrar todo el listado?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        function vaciarReporte() { if (confirm("¿Borrar todo el listado acumulado?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
         
         function compartirReporte() { 
             const t = gestionados.map(g => {
                 const tareasTexto = g.tareas.length > 0 ? `⚠️ FALTA ${g.tareas.join(', ⚠️ FALTA ')}` : "⚠️ REVISIÓN MANUAL";
                 return `⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ${tareasTexto}`;
             }).join('\n\n'); 
-            const finalReport = `REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte copiado.")); 
+            const finalReport = `REPORTES ULTRON\nAuditado por: ${auditorName.toUpperCase()}\n\n${t}`;
+            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte firmado ⚠️ copiado.")); 
         }
 
         function guardarEnHistorial(item) { 
@@ -360,7 +362,7 @@
 
         function actualizarHistorial() { 
             const lista = document.getElementById('listaHistorial'); 
-            if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[11px] text-center py-6 uppercase font-black">Vacío</p>'; return; } 
+            if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[11px] text-center py-6 uppercase font-black tracking-widest">Sin registros</p>'; return; } 
             lista.innerHTML = historial.map(h => `
                 <div onclick="buscarStock('${h.codigo}')" class="${h.descontinuado ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'} p-4 rounded-[1.5rem] flex justify-between items-center shadow-sm active:scale-95 transition-all border text-left">
                     <div class="w-2/3">
