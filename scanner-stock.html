@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ultron Auditor PRO - v31.0</title>
+    <title>Ultron Auditor PRO - v32.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -94,21 +94,21 @@
 
     <div class="app-frame">
         
-        <!-- LOGIN -->
+        <!-- PANTALLA 1: LOGIN -->
         <div id="introScreen" class="screen z-[500] items-center justify-center text-center hidden">
             <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mb-6 font-black italic shadow-xl">U</div>
             <h2 class="text-3xl font-black text-slate-800 tracking-tighter uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
-            <div class="mt-10 w-full px-6 text-center">
+            <div class="mt-10 w-full px-6">
                 <input id="auditorNameInput" type="text" placeholder="TU NOMBRE" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 font-black text-center mb-4 uppercase">
-                <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase text-xs tracking-widest italic">Iniciar Auditoría</button>
+                <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase text-xs tracking-widest italic">Entrar</button>
             </div>
         </div>
 
-        <!-- HOME -->
+        <!-- PANTALLA 2: HOME -->
         <div id="homeScreen" class="screen hidden fade-in">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h1 class="text-xl font-black text-blue-900 italic uppercase">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
+                    <h1 class="text-xl font-black text-blue-900 italic uppercase leading-none">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
                     <div class="flex items-center gap-2">
                         <p id="auditorDisplay" class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">AUDITOR: ---</p>
                         <button onclick="cerrarSesion()" class="text-red-400 active:scale-75"><i class="fas fa-power-off text-[10px]"></i></button>
@@ -126,7 +126,7 @@
                 <button onclick="buscarStock()" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md active:scale-90"><i class="fas fa-search text-xs"></i></button>
             </div>
 
-            <!-- ESCÁNER CON BOTÓN CERRAR -->
+            <!-- ESCÁNER -->
             <div id="scannerWrapper" class="hidden mb-4 fade-in">
                 <div class="bg-black rounded-2xl overflow-hidden relative border-4 border-blue-600">
                     <div id="reader"></div>
@@ -138,21 +138,21 @@
 
             <div class="flex-grow overflow-y-auto">
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL</h3>
+                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL COMPLETO</h3>
                     <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase">Limpiar</button>
                 </div>
                 <div id="listaHistorial" class="space-y-2 pb-10"></div>
             </div>
         </div>
 
-        <!-- RESULTADO (DISEÑO EXACTO IMAGEN) -->
+        <!-- PANTALLA 3: RESULTADO -->
         <div id="resultScreen" class="screen !p-0 hidden fade-in">
             <div id="resBanner" class="bg-blue-600 p-4 text-white text-center font-black italic text-[13px] tracking-[0.2em] uppercase shadow-md">
                 <span id="resCodigoLabel">CÓDIGO: ---</span>
             </div>
             
             <div class="p-5 flex-grow flex flex-col justify-start">
-                <h2 id="resNombre" class="text-[1.1rem] font-black text-slate-800 text-center leading-tight tracking-tight uppercase mb-4 line-clamp-2">NOMBRE PRODUCTO</h2>
+                <h2 id="resNombre" class="text-[1.1rem] font-black text-slate-800 text-center leading-tight tracking-tight uppercase mb-4 line-clamp-3">NOMBRE PRODUCTO</h2>
                 
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-slate-50 p-4 rounded-[1.8rem] border border-slate-100 text-center shadow-sm">
@@ -165,8 +165,7 @@
                     </div>
                 </div>
 
-                <!-- Panel de Acciones en Contenedor Gris -->
-                <div class="bg-slate-50/80 p-4 rounded-[2.2rem] border border-slate-100 space-y-3">
+                <div class="bg-slate-50/80 p-4 rounded-[2.2rem] border border-slate-100 space-y-3 flex-grow max-h-fit">
                     <div id="checklistArea" class="grid grid-cols-2 gap-2">
                         <label class="check-item check-red cursor-pointer">
                             <input type="checkbox" data-tarea="PRECIO" class="hidden">
@@ -204,7 +203,6 @@
                     <input id="inputUbi" type="text" placeholder="Escribir ubicación..." class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
                 </div>
 
-                <!-- BOTONES INFERIORES -->
                 <div class="flex gap-3 mt-auto mb-4">
                     <button onclick="irAHome()" class="w-[35%] bg-slate-200 text-slate-600 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95 text-center">CERRAR</button>
                     <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95">
@@ -217,25 +215,25 @@
         <!-- MODAL REPORTES -->
         <div id="modalGestion">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black italic uppercase italic">REPORTES ACUMULADOS</h2>
-                <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
+                <h2 class="text-xl font-black italic uppercase">LISTADO ALERTAS</h2>
+                <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-20 scrollbar-hide text-white"></div>
+            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-10 scrollbar-hide text-white"></div>
             <div class="flex gap-3 mt-4">
                 <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-[10px] italic">Enviar WhatsApp</button>
                 <button onclick="vaciarReporte()" class="bg-red-500/20 text-red-400 border border-red-500/20 p-5 rounded-2xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>
 
-        <!-- LOADER & ERROR -->
+        <!-- OVERLAYS -->
         <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/90">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-100 border-t-blue-600 mb-4"></div>
-            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest italic">Cargando datos...</p>
+            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest italic">Cargando...</p>
         </div>
 
         <div id="errorMsg" class="screen z-[1000] hidden items-center justify-center text-center px-8 bg-white">
             <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-6"></i>
-            <p class="font-black text-slate-800 uppercase text-xs mb-8 tracking-widest">Código inexistente</p>
+            <p class="font-black text-slate-800 uppercase text-xs mb-8">Código inexistente</p>
             <button onclick="irAHome()" class="w-full text-[10px] font-black text-blue-600 uppercase bg-blue-50 py-5 rounded-[2rem]">Volver</button>
         </div>
 
@@ -270,6 +268,7 @@
 
         function cerrarSesion() { if (confirm("¿Cambiar de auditor?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
         function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase(); }
+        function limpiarInput() { document.getElementById('codigoInput').value = ''; document.getElementById('codigoInput').focus(); }
         function toggleUbi() { const i = document.getElementById('inputUbi'); if(document.getElementById('checkUbi').checked){ i.classList.remove('hidden'); i.focus(); } else { i.classList.add('hidden'); i.value = ""; } }
         function limpiarHistorial() { if (confirm("¿Borrar historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
 
@@ -295,7 +294,7 @@
                 } else {
                     banner.classList.remove('bg-descontinuado'); resLabel.innerText = "CÓDIGO: " + data.codigo; resNombre.classList.remove('text-red-600');
                     if (parseInt(data.stock) <= 0) sBox.className = "p-3 rounded-[1.5rem] border-2 border-red-100 bg-red-50 text-red-600 text-center font-black shadow-sm";
-                    else sBox.className = "p-3 rounded-[1.5rem] border-2 border-green-50 bg-green-50 text-green-600 text-center font-black shadow-sm";
+                    else sBox.className = "p-3 rounded-[1.5rem] border-2 border-green-100 bg-green-50 text-green-600 text-center font-black shadow-sm";
                 }
                 
                 document.getElementById('resNombre').innerText = data.nombre; document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; document.getElementById('resStock').innerText = data.stock ?? 0; 
@@ -321,17 +320,12 @@
             html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 200 }, (text) => {
                 cerrarEscanner();
                 buscarStock(text);
-            }).catch(() => {
-                alert("Error al abrir cámara");
-                cerrarEscanner();
-            }); 
+            }).catch(() => { cerrarEscanner(); }); 
         }
 
         function cerrarEscanner() { 
             if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scannerWrapper').classList.add('hidden');
-                }).catch(() => { document.getElementById('scannerWrapper').classList.add('hidden'); });
+                html5QrCode.stop().then(() => { document.getElementById('scannerWrapper').classList.add('hidden'); }).catch(() => { document.getElementById('scannerWrapper').classList.add('hidden'); });
             } else { document.getElementById('scannerWrapper').classList.add('hidden'); }
         }
 
@@ -356,14 +350,12 @@
         function vaciarReporte() { if (confirm("¿Borrar todo?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
         
         function compartirReporte() { 
-            // MODIFICACIÓN: Agregar "FALTA" a las tareas
             const t = gestionados.map(g => {
                 const tareasTexto = g.tareas.length > 0 ? `FALTA ${g.tareas.join(', FALTA ')}` : "REVISIÓN MANUAL";
                 return `⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ${tareasTexto}`;
             }).join('\n\n'); 
-            
             const finalReport = `REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte con avisos de 'Falta' copiado.")); 
+            navigator.clipboard.writeText(finalReport).then(() => alert("Copiado.")); 
         }
 
         function guardarEnHistorial(item) { 
@@ -374,12 +366,12 @@
 
         function actualizarHistorial() { 
             const lista = document.getElementById('listaHistorial'); 
-            if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[11px] text-center py-6 uppercase font-black">Sin registros</p>'; return; } 
+            if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[11px] text-center py-6 uppercase font-black">Vacío</p>'; return; } 
             lista.innerHTML = historial.map(h => `
                 <div onclick="buscarStock('${h.codigo}')" class="${h.descontinuado ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'} p-4 rounded-[1.5rem] flex justify-between items-center shadow-sm active:scale-95 transition-all border">
                     <div class="w-2/3 text-left">
                         <p class="text-[8px] font-black text-slate-400 mb-0.5 uppercase italic">#${h.codigo}</p>
-                        <p class="truncate text-[10px] font-black uppercase ${h.descontinuado ? 'text-red-700' : 'text-slate-800'}">${h.nombre}</p>
+                        <p class="text-[10px] font-black uppercase leading-tight ${h.descontinuado ? 'text-red-700' : 'text-slate-800'}">${h.nombre}</p>
                         <span class="text-[9px] font-black ${h.descontinuado || parseInt(h.stock) <= 0 ? 'text-red-500' : 'text-slate-400'} uppercase">STK: ${h.stock}</span>
                     </div>
                     <div class="${h.descontinuado ? 'text-red-600' : 'text-blue-600'} font-black text-sm">$${h.precio.toLocaleString('es-CL')}</div>
