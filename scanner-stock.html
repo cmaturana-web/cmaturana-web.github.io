@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ultron Auditor PRO - v43.0</title>
+    <title>Ultron Auditor PRO - v44.0</title>
     <!-- Librerías PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -77,14 +77,13 @@
 
             <div id="scannerWrapper" class="hidden mb-4 relative">
                 <div class="bg-black rounded-2xl overflow-hidden border-4 border-blue-600"><div id="reader"></div></div>
-                <button onclick="cerrarEscanner()" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full z-50 flex items-center justify-center shadow-lg">
-                    <i class="fas fa-times text-xs"></i></button>
+                <button onclick="cerrarEscanner()" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full z-50 flex items-center justify-center shadow-lg"><i class="fas fa-times text-xs"></i></button>
             </div>
 
             <div class="flex-grow overflow-y-auto pr-1 text-left">
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic">HISTORIAL RECIENTE</h3>
-                    <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase">Limpiar</button>
+                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL</h3>
+                    <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase tracking-widest">Limpiar</button>
                 </div>
                 <div id="listaHistorial" class="space-y-2 pb-10"></div>
             </div>
@@ -92,12 +91,12 @@
 
         <!-- PANTALLA 3: RESULTADO -->
         <div id="resultScreen" class="screen !p-0 hidden fade-in text-center">
-            <div id="resBanner" class="bg-blue-600 p-4 text-white text-center font-black italic text-[13px] tracking-[0.2em] uppercase">
+            <div id="resBanner" class="bg-blue-600 p-4 text-white text-center font-black italic text-[13px] tracking-[0.2em] uppercase shadow-md">
                 <span id="resCodigoLabel">CÓDIGO: ---</span>
             </div>
             
             <div class="p-5 flex-grow flex flex-col justify-start overflow-hidden">
-                <h2 id="resNombre" class="text-[1rem] font-black text-slate-800 text-center leading-tight uppercase mb-4 px-2">PRODUCTO</h2>
+                <h2 id="resNombre" class="text-[1rem] font-black text-slate-800 text-center leading-tight uppercase mb-4 px-2">NOMBRE PRODUCTO</h2>
                 
                 <div class="grid grid-cols-2 gap-3 mb-4 text-center">
                     <div class="bg-slate-50 p-4 rounded-[1.5rem] border border-slate-100 text-center">
@@ -124,22 +123,23 @@
                             <div class="bg-white text-center flex flex-col items-center shadow-sm"><i class="fas fa-map-marker-alt"></i><span class="uppercase font-black text-[8px]">UBICACIÓN</span></div>
                         </label>
                         
-                        <!-- BOTÓN CÁMARA MEJORADO (Trigger JavaScript) -->
-                        <div onclick="triggerCamera()" id="btnFotoUI" class="bg-white border-2 border-dashed border-slate-200 rounded-[1.2rem] flex flex-col items-center justify-center p-2 cursor-pointer active:scale-95 transition-all">
+                        <!-- BOTÓN CÁMARA MEJORADO (Invisible e infalible) -->
+                        <div class="relative bg-white border-2 border-dashed border-slate-200 rounded-[1.2rem] flex flex-col items-center justify-center p-2 cursor-pointer overflow-hidden" id="btnFotoUI">
                             <i class="fas fa-camera text-slate-400"></i>
                             <span class="text-[8px] font-black text-slate-400 uppercase">RESPALDO</span>
+                            <!-- El input es real, está encima y es transparente -->
+                            <input type="file" accept="image/*" capture="environment" class="absolute inset-0 opacity-0 cursor-pointer" onchange="subirFotoDrive(this)">
                         </div>
-                        <input type="file" id="inputFotoHidden" accept="image/*" capture="environment" class="hidden" onchange="subirFotoDrive(this)">
                     </div>
 
-                    <input id="inputUbi" type="text" placeholder="¿Dónde está?" class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
-                    <div id="fotoPreview" class="hidden text-center"><p class="text-[9px] text-blue-600 font-black uppercase"><i class="fas fa-cloud-upload-alt"></i> Respaldo Drive OK</p></div>
+                    <input id="inputUbi" type="text" placeholder="Escribir lugar..." class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
+                    <div id="fotoPreview" class="hidden text-center"><p class="text-[9px] text-blue-600 font-black uppercase"><i class="fas fa-check-circle"></i> Foto en Drive OK</p></div>
                 </div>
 
                 <div class="flex gap-3 mt-auto mb-2">
                     <button onclick="irAHome()" class="w-[35%] bg-slate-200 text-slate-600 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95 text-center">CERRAR</button>
-                    <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95 text-center">
-                        <i class="fas fa-save text-center"></i> GUARDAR ALERTA
+                    <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fas fa-save"></i> GUARDAR ALERTA
                     </button>
                 </div>
             </div>
@@ -164,7 +164,7 @@
         <!-- OVERLAY CARGA -->
         <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/90">
             <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent mb-3 text-center"></div>
-            <p id="loaderText" class="text-blue-900 font-black text-[9px] uppercase tracking-widest italic text-center">Consultando...</p>
+            <p id="loaderText" class="text-blue-900 font-black text-[9px] uppercase tracking-widest italic text-center">Procesando...</p>
         </div>
     </div>
 
@@ -181,16 +181,11 @@
 
         function mostrarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
         function registrarAuditor() { const name = document.getElementById('auditorNameInput').value.trim(); if (name.length < 3) return; auditorName = name; localStorage.setItem('ultron_auditor_name', auditorName); actualizarAuditorDisplay(); mostrarPantalla('homeScreen'); }
-        function cerrarSesion() { if (confirm("¿Cerrar sesión del auditor?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
+        function cerrarSesion() { if (confirm("¿Cerrar sesión?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
         function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase(); }
         function toggleUbi() { const i = document.getElementById('inputUbi'); if(document.getElementById('checkUbi').checked){ i.classList.remove('hidden'); i.focus(); } else { i.classList.add('hidden'); i.value = ""; } }
-        function limpiarHistorial() { if (confirm("¿Borrar todo el historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
+        function limpiarHistorial() { if (confirm("¿Borrar todo?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
         function borrarItemHistorial(event, codigo) { event.stopPropagation(); if (confirm("¿Borrar item?")) { historial = historial.filter(h => h.codigo !== codigo); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); } }
-
-        // --- NUEVA FUNCIÓN PARA ABRIR CÁMARA ---
-        function triggerCamera() {
-            document.getElementById('inputFotoHidden').click();
-        }
 
         async function subirFotoDrive(input) {
             if (!input.files[0]) return;
@@ -202,16 +197,13 @@
             reader.onload = async function(e) {
                 const base64 = e.target.result;
                 try {
-                    const res = await fetch(GOOGLE_DRIVE_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ base64: base64, sku: currentProduct.codigo, auditor: auditorName }) 
-                    });
+                    const res = await fetch(GOOGLE_DRIVE_URL, { method: 'POST', body: JSON.stringify({ base64: base64, sku: currentProduct.codigo, auditor: auditorName }) });
                     const result = await res.json();
                     if (result.status === "success") {
                         currentFotoUrl = result.url;
                         document.getElementById('fotoPreview').classList.remove('hidden');
                         document.getElementById('btnFotoUI').classList.add('btn-foto-active');
-                        document.getElementById('btnFotoUI').innerHTML = '<i class="fas fa-check-circle"></i><span class="text-[8px] font-black uppercase">FOTO OK</span>';
+                        document.getElementById('btnFotoUI').innerHTML = '<i class="fas fa-check-circle"></i><span class="text-[8px] font-black uppercase text-blue-600">FOTO DRIVE OK</span>';
                     } else { alert("Error en Google Drive"); }
                 } catch (err) { alert("Error de conexión"); }
                 document.getElementById('loader').classList.add('hidden');
@@ -223,13 +215,11 @@
             const input = document.getElementById('codigoInput');
             const codigo = codigoForzado || input.value.trim();
             if (!codigo) return;
-            input.blur(); 
-            currentFotoUrl = ""; 
-            document.getElementById('fotoPreview').classList.add('hidden');
+            input.blur(); currentFotoUrl = ""; document.getElementById('fotoPreview').classList.add('hidden');
             document.getElementById('btnFotoUI').classList.remove('btn-foto-active');
-            document.getElementById('btnFotoUI').innerHTML = '<i class="fas fa-camera text-slate-400"></i><span class="text-[8px] font-black text-slate-400 uppercase">RESPALDO</span>';
+            document.getElementById('btnFotoUI').innerHTML = '<i class="fas fa-camera text-slate-400"></i><span class="text-[8px] font-black text-slate-400 uppercase">RESPALDO</span><input type="file" accept="image/*" capture="environment" class="absolute inset-0 opacity-0 cursor-pointer" onchange="subirFotoDrive(this)">';
             
-            document.getElementById('loaderText').innerText = "CONSULTANDO...";
+            document.getElementById('loaderText').innerText = "BUSCANDO...";
             mostrarPantalla('loader');
             try {
                 const response = await fetch(API_URL + codigo);
@@ -281,24 +271,23 @@
             document.getElementById('modalGestion').style.display = 'flex'; 
             const lista = document.getElementById('listaReporte'); 
             lista.innerHTML = gestionados.map((g, i) => `
-            <div class="${g.descontinuado ? 'bg-red-50/10 border-red-500/30' : 'bg-white/10 border-white/10'} p-4 rounded-[1.5rem] border mb-2 relative overflow-hidden text-left">
+            <div class="${g.descontinuado ? 'bg-red-50/10 border-red-500/30' : 'bg-white/10 border-white/10'} p-4 rounded-[1.5rem] border mb-2 relative overflow-hidden text-left shadow-sm">
                 <div class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl">${i + 1}</div>
                 <p class="font-black text-[11px] uppercase w-4/5 leading-tight">${g.nombre}</p>
                 <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">#${g.codigo} | STK: ${g.stock}</p>
-                <div class="flex flex-wrap gap-2 mt-3">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase shadow-md">⚠️ FALTA ${t}</span>`).join('')}${g.foto ? '<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase">📸 FOTO OK</span>' : ''}</div>
+                <div class="flex flex-wrap gap-2 mt-3">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase">⚠️ FALTA ${t}</span>`).join('')}${g.foto ? '<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase">📸 FOTO OK</span>' : ''}</div>
             </div>`).join(''); 
         }
 
         function cerrarModalGestion() { document.getElementById('modalGestion').style.display = 'none'; }
-        function vaciarReporte() { if (confirm("¿Borrar todo el listado acumulado?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        function vaciarReporte() { if (confirm("¿Borrar todo?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
         
         function compartirReporte() { 
             const t = gestionados.map((g, i) => {
                 const tareasTexto = g.tareas.length > 0 ? `⚠️ FALTA ${g.tareas.join(', ⚠️ FALTA ')}` : "⚠️ REVISIÓN MANUAL";
                 return `${i+1}. ⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ${tareasTexto}${g.foto ? '\n📸 FOTO: '+g.foto : ''}`;
             }).join('\n\n'); 
-            const finalReport = `REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte firmado ⚠️ copiado.")); 
+            navigator.clipboard.writeText(`REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`).then(() => alert("Reporte firmado ⚠️ copiado.")); 
         }
 
         function guardarEnHistorial(item) { historial = historial.filter(h => h.codigo !== item.codigo); historial.unshift({ ...item }); historial = historial.slice(0, 10); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); }
