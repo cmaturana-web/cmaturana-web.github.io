@@ -3,29 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ultron Auditor PRO - v33.0</title>
+    <title>Ultron Auditor PRO - v34.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* RESET PARA MÓVIL Y PC */
+        * { box-sizing: border-box; }
         body { 
             background-color: #cbd5e1; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            min-height: 100vh;
-            min-height: 100dvh;
+            height: 100vh;
+            height: 100dvh;
             margin: 0;
-            font-family: system-ui, -apple-system, sans-serif;
+            padding: 0;
+            font-family: system-ui, sans-serif;
             overflow: hidden;
         }
         
         .app-frame {
             width: 100%;
             max-width: 410px; 
-            height: 95vh;
-            height: 95dvh;
-            background-color: #f8fafc;
+            height: 100%;
+            max-height: 95dvh;
+            background-color: #ffffff;
             border: 4px solid #2563eb;
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
             border-radius: 2.5rem;
@@ -36,7 +39,7 @@
         }
 
         @media (max-width: 480px) {
-            .app-frame { height: 100vh; height: 100dvh; max-width: 100%; border-radius: 0; border: none; }
+            .app-frame { max-height: 100dvh; border-radius: 0; border: none; }
         }
 
         .screen {
@@ -44,17 +47,25 @@
             inset: 0;
             display: flex;
             flex-direction: column;
-            background-color: #f8fafc;
+            background-color: #ffffff;
             padding: 1rem;
             overflow: hidden;
         }
 
-        .fade-in { animation: fadeIn 0.2s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* PANTALLA RESULTADO COMPACTA */
+        .compact-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100%;
+        }
 
-        /* ESTILO CHECKLIST */
-        .check-item div { padding: 0.6rem 0.2rem; border-width: 2px; border-radius: 1rem; transition: all 0.2s; border-color: #f1f5f9; background-color: white; }
-        .check-item div i { font-size: 1.1rem; margin-bottom: 2px; color: #94a3b8; }
+        .fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CHECKLIST */
+        .check-item div { padding: 0.6rem 0.2rem; border-width: 2px; border-radius: 1.2rem; transition: all 0.2s; border-color: #f1f5f9; background-color: #fff; }
+        .check-item div i { font-size: 1rem; margin-bottom: 2px; color: #94a3b8; }
         .check-item span { font-size: 8px; font-weight: 900; color: #64748b; }
         
         .check-red input:checked + div { border-color: #ef4444; background-color: #fef2f2; }
@@ -68,12 +79,11 @@
         #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; }
         .bg-descontinuado { background-color: #dc2626 !important; }
 
-        /* MODAL REPORTES SÓLIDO */
         #modalGestion {
             position: absolute;
             inset: 0;
             z-index: 9999;
-            background-color: #020617; /* Sólido total */
+            background-color: #020617;
             display: none;
             flex-direction: column;
             padding: 1.5rem;
@@ -86,17 +96,17 @@
 
     <div class="app-frame">
         
-        <!-- LOGIN -->
+        <!-- PANTALLA 1: LOGIN -->
         <div id="introScreen" class="screen z-[500] items-center justify-center text-center hidden">
             <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mb-6 font-black italic shadow-xl">U</div>
             <h2 class="text-3xl font-black text-slate-800 tracking-tighter uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
-            <div class="mt-10 w-full px-6">
-                <input id="auditorNameInput" type="text" placeholder="TU NOMBRE" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 font-black text-center mb-4 uppercase">
-                <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase text-xs tracking-widest italic">Entrar</button>
+            <div class="mt-8 w-full px-6">
+                <input id="auditorNameInput" type="text" placeholder="TU NOMBRE" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 font-black text-center mb-4 uppercase">
+                <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-4 rounded-3xl shadow-lg active:scale-95 uppercase text-xs italic tracking-widest">Entrar</button>
             </div>
         </div>
 
-        <!-- HOME -->
+        <!-- PANTALLA 2: HOME -->
         <div id="homeScreen" class="screen hidden fade-in">
             <div class="flex justify-between items-center mb-4">
                 <div>
@@ -114,10 +124,11 @@
 
             <div class="bg-white p-1 rounded-[2rem] shadow-sm flex items-center mb-4 border border-slate-200">
                 <input id="codigoInput" type="number" inputmode="numeric" placeholder="ESCANEAR..." class="flex-grow p-3 text-base font-bold bg-transparent outline-none w-full" onkeypress="if(event.key === 'Enter') buscarStock()">
-                <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-10 h-10 rounded-xl flex items-center justify-center mr-1 active:scale-90"><i class="fas fa-camera"></i></button>
+                <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-10 h-10 rounded-xl flex items-center justify-center mr-1"><i class="fas fa-camera"></i></button>
                 <button onclick="buscarStock()" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md active:scale-90"><i class="fas fa-search text-xs"></i></button>
             </div>
 
+            <!-- ESCÁNER CON BOTÓN CERRAR -->
             <div id="scannerWrapper" class="hidden mb-4 fade-in">
                 <div class="bg-black rounded-2xl overflow-hidden relative border-4 border-blue-600">
                     <div id="reader"></div>
@@ -127,36 +138,38 @@
                 </div>
             </div>
 
-            <div class="flex-grow overflow-y-auto">
+            <div class="flex-grow overflow-y-auto pr-1">
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL</h3>
+                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL RECIENTE</h3>
                     <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase">Limpiar</button>
                 </div>
                 <div id="listaHistorial" class="space-y-2 pb-10"></div>
             </div>
         </div>
 
-        <!-- RESULTADO -->
+        <!-- PANTALLA 3: RESULTADO (MÁXIMA COMPACTACIÓN) -->
         <div id="resultScreen" class="screen !p-0 hidden fade-in">
-            <div id="resBanner" class="bg-blue-600 p-4 text-white text-center font-black italic text-[13px] tracking-[0.2em] uppercase shadow-md">
+            <div id="resBanner" class="bg-blue-600 p-3 text-white text-center font-black italic text-[12px] tracking-[0.2em] uppercase shadow-md">
                 <span id="resCodigoLabel">CÓDIGO: ---</span>
             </div>
             
-            <div class="p-5 flex-grow flex flex-col justify-start">
-                <h2 id="resNombre" class="text-[1.1rem] font-black text-slate-800 text-center leading-tight tracking-tight uppercase mb-4">NOMBRE PRODUCTO</h2>
+            <div class="p-4 flex-grow flex flex-col">
+                <h2 id="resNombre" class="text-[1rem] font-black text-slate-800 text-center leading-tight tracking-tight uppercase mb-3 px-2">PRODUCTO</h2>
                 
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-slate-50 p-4 rounded-[1.8rem] border border-slate-100 text-center shadow-sm">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">PVP</span>
-                        <p id="resPrecio" class="text-xl font-black text-slate-800">$0</p>
+                <!-- PVP Y STOCK ARRIBA -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <div class="bg-slate-50 p-3 rounded-[1.5rem] border border-slate-100 text-center">
+                        <span class="text-[8px] font-black text-slate-400 uppercase block">PVP</span>
+                        <p id="resPrecio" class="text-lg font-black text-slate-800">$0</p>
                     </div>
-                    <div id="stockBox" class="p-4 rounded-[1.8rem] border text-center shadow-sm flex flex-col justify-center">
-                        <span id="stockLabel" class="text-[9px] font-black uppercase tracking-widest block mb-1">STOCK</span>
-                        <p id="resStock" class="text-xl font-black">0</p>
+                    <div id="stockBox" class="p-3 rounded-[1.5rem] border text-center flex flex-col justify-center">
+                        <span id="stockLabel" class="text-[8px] font-black uppercase block">STOCK</span>
+                        <p id="resStock" class="text-lg font-black">0</p>
                     </div>
                 </div>
 
-                <div class="bg-slate-50/80 p-4 rounded-[2.2rem] border border-slate-100 space-y-3 flex-grow max-h-fit">
+                <!-- PANEL GESTIÓN COMPACTO -->
+                <div class="bg-slate-50/50 p-3 rounded-[2rem] border border-slate-100 space-y-2 flex-grow max-h-[45%] overflow-y-auto">
                     <div id="checklistArea" class="grid grid-cols-2 gap-2">
                         <label class="check-item check-red cursor-pointer">
                             <input type="checkbox" data-tarea="PRECIO" class="hidden">
@@ -186,17 +199,18 @@
                     
                     <label class="check-item check-green cursor-pointer block">
                         <input type="checkbox" id="checkUbi" class="hidden" onchange="toggleUbi()">
-                        <div class="p-3.5 bg-white text-center shadow-sm flex items-center justify-center gap-3 rounded-2xl">
+                        <div class="p-3 bg-white text-center shadow-sm flex items-center justify-center gap-2 rounded-2xl">
                             <i class="fas fa-map-marker-alt !m-0 !text-sm"></i>
                             <span class="uppercase tracking-widest">UBICACIÓN MANUAL</span>
                         </div>
                     </label>
-                    <input id="inputUbi" type="text" placeholder="Escribir ubicación..." class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
+                    <input id="inputUbi" type="text" placeholder="¿Dónde está?" class="hidden w-full p-3 bg-white rounded-xl border-2 border-blue-100 text-xs font-bold text-blue-900 outline-none fade-in">
                 </div>
 
-                <div class="flex gap-3 mt-auto mb-4">
-                    <button onclick="irAHome()" class="w-[35%] bg-slate-200 text-slate-600 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95 text-center">CERRAR</button>
-                    <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95">
+                <!-- BOTONES FINALES -->
+                <div class="flex gap-3 mt-4 mb-2">
+                    <button onclick="irAHome()" class="w-[35%] bg-slate-200 text-slate-600 font-black py-4 rounded-[1.5rem] uppercase text-[10px] active:scale-95 text-center">CERRAR</button>
+                    <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-4 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95">
                         <i class="fas fa-save"></i> GUARDAR ALERTA
                     </button>
                 </div>
@@ -206,10 +220,10 @@
         <!-- MODAL REPORTES -->
         <div id="modalGestion">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black italic uppercase italic">REPORTES ACUMULADOS</h2>
-                <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
+                <h2 class="text-xl font-black italic uppercase italic tracking-tighter">LISTADO ALERTAS</h2>
+                <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-20 scrollbar-hide text-white"></div>
+            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-10 scrollbar-hide text-white"></div>
             <div class="flex gap-3 mt-4">
                 <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-[10px] italic">Enviar WhatsApp</button>
                 <button onclick="vaciarReporte()" class="bg-red-500/20 text-red-400 border border-red-500/20 p-5 rounded-2xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
@@ -218,14 +232,14 @@
 
         <!-- OVERLAYS -->
         <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/90">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-100 border-t-blue-600 mb-4"></div>
-            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest italic">Cargando datos...</p>
+            <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-3"></div>
+            <p class="text-blue-900 font-black text-[9px] uppercase tracking-widest italic text-center">Consultando Pasillo...</p>
         </div>
 
         <div id="errorMsg" class="screen z-[1000] hidden items-center justify-center text-center px-8 bg-white">
-            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-6"></i>
-            <p class="font-black text-slate-800 uppercase text-xs mb-8">Código inexistente</p>
-            <button onclick="irAHome()" class="w-full text-[10px] font-black text-blue-600 uppercase bg-blue-50 py-5 rounded-[2rem]">Volver</button>
+            <i class="fas fa-ghost text-4xl text-red-500 mb-4"></i>
+            <p class="font-black text-slate-800 uppercase text-xs mb-8">Código no encontrado</p>
+            <button onclick="irAHome()" class="w-full text-[10px] font-black text-blue-600 uppercase bg-blue-50 py-4 rounded-[2rem]">Volver</button>
         </div>
 
     </div>
@@ -257,11 +271,11 @@
             mostrarPantalla('homeScreen');
         }
 
-        function cerrarSesion() { if (confirm("¿Cerrar sesión del auditor?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
+        function cerrarSesion() { if (confirm("¿Cerrar sesión?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
         function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase(); }
         function limpiarInput() { document.getElementById('codigoInput').value = ''; document.getElementById('codigoInput').focus(); }
         function toggleUbi() { const i = document.getElementById('inputUbi'); if(document.getElementById('checkUbi').checked){ i.classList.remove('hidden'); i.focus(); } else { i.classList.add('hidden'); i.value = ""; } }
-        function limpiarHistorial() { if (confirm("¿Borrar historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
+        function limpiarHistorial() { if (confirm("¿Limpiar historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
 
         async function buscarStock(codigoForzado = null) {
             const input = document.getElementById('codigoInput');
@@ -333,7 +347,7 @@
                     <span class="text-[10px] font-black ${g.descontinuado ? 'text-red-400' : 'text-blue-400'}">STK: ${g.stock}</span>
                 </div>
                 <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest mb-2">#${g.codigo} | ${g.time}</p>
-                <div class="flex flex-wrap gap-2">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-full italic">⚠️ FALTA ${t}</span>`).join('')}${g.ubicacion ? `<span class="bg-white/10 text-white text-[8px] font-black px-2 py-1 rounded-full border border-white/20">📍 ${g.ubicacion}</span>` : ''}</div>
+                <div class="flex flex-wrap gap-2">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase">⚠️ FALTA ${t}</span>`).join('')}</div>
             </div>`).join(''); 
         }
 
@@ -341,14 +355,13 @@
         function vaciarReporte() { if (confirm("¿Borrar todo el listado?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
         
         function compartirReporte() { 
-            // MEJORA: Agregar ⚠️ FALTA a cada ítem del reporte compartido
             const t = gestionados.map(g => {
-                const tareasTexto = g.tareas.length > 0 ? `⚠️ FALTA ${g.tareas.join(', ⚠️ FALTA ')}` : "⚠️ REVISIÓN PENDIENTE";
+                const tareasTexto = g.tareas.length > 0 ? `⚠️ FALTA ${g.tareas.join(', ⚠️ FALTA ')}` : "⚠️ REVISIÓN MANUAL";
                 return `⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ${tareasTexto}`;
             }).join('\n\n'); 
             
-            const finalReport = `REPORTES ULTRON\nAuditado por: ${auditorName.toUpperCase()}\n\n${t}`;
-            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte ⚠️ copiado al portapapeles.")); 
+            const finalReport = `REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`;
+            navigator.clipboard.writeText(finalReport).then(() => alert("Reporte con avisos ⚠️ copiado.")); 
         }
 
         function guardarEnHistorial(item) { 
