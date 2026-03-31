@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultron Auditor PRO - v28.0</title>
+    <title>Ultron Auditor PRO - v29.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,22 +19,24 @@
             overflow: hidden;
         }
         
+        /* EL MARCO SE MANTIENE IGUAL EN MÓVIL Y PC */
         .app-frame {
             width: 100%;
             max-width: 410px; 
             height: 92vh;
-            aspect-ratio: 9 / 16;
             background-color: #f8fafc;
             border: 4px solid #2563eb;
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
             border-radius: 2.5rem;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        @media (max-width: 480px) {
-            .app-frame { height: 100vh; max-width: 100%; border: none; border-radius: 0; aspect-ratio: auto; }
-            body { background-color: #f8fafc; }
+        /* Ajuste fino para móviles muy pequeños */
+        @media (max-height: 700px) {
+            .app-frame { height: 98vh; border-radius: 1.5rem; }
         }
 
         .screen {
@@ -45,20 +47,24 @@
             background-color: #f8fafc;
             padding: 1.2rem;
             overflow-y: auto;
+            scrollbar-width: none;
         }
+        .screen::-webkit-scrollbar { display: none; }
 
         .fade-in { animation: fadeIn 0.25s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* GESTIÓN DE BOTONES */
+        /* ESTILOS DE GESTIÓN */
         .check-item div { padding: 0.8rem 0.4rem; border-width: 2px; border-radius: 1.2rem; transition: all 0.2s; border-color: #f1f5f9; }
         .check-item div i { font-size: 1.1rem; margin-bottom: 4px; color: #94a3b8; }
         .check-item span { font-size: 9px; font-weight: 900; color: #64748b; }
         
+        /* ALERTAS EN ROJO */
         .check-red input:checked + div { border-color: #ef4444; background-color: #fef2f2; }
         .check-red input:checked + div i { color: #dc2626; }
         .check-red input:checked + div span { color: #991b1b; }
 
+        /* UBICACIÓN EN VERDE */
         .check-green input:checked + div { border-color: #22c55e; background-color: #f0fdf4; }
         .check-green input:checked + div i { color: #16a34a; }
         .check-green input:checked + div span { color: #14532d; }
@@ -66,13 +72,13 @@
         #reader { width: 100% !important; border-radius: 1.5rem; overflow: hidden; }
         .bg-descontinuado { background-color: #dc2626 !important; }
 
-        /* MODAL REPORTES - CORREGIDO */
+        /* MODAL REPORTES SÓLIDO */
         #modalGestion {
             position: absolute;
             inset: 0;
             z-index: 9999;
-            background-color: #0f172a; /* Fondo sólido */
-            display: none; /* Inicialmente oculto */
+            background-color: #0f172a;
+            display: none;
             flex-direction: column;
             padding: 1.5rem;
             color: white;
@@ -87,14 +93,14 @@
         <!-- PANTALLA 1: LOGIN -->
         <div id="introScreen" class="screen z-[500] items-center justify-center text-center hidden">
             <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mb-6 shadow-xl font-black italic">U</div>
-            <h2 class="text-3xl font-black text-slate-800 tracking-tighter uppercase leading-none text-center w-full">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
-            <div class="mt-10 w-full px-4">
+            <h2 class="text-3xl font-black text-slate-800 tracking-tighter uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
+            <div class="mt-10 w-full px-4 text-center">
                 <input id="auditorNameInput" type="text" placeholder="TU NOMBRE" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 font-black text-center mb-4 text-slate-700 uppercase">
                 <button onclick="registrarAuditor()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase text-xs tracking-widest italic">Entrar</button>
             </div>
         </div>
 
-        <!-- PANTALLA 2: HOME (Buscador) -->
+        <!-- PANTALLA 2: HOME (Buscador / Historial) -->
         <div id="homeScreen" class="screen hidden fade-in">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -120,7 +126,7 @@
 
             <div class="flex-grow">
                 <div class="flex justify-between items-center mb-3 px-1">
-                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL RECIENTE</h3>
+                    <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL</h3>
                     <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase">Limpiar</button>
                 </div>
                 <div id="listaHistorial" class="space-y-2 pb-10"></div>
@@ -147,7 +153,7 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-50/50 p-4 rounded-[2.2rem] border border-slate-100 space-y-3 flex-grow">
+                <div class="bg-slate-50/50 p-4 rounded-[2.2rem] border border-slate-100 space-y-3 flex-grow max-h-fit">
                     <div id="checklistArea" class="grid grid-cols-2 gap-2">
                         <label class="check-item check-red cursor-pointer">
                             <input type="checkbox" data-tarea="PRECIO" class="hidden">
@@ -194,13 +200,13 @@
             </div>
         </div>
 
-        <!-- MODAL REPORTES (Sólido) -->
+        <!-- MODAL REPORTES -->
         <div id="modalGestion">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-xl font-black italic uppercase">LISTADO ALERTAS</h2>
                 <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-10"></div>
+            <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-20 scrollbar-hide text-white"></div>
             <div class="flex gap-3 mt-4">
                 <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-[10px] italic">Enviar WhatsApp</button>
                 <button onclick="vaciarReporte()" class="bg-red-500/20 text-red-400 border border-red-500/20 p-5 rounded-2xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
@@ -210,12 +216,12 @@
         <!-- OVERLAYS -->
         <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/90">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-100 border-t-blue-600 mb-4"></div>
-            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest">Consultando...</p>
+            <p class="text-blue-900 font-black text-[10px] uppercase tracking-widest italic">Cargando...</p>
         </div>
 
         <div id="errorMsg" class="screen z-[1000] hidden items-center justify-center text-center px-8 bg-white">
-            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-6"></i>
-            <p class="font-black text-slate-800 uppercase text-xs mb-8">El código no existe</p>
+            <i class="fas fa-ghost text-4xl text-red-500 mb-6"></i>
+            <p class="font-black text-slate-800 uppercase text-xs mb-8">No encontrado</p>
             <button onclick="irAHome()" class="w-full text-[10px] font-black text-blue-600 uppercase bg-blue-50 py-5 rounded-[2rem]">Volver</button>
         </div>
 
@@ -322,7 +328,7 @@
             document.getElementById('modalGestion').style.display = 'flex'; 
             const lista = document.getElementById('listaReporte'); 
             lista.innerHTML = gestionados.map(g => `
-            <div class="${g.descontinuado ? 'bg-red-50/10 border-red-500/30' : 'bg-white/10 border-white/10'} p-4 rounded-[1.5rem] border shadow-sm">
+            <div class="${g.descontinuado ? 'bg-red-50/10 border-red-500/30' : 'bg-white/10 border-white/10'} p-4 rounded-[1.5rem] border shadow-sm mb-2">
                 <div class="flex justify-between items-start mb-1">
                     <p class="font-black text-[11px] uppercase w-4/5 leading-tight ${g.descontinuado ? 'text-red-400' : 'text-white'}">${g.nombre}</p>
                     <span class="text-[10px] font-black ${g.descontinuado ? 'text-red-400' : 'text-blue-400'}">STK: ${g.stock}</span>
@@ -333,16 +339,19 @@
 
         function cerrarModalGestion() { document.getElementById('modalGestion').style.display = 'none'; }
         function vaciarReporte() { if (confirm("¿Borrar todo?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        
         function compartirReporte() { 
-            const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ${g.tareas.join(', ')}\n📍 UBICACIÓN: ${g.ubicacion || 'N/A'}`).join('\n\n'); 
+            const t = gestionados.map(g => `⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ${g.tareas.join(', ')}`).join('\n\n'); 
             const finalReport = `REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`;
             navigator.clipboard.writeText(finalReport).then(() => alert("Copiado.")); 
         }
+
         function guardarEnHistorial(item) { 
             historial = historial.filter(h => h.codigo !== item.codigo); 
             historial.unshift({ codigo: item.codigo, nombre: item.nombre, precio: item.precio, stock: item.stock, descontinuado: item.descontinuado }); 
             historial = historial.slice(0, 10); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); 
         }
+
         function actualizarHistorial() { 
             const lista = document.getElementById('listaHistorial'); 
             if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[10px] text-center py-6 uppercase font-black">Vacío</p>'; return; } 
