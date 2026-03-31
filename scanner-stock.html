@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ultron Auditor PRO - v54.0</title>
+    <title>GESTOR DE COMPRAS - v55.0</title>
     <!-- Librerías de Generación de Documentos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -34,8 +34,10 @@
         
         <!-- PANTALLA 1: LOGIN -->
         <div id="introScreen" class="screen z-[500] items-center justify-center text-center hidden px-8 text-slate-800">
-            <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mb-6 font-black italic shadow-xl">U</div>
-            <h2 class="text-3xl font-black tracking-tighter uppercase leading-none">ULTRON <br><span class="text-blue-600">AUDITOR</span></h2>
+            <div class="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center text-white text-4xl mb-6 font-black italic shadow-xl">MT</div>
+            <h2 class="text-3xl font-black tracking-tighter uppercase leading-none">GESTOR DE <br><span class="text-blue-600 font-black">COMPRAS</span></h2>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">By Carlos Maturana</p>
+            
             <input id="auditorNameInput" type="text" placeholder="TU NOMBRE" class="w-full mt-10 p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none text-center font-bold uppercase focus:border-blue-500">
             <button onclick="registrarAuditor()" class="w-full mt-4 bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg active:scale-95 uppercase text-xs italic">Entrar</button>
         </div>
@@ -44,7 +46,7 @@
         <div id="homeScreen" class="screen hidden fade-in">
             <div class="flex justify-between items-center mb-4">
                 <div class="text-left text-slate-800">
-                    <h1 class="text-xl font-black text-blue-900 italic uppercase leading-none">ULTRON <span class="text-blue-500 font-bold">GESTIÓN</span></h1>
+                    <h1 class="text-xl font-black text-blue-900 italic uppercase leading-none">GESTOR DE <span class="text-blue-500 font-bold">COMPRAS</span></h1>
                     <div class="flex items-center gap-1 mt-1">
                         <p id="auditorDisplay" class="text-[8px] font-black text-slate-400 uppercase truncate max-w-[100px]">---</p>
                         <button onclick="cerrarSesion()" class="text-red-500 text-[8px] font-bold active:scale-90 transition-transform">[SALIR]</button>
@@ -57,7 +59,7 @@
             </div>
 
             <div class="bg-white p-1 rounded-[2rem] shadow-sm flex items-center mb-4 border border-slate-200">
-                <input id="codigoInput" type="number" inputmode="numeric" placeholder="ESCANEAR..." class="flex-grow p-3 text-base font-bold bg-transparent outline-none w-full text-slate-700" onkeypress="if(event.key === 'Enter') buscarStock()">
+                <input id="codigoInput" type="number" inputmode="numeric" placeholder="ESCANEAR PRODUCTO..." class="flex-grow p-3 text-base font-bold bg-transparent outline-none w-full text-slate-700" onkeypress="if(event.key === 'Enter') buscarStock()">
                 <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-10 h-10 rounded-xl flex items-center justify-center mr-1 active:scale-90"><i class="fas fa-camera"></i></button>
                 <button onclick="buscarStock()" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md active:scale-90"><i class="fas fa-search text-xs"></i></button>
             </div>
@@ -72,7 +74,8 @@
                     <h3 class="text-slate-400 text-[9px] font-black uppercase italic tracking-widest">HISTORIAL</h3>
                     <button onclick="limpiarHistorial()" class="text-red-400 text-[9px] font-black uppercase">Limpiar</button>
                 </div>
-                <div id="listaHistorial" class="space-y-2 pb-10"></div>
+                <div id="listaHistorial" class="space-y-2 pb-5"></div>
+                <p class="text-[8px] text-center text-slate-300 font-bold uppercase mt-4">By Carlos Maturana</p>
             </div>
         </div>
 
@@ -111,12 +114,12 @@
                         </label>
                         <div class="relative bg-white border-2 border-dashed border-slate-200 rounded-[1.2rem] flex flex-col items-center justify-center p-2 cursor-pointer active:scale-95" id="btnFotoUI">
                             <i class="fas fa-camera text-slate-400"></i>
-                            <span class="text-[8px] font-black text-slate-400 uppercase">FOTO PDF</span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase text-center">FOTO PDF</span>
                             <input type="file" accept="image/*" capture="environment" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="procesarFotoLocal(this)">
                         </div>
                     </div>
                     <input id="inputUbi" type="text" placeholder="¿Dónde está?" class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
-                    <div id="fotoStatus" class="hidden text-center"><p class="text-[9px] text-blue-600 font-black uppercase"><i class="fas fa-check-circle"></i> Imagen Guardada</p></div>
+                    <div id="fotoStatus" class="hidden text-center"><p class="text-[9px] text-blue-600 font-black uppercase"><i class="fas fa-check-circle"></i> Imagen Lista</p></div>
                 </div>
 
                 <div class="flex gap-3 mt-auto mb-2 text-center">
@@ -136,18 +139,18 @@
             </div>
             <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-10 scrollbar-hide text-white"></div>
             <div class="flex flex-col gap-3 mt-4">
-                <button onclick="generarPDF()" class="w-full bg-slate-800 text-white font-black py-4 rounded-xl text-[10px] italic flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-file-pdf text-red-400"></i> GENERAR REPORTE PDF + FOTOS</button>
+                <button onclick="generarPDF()" class="w-full bg-slate-800 text-white font-black py-4 rounded-xl text-[10px] italic flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-file-pdf text-red-400"></i> GENERAR REPORTE PDF</button>
                 <div class="flex gap-3 text-center justify-center">
-                    <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-[10px] italic text-center">WhatsApp</button>
+                    <button onclick="compartirReporte()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-[10px] italic">WhatsApp</button>
                     <button onclick="vaciarReporte()" class="bg-red-500/20 text-red-400 border border-red-500/20 p-5 rounded-2xl active:scale-90"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </div>
         </div>
 
         <!-- LOADER -->
-        <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/95">
+        <div id="loader" class="screen z-[1000] hidden items-center justify-center bg-white/95 text-slate-800">
             <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent mb-3 text-center"></div>
-            <p id="loaderText" class="text-blue-900 font-black text-[9px] uppercase tracking-widest italic text-center text-slate-800">Procesando...</p>
+            <p id="loaderText" class="text-blue-900 font-black text-[9px] uppercase tracking-widest italic text-center">Procesando...</p>
         </div>
     </div>
 
@@ -162,10 +165,10 @@
 
         function mostrarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
         function registrarAuditor() { const name = document.getElementById('auditorNameInput').value.trim(); if (name.length < 3) return; auditorName = name; localStorage.setItem('ultron_auditor_name', auditorName); actualizarAuditorDisplay(); mostrarPantalla('homeScreen'); }
-        function cerrarSesion() { if (confirm("¿Cerrar sesión?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
-        function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = "AUDITOR: " + auditorName.toUpperCase(); }
+        function cerrarSesion() { if (confirm("¿Cerrar sesión del gestor?")) { localStorage.removeItem('ultron_auditor_name'); location.reload(); } }
+        function actualizarAuditorDisplay() { document.getElementById('auditorDisplay').innerText = auditorName.toUpperCase(); }
         function toggleUbi() { const i = document.getElementById('inputUbi'); if(document.getElementById('checkUbi').checked){ i.classList.remove('hidden'); i.focus(); } else { i.classList.add('hidden'); i.value = ""; } }
-        function limpiarHistorial() { if (confirm("¿Limpiar historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
+        function limpiarHistorial() { if (confirm("¿Borrar todo el historial?")) { historial = []; localStorage.setItem('ultron_history', '[]'); actualizarHistorial(); } }
         function borrarItemHistorial(event, codigo) { event.stopPropagation(); if (confirm("¿Borrar item?")) { historial = historial.filter(h => h.codigo !== codigo); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); } }
 
         async function procesarFotoLocal(input) {
@@ -187,7 +190,7 @@
                     currentBase64 = canvas.toDataURL('image/jpeg', 0.8);
                     document.getElementById('fotoStatus').classList.remove('hidden');
                     document.getElementById('btnFotoUI').style.borderColor = "#22c55e";
-                    document.getElementById('btnFotoUI').innerHTML = '<i class="fas fa-check-circle text-green-600"></i><span class="text-[8px] font-black text-green-600 uppercase text-center">FOTO OK</span>';
+                    document.getElementById('btnFotoUI').innerHTML = '<i class="fas fa-check-circle text-green-600"></i><span class="text-[8px] font-black text-green-700 uppercase text-center">FOTO OK</span>';
                     document.getElementById('loader').classList.add('hidden');
                 }
                 img.src = event.target.result;
@@ -211,11 +214,11 @@
                 currentProduct = data; guardarEnHistorial(data);
                 const banner = document.getElementById('resBanner'), resLabel = document.getElementById('resCodigoLabel'), resNombre = document.getElementById('resNombre'), sBox = document.getElementById('stockBox');
                 if (data.descontinuado === true) {
-                    banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-2"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-3 rounded-[1.5rem] border-2 border-red-200 bg-red-50 text-red-600 text-center font-black";
+                    banner.classList.add('bg-descontinuado'); resLabel.innerHTML = `<i class="fas fa-ban mr-2"></i> DESCONTINUADO: ${data.codigo}`; resNombre.classList.add('text-red-600'); sBox.className = "p-3 rounded-[1.5rem] border-2 border-red-200 bg-red-50 text-red-600 text-center font-black shadow-sm";
                 } else {
                     banner.classList.remove('bg-descontinuado'); resLabel.innerText = "CÓDIGO: " + data.codigo; resNombre.classList.remove('text-red-600');
-                    if (parseInt(data.stock) <= 0) sBox.className = "p-3 rounded-[1.5rem] border-2 border-red-100 bg-red-50 text-red-600 text-center font-black";
-                    else sBox.className = "p-3 rounded-[1.5rem] border-2 border-green-100 bg-green-50 text-green-600 text-center font-black";
+                    if (parseInt(data.stock) <= 0) sBox.className = "p-3 rounded-[1.5rem] border-2 border-red-100 bg-red-50 text-red-600 text-center font-black shadow-sm";
+                    else sBox.className = "p-3 rounded-[1.5rem] border-2 border-green-100 bg-green-50 text-green-600 text-center font-black shadow-sm";
                 }
                 document.getElementById('resNombre').innerText = data.nombre; document.getElementById('resPrecio').innerText = data.precio ? "$" + data.precio.toLocaleString('es-CL') : "---"; document.getElementById('resStock').innerText = data.stock ?? 0; 
                 mostrarPantalla('resultScreen');
@@ -241,18 +244,8 @@
             doc.setFillColor(...azul); doc.rect(10, 10, 277, 10, 'F');
             doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("PLANILLA CAMINATA COMPRAS", 148.5, 17, { align: "center" });
             doc.autoTable({ startY: 20, theme: 'grid', body: [[{content:'Tienda', styles:{fillColor:azul, textColor:255}},'MAITENCILLO'], [{content:'Responsable', styles:{fillColor:azul, textColor:255}},auditorName.toUpperCase()], [{content:'Fecha', styles:{fillColor:azul, textColor:255}},new Date().toLocaleDateString()]] });
-            
-            // CORRECCIÓN: SIN EMOJI EN EL PDF PARA EVITAR CARACTERES EXTRAÑOS
-            const bodyTable = gestionados.map((g, i) => [
-                i+1, g.codigo, g.nombre, 
-                g.tareas.includes("PRECIO") ? "FALTA" : "", 
-                g.tareas.includes("REPOSICIÓN") ? "FALTA" : "", 
-                g.tareas.includes("LIMPIEZA") ? "FALTA" : "", 
-                g.tareas.includes("REVISAR EXISTENCIA") ? "REVISAR" : "", 
-                g.ubicacion || ""
-            ]);
-
-            doc.autoTable({ startY: doc.lastAutoTable.finalY + 5, head: [['N°','SKU','DESCRIPCIÓN','PRECIO','REP','LIMP','EXIST','UBICACIÓN']], body: bodyTable, theme:'grid', headStyles: { fillColor: azul, textColor: 255, fontSize: 8, halign: 'center' }, styles: { fontSize: 8, cellPadding: 2 }, columnStyles: { 0:{cellWidth:10}, 1:{cellWidth:30}, 2:{cellWidth:100}, 3:{cellWidth:20, halign:'center'}, 4:{cellWidth:20, halign:'center'}, 5:{cellWidth:20, halign:'center'}, 6:{cellWidth:20, halign:'center'}, 7:{cellWidth:37} } });
+            const bodyTable = gestionados.map((g, i) => [i+1, g.codigo, g.nombre, g.tareas.includes("PRECIO")?"FALTA":"", g.tareas.includes("REPOSICIÓN")?"FALTA":"", g.tareas.includes("LIMPIEZA")?"FALTA":"", g.tareas.includes("REVISAR EXISTENCIA")?"REVISAR":"", g.ubicacion || ""]);
+            doc.autoTable({ startY: doc.lastAutoTable.finalY + 5, head: [['N°','SKU','DESCRIPCIÓN','PRECIO','REP','LIMP','EXIST','UBICACIÓN']], body: bodyTable, theme:'grid', headStyles: { fillColor: azul, textColor: 255, fontSize: 8, halign: 'center' }, styles: { fontSize: 8, cellPadding: 2 }, columnStyles: { 0:{cellWidth:10}, 1:{cellWidth:30}, 2:{cellWidth:100}, 3:{halign:'center'}, 4:{halign:'center'}, 5:{halign:'center'}, 6:{halign:'center'}, 7:{cellWidth:35} } });
 
             const conFotos = gestionados.filter(g => g.fotoBase64);
             if (conFotos.length > 0) {
@@ -274,7 +267,7 @@
                     if ((index + 1) % 2 === 0) { xPos = 15; yPos += 90; } else { xPos += 140; }
                 });
             }
-            doc.save(`Reporte_Maitencillo_${new Date().toLocaleDateString()}.pdf`);
+            doc.save(`Gestor_Compras_${new Date().toLocaleDateString()}.pdf`);
         }
 
         function abrirEscanner() { document.getElementById('scannerWrapper').classList.remove('hidden'); html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 200 }, (text) => { cerrarEscanner(); buscarStock(text); }); }
@@ -288,19 +281,19 @@
                 <div class="flex flex-wrap gap-2 mt-3">${g.tareas.map(t => `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase">⚠️ FALTA ${t}</span>`).join('')}${g.fotoBase64 ? '<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full italic uppercase shadow-sm">📸 FOTO OK</span>' : ''}</div>
             </div>`).join(''); }
         function cerrarModalGestion() { document.getElementById('modalGestion').style.display = 'none'; }
-        function vaciarReporte() { if (confirm("¿Borrar todo?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
-        function compartirReporte() { const t = gestionados.map((g, i) => `${i+1}. ⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ⚠️ FALTA ${g.tareas.join(', ⚠️ FALTA ')}`).join('\n\n'); navigator.clipboard.writeText(`REPORTES ULTRON\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`).then(() => alert("Copiado ⚠️")); }
+        function vaciarReporte() { if (confirm("¿Borrar todo el listado acumulado?")) { gestionados = []; localStorage.setItem('ultron_gestionados', '[]'); actualizarBadge(); cerrarModalGestion(); } }
+        function compartirReporte() { const t = gestionados.map((g, i) => `${i+1}. ⚠️ ${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 TAREAS: ⚠️ FALTA ${g.tareas.join(', ⚠️ FALTA ')}`).join('\n\n'); navigator.clipboard.writeText(`GESTOR DE COMPRAS\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`).then(() => alert("Copiado ⚠️")); }
         function guardarEnHistorial(item) { historial = historial.filter(h => h.codigo !== item.codigo); historial.unshift({ ...item }); historial = historial.slice(0, 10); localStorage.setItem('ultron_history', JSON.stringify(historial)); actualizarHistorial(); }
         function actualizarHistorial() { 
             const lista = document.getElementById('listaHistorial'); 
             if (historial.length === 0) { lista.innerHTML = '<p class="text-slate-300 italic text-[11px] text-center py-6 uppercase font-black">Vacío</p>'; return; } 
             lista.innerHTML = historial.map(h => `
-                <div onclick="buscarStock('${h.codigo}')" class="flex items-center gap-2 mb-2">
-                    <div class="flex-grow ${h.descontinuado ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'} p-4 rounded-[1.5rem] flex justify-between items-center shadow-sm active:scale-95 transition-all border text-left">
+                <div class="flex items-center gap-2 mb-2">
+                    <div onclick="buscarStock('${h.codigo}')" class="flex-grow ${h.descontinuado ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'} p-4 rounded-[1.5rem] flex justify-between items-center shadow-sm active:scale-95 transition-all border text-left">
                         <div class="w-2/3">
                             <p class="text-[8px] font-black text-slate-400 mb-0.5 uppercase italic">#${h.codigo}</p>
                             <p class="text-[10px] font-black uppercase leading-tight">${h.nombre}</p>
-                            <span class="text-[9px] font-black ${h.descontinuado || parseInt(h.stock) <= 0 ? 'text-red-500' : 'text-slate-400'} uppercase">STK: ${h.stock}</span>
+                            <span class="text-[9px] font-black ${h.descontinuado || parseInt(h.stock) <= 0 ? 'text-red-500' : 'text-slate-400'} uppercase font-bold">STK: ${h.stock}</span>
                         </div>
                         <div class="${h.descontinuado ? 'text-red-600' : 'text-blue-600'} font-black text-sm">$${h.precio.toLocaleString('es-CL')}</div>
                     </div>
