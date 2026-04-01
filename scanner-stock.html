@@ -666,7 +666,6 @@
         const fecha=new Date().toLocaleDateString('es-CL').replace(/\//g,'-');
         const nombreArchivo=tipoReporte==='caminata'?`Caminata de Compras ${fecha}`:`Auditoria Maitencillo ${fecha}`;
         doc.save(`${nombreArchivo}.pdf`);
-        gestionados=[]; localStorage.setItem('ultron_gestionados','[]');
         actualizarBadge(); cerrarModalGestion();
     }
 
