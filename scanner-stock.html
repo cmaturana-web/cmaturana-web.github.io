@@ -770,18 +770,32 @@
         inp.value=''; inp.classList.add('hidden'); icon.className='fas fa-cubes text-slate-300'; lbl.style.borderColor=''; lbl.style.backgroundColor='';
     }
 
-    function abrirEscanner() {
-        document.getElementById('scannerWrapper').classList.remove('hidden');
-        html5QrCode = new Html5Qrcode("reader");
+function abrirEscanner() {
+    document.getElementById('scannerWrapper').classList.remove('hidden');
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        {
+            fps: 15,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            videoConstraints: {
+                facingMode: "environment",
+                focusMode: "continuous",
+                advanced: [
+                    { focusMode: "continuous" },
+                    { torch: false }
+                ]
+            }
+        },
+        (text) => { cerrarEscanner(); buscarStock(text); }
+    ).catch(err => {
         html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0, focusMode: "continuous", advanced: [{ focusMode: "continuous" }] },
+            { fps: 15, qrbox: { width: 250, height: 250 } },
             (text) => { cerrarEscanner(); buscarStock(text); }
         );
-    }
-    function cerrarEscanner() {
-        if (html5QrCode) { html5QrCode.stop().then(()=>document.getElementById('scannerWrapper').classList.add('hidden')).catch(()=>document.getElementById('scannerWrapper').classList.add('hidden')); }
-        else document.getElementById('scannerWrapper').classList.add('hidden');
+    });
     }
 </script>
 </body>
