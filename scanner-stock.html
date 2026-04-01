@@ -81,7 +81,7 @@
         }
         .info-card-icon { font-size: 1.5rem; line-height: 1; }
         .info-card-title { font-size: 11px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.03em; }
-        .info-card-desc { font-size: 9px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+        .info-card-desc { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -616,9 +616,9 @@
                 if (data.column.index === 3) {
                     const val = parseInt(data.cell.raw);
                     if (!isNaN(val)) {
-                        data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold'; data.cell.styles.fontSize = 8;
-                        if (val <= 0) { data.cell.styles.textColor = rojo; data.cell.styles.fillColor = [255,235,235]; }
-                        else { data.cell.styles.textColor = verde; data.cell.styles.fillColor = [240,253,244]; }
+                        data.cell.styles.halign='center'; data.cell.styles.fontStyle='bold'; data.cell.styles.fontSize=8;
+                        if (val <= 0) { data.cell.styles.textColor=rojo; data.cell.styles.fillColor=[255,235,235]; }
+                        else { data.cell.styles.textColor=verde; data.cell.styles.fillColor=[240,253,244]; }
                     }
                 }
                 if (data.cell.raw === "X") { data.cell.styles.textColor=rojo; data.cell.styles.fontStyle='bold'; data.cell.styles.halign='center'; data.cell.styles.fontSize=12; data.cell.styles.fillColor=[255,235,235]; }
@@ -770,32 +770,32 @@
         inp.value=''; inp.classList.add('hidden'); icon.className='fas fa-cubes text-slate-300'; lbl.style.borderColor=''; lbl.style.backgroundColor='';
     }
 
-function abrirEscanner() {
-    document.getElementById('scannerWrapper').classList.remove('hidden');
-    html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-        { facingMode: "environment" },
-        {
-            fps: 15,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-            videoConstraints: {
-                facingMode: "environment",
-                focusMode: "continuous",
-                advanced: [
-                    { focusMode: "continuous" },
-                    { torch: false }
-                ]
-            }
-        },
-        (text) => { cerrarEscanner(); buscarStock(text); }
-    ).catch(err => {
+    function abrirEscanner() {
+        const readerEl = document.getElementById('reader');
+        readerEl.innerHTML = '';
+        document.getElementById('scannerWrapper').classList.remove('hidden');
+        html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 15, qrbox: { width: 250, height: 250 } },
-            (text) => { cerrarEscanner(); buscarStock(text); }
-        );
-    });
+            { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+            (text) => { cerrarEscanner(); buscarStock(text); },
+            (err) => {}
+        ).catch(() => {
+            document.getElementById('scannerWrapper').classList.add('hidden');
+            html5QrCode = null;
+        });
+    }
+
+    function cerrarEscanner() {
+        document.getElementById('scannerWrapper').classList.add('hidden');
+        if (!html5QrCode) return;
+        html5QrCode.stop()
+            .catch(() => {})
+            .finally(() => {
+                try { html5QrCode.clear(); } catch(e) {}
+                html5QrCode = null;
+                document.getElementById('reader').innerHTML = '';
+            });
     }
 </script>
 </body>
