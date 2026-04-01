@@ -64,6 +64,24 @@
         .rain-icon { position: absolute; font-size: 18px; animation: rainDrop linear infinite; opacity: 0; color: rgba(96,165,250,0.35); }
         @keyframes rainDrop { 0% { transform: translateY(-30px) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.2; } 100% { transform: translateY(110dvh) rotate(20deg); opacity: 0; } }
         #introScreen .content-wrap { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0 2rem; }
+
+        /* PANTALLAS INFO FULLSCREEN */
+        .info-screen {
+            position: absolute; inset: 0; z-index: 8888;
+            background: #020617; display: none;
+            flex-direction: column; padding: 1.5rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .info-screen.active { display: flex; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; }
+        .info-card {
+            background: rgba(255,255,255,0.06); border-radius: 1rem;
+            padding: 1rem; border: 0.5px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; gap: 4px; justify-content: center;
+        }
+        .info-card-icon { font-size: 1.4rem; }
+        .info-card-title { font-size: 10px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.03em; }
+        .info-card-desc { font-size: 9px; color: rgba(255,255,255,0.5); line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -89,6 +107,128 @@
         </div>
     </div>
 
+    <!-- INFO HOME -->
+    <div id="infoHome" class="info-screen">
+        <div class="flex justify-between items-center mb-5 flex-shrink-0">
+            <div>
+                <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">PANTALLA <span class="text-blue-400">PRINCIPAL</span></h2>
+                <p class="text-white/30 text-[8px] font-bold uppercase tracking-widest">Guía de uso</p>
+            </div>
+            <button onclick="cerrarInfo('infoHome')" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-black"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <span class="info-card-icon">🔍</span>
+                <span class="info-card-title">Buscar</span>
+                <span class="info-card-desc">Escribe o escanea un código para ver stock y precio en tiempo real.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">📷</span>
+                <span class="info-card-title">Cámara</span>
+                <span class="info-card-desc">Escáner con autofocus continuo para códigos de barras y QR.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">📋</span>
+                <span class="info-card-title">Alertas</span>
+                <span class="info-card-desc">Toca el portapapeles para ver alertas y generar reportes PDF.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">🕐</span>
+                <span class="info-card-title">Historial</span>
+                <span class="info-card-desc">Últimos 10 productos. Toca uno para volver a buscarlo.</span>
+            </div>
+        </div>
+        <button onclick="cerrarInfo('infoHome')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] italic mt-4 flex-shrink-0 active:scale-95">CERRAR</button>
+    </div>
+
+    <!-- INFO RESULTADO -->
+    <div id="infoResult" class="info-screen">
+        <div class="flex justify-between items-center mb-5 flex-shrink-0">
+            <div>
+                <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">PANTALLA <span class="text-blue-400">PRODUCTO</span></h2>
+                <p class="text-white/30 text-[8px] font-bold uppercase tracking-widest">Guía de uso</p>
+            </div>
+            <button onclick="cerrarInfo('infoResult')" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-black"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <span class="info-card-icon">📦</span>
+                <span class="info-card-title">Min. STK</span>
+                <span class="info-card-desc">Define el stock mínimo recomendado para el producto.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">🏷</span>
+                <span class="info-card-title">Tareas</span>
+                <span class="info-card-desc">Marca precio, reposición, limpieza o revisar existencia.</span>
+            </div>
+            <div class="info-card" style="border-color:rgba(251,191,36,0.3);">
+                <span class="info-card-icon">🛒</span>
+                <span class="info-card-title" style="color:#fbbf24;">Comprar</span>
+                <span class="info-card-desc">Marca si debe comprarse. Sale como "SÍ" en el PDF.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">📍</span>
+                <span class="info-card-title">Ubicación</span>
+                <span class="info-card-desc">Indica dónde está el producto en la tienda.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">📸</span>
+                <span class="info-card-title">Foto PDF</span>
+                <span class="info-card-desc">Toma una foto que se adjunta al reporte PDF.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">💾</span>
+                <span class="info-card-title">Guardar</span>
+                <span class="info-card-desc">Guarda el producto en el listado de alertas.</span>
+            </div>
+        </div>
+        <button onclick="cerrarInfo('infoResult')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] italic mt-4 flex-shrink-0 active:scale-95">CERRAR</button>
+    </div>
+
+    <!-- INFO ALERTAS -->
+    <div id="infoGestion" class="info-screen" style="z-index:99999;">
+        <div class="flex justify-between items-center mb-5 flex-shrink-0">
+            <div>
+                <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">PANEL <span class="text-blue-400">ALERTAS</span></h2>
+                <p class="text-white/30 text-[8px] font-bold uppercase tracking-widest">Guía de uso</p>
+            </div>
+            <button onclick="cerrarInfo('infoGestion')" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-black"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <span class="info-card-icon">📋</span>
+                <span class="info-card-title">Listado</span>
+                <span class="info-card-desc">Productos con tareas marcadas durante la jornada.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">📄</span>
+                <span class="info-card-title">PDF</span>
+                <span class="info-card-desc">Exporta planilla con tareas, stock y fotos adjuntas.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">🏪</span>
+                <span class="info-card-title">Auditoría</span>
+                <span class="info-card-desc">Reporte de auditoría interna de la tienda Maitencillo.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">🚶</span>
+                <span class="info-card-title">Caminata</span>
+                <span class="info-card-desc">Reporte de caminata de compras por la tienda.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">💬</span>
+                <span class="info-card-title">WhatsApp</span>
+                <span class="info-card-desc">Copia resumen al portapapeles para enviar por WhatsApp.</span>
+            </div>
+            <div class="info-card">
+                <span class="info-card-icon">🗑</span>
+                <span class="info-card-title">Vaciar</span>
+                <span class="info-card-desc">Borra toda la lista para comenzar una nueva jornada.</span>
+            </div>
+        </div>
+        <button onclick="cerrarInfo('infoGestion')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] italic mt-4 flex-shrink-0 active:scale-95">CERRAR</button>
+    </div>
+
     <!-- PANTALLA HOME -->
     <div id="homeScreen" class="screen hidden fade-in">
         <div class="flex justify-between items-center mb-5">
@@ -100,25 +240,13 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="toggleInfoHome()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all font-black text-lg">?</button>
+                <button onclick="abrirInfo('infoHome')" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all font-black text-lg">?</button>
                 <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all">
                     <i class="fas fa-clipboard-list text-lg"></i>
                     <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white hidden">0</span>
                 </button>
             </div>
         </div>
-
-        <div id="panelInfoHome" style="display:none;" class="flex-col gap-2 bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4 flex-shrink-0">
-            <div class="flex justify-between items-center mb-1">
-                <span class="text-blue-500 text-[9px] font-black uppercase tracking-widest">¿Cómo usar esta pantalla?</span>
-                <button onclick="toggleInfoHome()" class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-[10px] font-black">✕</button>
-            </div>
-            <p class="text-[11px] text-blue-800 leading-relaxed">🔍 <span class="font-black">BUSCAR</span> — Escribe o escanea un código de barras para consultar stock y precio en tiempo real.</p>
-            <p class="text-[11px] text-blue-800 leading-relaxed">📷 <span class="font-black">CÁMARA</span> — Activa el escáner con autofocus continuo para leer códigos de barras y QR.</p>
-            <p class="text-[11px] text-blue-800 leading-relaxed">📋 <span class="font-black">ALERTAS</span> — Toca el ícono del portapapeles para ver el listado de alertas guardadas y generar reportes.</p>
-            <p class="text-[11px] text-blue-800 leading-relaxed">🕐 <span class="font-black">HISTORIAL</span> — Últimos 10 productos consultados. Toca uno para volver a buscarlo rápidamente.</p>
-        </div>
-
         <div class="bg-white p-1 rounded-[2rem] shadow-sm flex items-center mb-5 border border-slate-200">
             <input id="codigoInput" type="number" inputmode="numeric" placeholder="ESCANEAR PRODUCTO..." class="flex-grow p-3 text-base font-bold bg-transparent outline-none w-full text-slate-700" onkeypress="if(event.key==='Enter') buscarStock()">
             <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-10 h-10 rounded-xl flex items-center justify-center mr-1"><i class="fas fa-camera"></i></button>
@@ -173,7 +301,7 @@
                     <label class="check-item check-red cursor-pointer"><input type="checkbox" data-tarea="REPOSICIÓN" class="hidden"><div class="bg-white"><i class="fas fa-boxes text-slate-300"></i><span class="uppercase text-[8px] font-black">REPOSICIÓN</span></div></label>
                     <label class="check-item check-red cursor-pointer"><input type="checkbox" data-tarea="LIMPIEZA" class="hidden"><div class="bg-white"><i class="fas fa-broom text-slate-300"></i><span class="uppercase text-[8px] font-black">LIMPIEZA</span></div></label>
                     <label class="check-item check-red cursor-pointer"><input type="checkbox" data-tarea="REVISAR EXISTENCIA" class="hidden"><div class="bg-white"><i class="fas fa-clipboard-check text-slate-300"></i><span class="uppercase text-[8px] font-black leading-none">REVISAR EXISTENCIA</span></div></label>
-                    <label class="check-item check-amber cursor-pointer col-span-2"><input type="checkbox" data-tarea="COMPRAR" class="hidden"><div class="bg-white"><i class="fas fa-shopping-cart text-slate-300"></i><span class="uppercase text-[8px] font-black">COMPRAR</span></div></label>
+                    <label class="check-item check-amber cursor-pointer"><input type="checkbox" data-tarea="COMPRAR" class="hidden"><div class="bg-white"><i class="fas fa-shopping-cart text-slate-300"></i><span class="uppercase text-[8px] font-black">COMPRAR</span></div></label>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <label class="check-item check-green cursor-pointer">
@@ -189,26 +317,12 @@
                 <input id="inputUbi" type="text" placeholder="¿Dónde está?" class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
                 <div id="fotoStatus" class="hidden text-center"><p class="text-[9px] text-green-600 font-black uppercase"><i class="fas fa-check-circle"></i> Imagen Guardada</p></div>
             </div>
-
-            <div id="panelInfoResult" style="display:none;" class="flex-col gap-2 bg-blue-50 border border-blue-100 rounded-2xl p-4 mt-3 flex-shrink-0">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-blue-500 text-[9px] font-black uppercase tracking-widest">¿Cómo usar esta pantalla?</span>
-                    <button onclick="toggleInfoResult()" class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-[10px] font-black">✕</button>
-                </div>
-                <p class="text-[11px] text-blue-800 leading-relaxed">📦 <span class="font-black">MIN. STK</span> — Define el stock mínimo recomendado para el producto.</p>
-                <p class="text-[11px] text-blue-800 leading-relaxed">🏷 <span class="font-black">TAREAS</span> — Marca lo que necesita atención: precio, reposición, limpieza o revisar existencia.</p>
-                <p class="text-[11px] text-blue-800 leading-relaxed">🛒 <span class="font-black">COMPRAR</span> — Marca si el producto debe ser comprado. Aparece como "SÍ" en el reporte PDF.</p>
-                <p class="text-[11px] text-blue-800 leading-relaxed">📍 <span class="font-black">UBICACIÓN</span> — Indica dónde está el producto en la tienda.</p>
-                <p class="text-[11px] text-blue-800 leading-relaxed">📸 <span class="font-black">FOTO PDF</span> — Toma una foto que se adjuntará al reporte PDF.</p>
-                <p class="text-[11px] text-blue-800 leading-relaxed">💾 <span class="font-black">GUARDAR ALERTA</span> — Guarda el producto con las tareas marcadas en el listado.</p>
-            </div>
-
             <div class="flex gap-3 mt-3 mb-2 text-center">
                 <button onclick="irAHome()" class="w-[30%] bg-slate-200 text-slate-600 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95">CERRAR</button>
                 <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95">
                     <i class="fas fa-save"></i> GUARDAR ALERTA
                 </button>
-                <button onclick="toggleInfoResult()" class="bg-blue-600 text-white font-black w-14 rounded-[1.5rem] shadow-xl text-lg flex items-center justify-center active:scale-95 flex-shrink-0">?</button>
+                <button onclick="abrirInfo('infoResult')" class="bg-blue-600 text-white font-black w-14 rounded-[1.5rem] shadow-xl text-lg flex items-center justify-center active:scale-95 flex-shrink-0">?</button>
             </div>
         </div>
     </div>
@@ -218,19 +332,9 @@
         <div class="flex justify-between items-center mb-4 w-full flex-shrink-0">
             <div class="flex items-center gap-3">
                 <h2 class="text-xl font-black italic uppercase tracking-tighter">LISTADO ALERTAS</h2>
-                <button onclick="toggleInfoGestion()" class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">?</button>
+                <button onclick="abrirInfo('infoGestion')" class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">?</button>
             </div>
             <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="panelInfoGestion" style="display:none;" class="flex-col gap-2 bg-white/5 border border-white/10 rounded-2xl p-4 mb-4 flex-shrink-0">
-            <div class="flex justify-between items-center mb-1">
-                <span class="text-blue-400 text-[9px] font-black uppercase tracking-widest">¿Cómo usar este panel?</span>
-                <button onclick="toggleInfoGestion()" class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white text-[10px] font-black">✕</button>
-            </div>
-            <p class="text-[11px] text-white/80 leading-relaxed">📋 <span class="text-white font-black">LISTADO DE ALERTAS</span> — Aquí se acumulan todos los productos que marcaste con tareas pendientes durante la jornada.</p>
-            <p class="text-[11px] text-white/80 leading-relaxed">📄 <span class="text-white font-black">GENERAR PDF</span> — Exporta todas las alertas en una planilla profesional con tabla de productos, stock, tareas marcadas y fotos. El stock aparece en verde si es positivo y rojo si es 0 o negativo.</p>
-            <p class="text-[11px] text-white/80 leading-relaxed">💬 <span class="text-white font-black">WHATSAPP</span> — Copia un resumen de texto con todos los productos y alertas al portapapeles, listo para pegar directamente en WhatsApp.</p>
-            <p class="text-[11px] text-white/80 leading-relaxed">🗑 <span class="text-white font-black">VACIAR</span> — Borra toda la lista de alertas para comenzar una nueva jornada.</p>
         </div>
         <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-4"></div>
         <div class="flex flex-col gap-3 mt-4 flex-shrink-0">
@@ -311,6 +415,14 @@
             el.style.animationDelay = (Math.random() * 6) + 's';
             bg.appendChild(el);
         }
+    }
+
+    // ── PANTALLAS INFO ────────────────────────────────────────
+    function abrirInfo(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function cerrarInfo(id) {
+        document.getElementById(id).classList.remove('active');
     }
 
     window.onload = async () => {
@@ -430,7 +542,6 @@
         document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false);
         document.getElementById('inputUbi').classList.add('hidden');
         document.getElementById('inputUbi').value = '';
-        document.getElementById('panelInfoResult').style.display = 'none';
         resetMinStk();
         mostrarPantalla('homeScreen');
     }
@@ -438,25 +549,6 @@
         const i = document.getElementById('inputUbi');
         if (document.getElementById('checkUbi').checked) { i.classList.remove('hidden'); i.focus(); }
         else { i.classList.add('hidden'); i.value = ""; }
-    }
-
-    function toggleInfoHome() {
-        const p = document.getElementById('panelInfoHome');
-        const v = p.style.display === 'flex';
-        p.style.display = v ? 'none' : 'flex';
-        if (!v) p.style.flexDirection = 'column';
-    }
-    function toggleInfoResult() {
-        const p = document.getElementById('panelInfoResult');
-        const v = p.style.display === 'flex';
-        p.style.display = v ? 'none' : 'flex';
-        if (!v) p.style.flexDirection = 'column';
-    }
-    function toggleInfoGestion() {
-        const p = document.getElementById('panelInfoGestion');
-        const v = p.style.display === 'flex';
-        p.style.display = v ? 'none' : 'flex';
-        if (!v) p.style.flexDirection = 'column';
     }
 
     async function procesarFotoLocal(input) {
@@ -574,8 +666,7 @@
             margin: { left: 10, right: 10 }
         });
         const body = gestionados.map((g, i) => [
-            i + 1,
-            g.codigo,
+            i + 1, g.codigo,
             g.descontinuado ? g.nombre + ' [DESCONTINUADO]' : g.nombre,
             g.stock ?? 0,
             g.minStk && g.minStk !== "" ? g.minStk : "",
@@ -596,20 +687,12 @@
             didDrawPage: function(data) { if (data.pageNumber > 1) mkHeader(doc, tituloDoc + " (cont.)"); },
             didParseCell: function(data) {
                 if (data.section !== 'body') return;
-                // STK — verde si positivo, rojo si 0 o negativo
                 if (data.column.index === 3) {
                     const val = parseInt(data.cell.raw);
                     if (!isNaN(val)) {
-                        data.cell.styles.halign = 'center';
-                        data.cell.styles.fontStyle = 'bold';
-                        data.cell.styles.fontSize = 8;
-                        if (val <= 0) {
-                            data.cell.styles.textColor = rojo;
-                            data.cell.styles.fillColor = [255, 235, 235];
-                        } else {
-                            data.cell.styles.textColor = verde;
-                            data.cell.styles.fillColor = [240, 253, 244];
-                        }
+                        data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold'; data.cell.styles.fontSize = 8;
+                        if (val <= 0) { data.cell.styles.textColor = rojo; data.cell.styles.fillColor = [255,235,235]; }
+                        else { data.cell.styles.textColor = verde; data.cell.styles.fillColor = [240,253,244]; }
                     }
                 }
                 if (data.cell.raw === "X") { data.cell.styles.textColor=rojo; data.cell.styles.fontStyle='bold'; data.cell.styles.halign='center'; data.cell.styles.fontSize=12; data.cell.styles.fillColor=[255,235,235]; }
@@ -712,7 +795,7 @@
                     ${g.descontinuado?'<span class="badge-desc"><i class="fas fa-ban mr-1"></i>DESCONTINUADO</span>':''}
                     <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">#${g.codigo} | STK: <span class="${parseInt(g.stock)<=0?'text-red-400':'text-green-400'}">${g.stock}</span></p>
                     <div class="flex flex-wrap gap-2 mt-3">
-                        ${g.tareas.map(t=>`<span class="${t==='COMPRAR'?'bg-amber-500':'bg-red-600'} text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">${t==='COMPRAR'?'🛒 '+t:t}</span>`).join('')}
+                        ${g.tareas.map(t=>`<span class="${t==='COMPRAR'?'bg-amber-500 text-amber-900':'bg-red-600 text-white'} text-[8px] font-black px-3 py-1 rounded-full uppercase">${t==='COMPRAR'?'🛒 '+t:t}</span>`).join('')}
                         ${g.minStk?`<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">MIN. STK: ${g.minStk}</span>`:''}
                         ${g.fotoBase64?'<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">📸 RESPALDO FOTOGRÁFICO</span>':''}
                     </div>
@@ -727,7 +810,6 @@
     }
     function cerrarModalGestion() {
         document.getElementById('modalGestion').style.display='none';
-        document.getElementById('panelInfoGestion').style.display='none';
     }
     function vaciarReporte() {
         if (confirm("¿Borrar todo?")) { gestionados=[]; localStorage.setItem('ultron_gestionados','[]'); actualizarBadge(); cerrarModalGestion(); }
@@ -762,30 +844,18 @@
         inp.value=''; inp.classList.add('hidden'); icon.className='fas fa-cubes text-slate-300'; lbl.style.borderColor=''; lbl.style.backgroundColor='';
     }
 
-    // ── ESCÁNER CON AUTOFOCUS CONTINUO ────────────────────────
     function abrirEscanner() {
         document.getElementById('scannerWrapper').classList.remove('hidden');
         html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start(
             { facingMode: "environment" },
-            {
-                fps: 20,
-                qrbox: { width: 220, height: 220 },
-                aspectRatio: 1.0,
-                focusMode: "continuous",
-                advanced: [{ focusMode: "continuous" }]
-            },
+            { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0, focusMode: "continuous", advanced: [{ focusMode: "continuous" }] },
             (text) => { cerrarEscanner(); buscarStock(text); }
         );
     }
     function cerrarEscanner() {
-        if (html5QrCode) {
-            html5QrCode.stop()
-                .then(() => document.getElementById('scannerWrapper').classList.add('hidden'))
-                .catch(() => document.getElementById('scannerWrapper').classList.add('hidden'));
-        } else {
-            document.getElementById('scannerWrapper').classList.add('hidden');
-        }
+        if (html5QrCode) { html5QrCode.stop().then(()=>document.getElementById('scannerWrapper').classList.add('hidden')).catch(()=>document.getElementById('scannerWrapper').classList.add('hidden')); }
+        else document.getElementById('scannerWrapper').classList.add('hidden');
     }
 </script>
 </body>
