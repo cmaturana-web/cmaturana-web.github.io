@@ -68,7 +68,7 @@
             <select id="auditorSelect" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-bold text-slate-700 uppercase appearance-none text-center">
                 <option value="" disabled selected>SELECCIONAR USUARIO</option>
             </select>
-            <input id="passwordInput" type="password" placeholder="CONTRASEÑA" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-bold text-center text-slate-700 tracking-widest">
+            <input id="passwordInput" type="password" placeholder="CONTRASEÑA" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-bold text-center text-slate-700 tracking-widest" onkeypress="if(event.key==='Enter') loginSistema()">
             <button onclick="loginSistema()" class="w-full mt-2 bg-blue-600 text-white font-black py-5 rounded-2xl shadow-lg active:scale-95 uppercase text-xs italic tracking-widest transition-all">
                 Entrar al Sistema
             </button>
