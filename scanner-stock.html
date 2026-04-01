@@ -73,15 +73,15 @@
             animation: fadeIn 0.2s ease-out;
         }
         .info-screen.active { display: flex; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
         .info-card {
-            background: rgba(255,255,255,0.06); border-radius: 1rem;
-            padding: 1rem; border: 0.5px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; gap: 4px; justify-content: center;
+            background: rgba(255,255,255,0.07); border-radius: 1rem;
+            padding: 1rem; border: 0.5px solid rgba(255,255,255,0.12);
+            display: flex; flex-direction: column; gap: 5px; justify-content: center; overflow: hidden;
         }
-        .info-card-icon { font-size: 1.4rem; }
-        .info-card-title { font-size: 10px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.03em; }
-        .info-card-desc { font-size: 9px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+        .info-card-icon { font-size: 1.5rem; line-height: 1; }
+        .info-card-title { font-size: 11px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.03em; }
+        .info-card-desc { font-size: 9px; color: rgba(255,255,255,0.55); line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -114,31 +114,15 @@
                 <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">PANTALLA <span class="text-blue-400">PRINCIPAL</span></h2>
                 <p class="text-white/30 text-[8px] font-bold uppercase tracking-widest">Guía de uso</p>
             </div>
-            <button onclick="cerrarInfo('infoHome')" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-black"><i class="fas fa-times"></i></button>
+            <button onclick="cerrarInfo('infoHome')" class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-black active:scale-90"><i class="fas fa-times"></i></button>
         </div>
-        <div class="info-grid">
-            <div class="info-card">
-                <span class="info-card-icon">🔍</span>
-                <span class="info-card-title">Buscar</span>
-                <span class="info-card-desc">Escribe o escanea un código para ver stock y precio en tiempo real.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">📷</span>
-                <span class="info-card-title">Cámara</span>
-                <span class="info-card-desc">Escáner con autofocus continuo para códigos de barras y QR.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">📋</span>
-                <span class="info-card-title">Alertas</span>
-                <span class="info-card-desc">Toca el portapapeles para ver alertas y generar reportes PDF.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">🕐</span>
-                <span class="info-card-title">Historial</span>
-                <span class="info-card-desc">Últimos 10 productos. Toca uno para volver a buscarlo.</span>
-            </div>
+        <div class="info-grid" style="grid-template-rows:1fr 1fr;">
+            <div class="info-card"><span class="info-card-icon">🔍</span><span class="info-card-title">Buscar</span><span class="info-card-desc">Escribe o escanea un código para ver stock y precio en tiempo real.</span></div>
+            <div class="info-card"><span class="info-card-icon">📷</span><span class="info-card-title">Cámara</span><span class="info-card-desc">Autofocus continuo para leer códigos de barras y QR.</span></div>
+            <div class="info-card"><span class="info-card-icon">📋</span><span class="info-card-title">Alertas</span><span class="info-card-desc">Toca el portapapeles para ver alertas y generar reportes PDF.</span></div>
+            <div class="info-card"><span class="info-card-icon">🕐</span><span class="info-card-title">Historial</span><span class="info-card-desc">Últimos 10 productos. Toca uno para volver a buscarlo.</span></div>
         </div>
-        <button onclick="cerrarInfo('infoHome')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] italic mt-4 flex-shrink-0 active:scale-95">CERRAR</button>
+        <button onclick="cerrarInfo('infoHome')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[11px] italic mt-4 flex-shrink-0 active:scale-95 tracking-widest">CERRAR</button>
     </div>
 
     <!-- INFO RESULTADO -->
@@ -148,41 +132,17 @@
                 <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">PANTALLA <span class="text-blue-400">PRODUCTO</span></h2>
                 <p class="text-white/30 text-[8px] font-bold uppercase tracking-widest">Guía de uso</p>
             </div>
-            <button onclick="cerrarInfo('infoResult')" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-black"><i class="fas fa-times"></i></button>
+            <button onclick="cerrarInfo('infoResult')" class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-black active:scale-90"><i class="fas fa-times"></i></button>
         </div>
-        <div class="info-grid">
-            <div class="info-card">
-                <span class="info-card-icon">📦</span>
-                <span class="info-card-title">Min. STK</span>
-                <span class="info-card-desc">Define el stock mínimo recomendado para el producto.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">🏷</span>
-                <span class="info-card-title">Tareas</span>
-                <span class="info-card-desc">Marca precio, reposición, limpieza o revisar existencia.</span>
-            </div>
-            <div class="info-card" style="border-color:rgba(251,191,36,0.3);">
-                <span class="info-card-icon">🛒</span>
-                <span class="info-card-title" style="color:#fbbf24;">Comprar</span>
-                <span class="info-card-desc">Marca si debe comprarse. Sale como "SÍ" en el PDF.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">📍</span>
-                <span class="info-card-title">Ubicación</span>
-                <span class="info-card-desc">Indica dónde está el producto en la tienda.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">📸</span>
-                <span class="info-card-title">Foto PDF</span>
-                <span class="info-card-desc">Toma una foto que se adjunta al reporte PDF.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">💾</span>
-                <span class="info-card-title">Guardar</span>
-                <span class="info-card-desc">Guarda el producto en el listado de alertas.</span>
-            </div>
+        <div class="info-grid" style="grid-template-rows:1fr 1fr 1fr;">
+            <div class="info-card"><span class="info-card-icon">📦</span><span class="info-card-title">Min. STK</span><span class="info-card-desc">Stock mínimo recomendado para el producto.</span></div>
+            <div class="info-card"><span class="info-card-icon">🏷</span><span class="info-card-title">Tareas</span><span class="info-card-desc">Precio, reposición, limpieza o revisar existencia.</span></div>
+            <div class="info-card" style="border-color:rgba(251,191,36,0.3);"><span class="info-card-icon">🛒</span><span class="info-card-title" style="color:#fbbf24;">Comprar</span><span class="info-card-desc">Sale como "SÍ" en el reporte PDF.</span></div>
+            <div class="info-card"><span class="info-card-icon">📍</span><span class="info-card-title">Ubicación</span><span class="info-card-desc">Indica dónde está el producto en la tienda.</span></div>
+            <div class="info-card"><span class="info-card-icon">📸</span><span class="info-card-title">Foto PDF</span><span class="info-card-desc">Toma una foto que se adjunta al reporte PDF.</span></div>
+            <div class="info-card"><span class="info-card-icon">💾</span><span class="info-card-title">Guardar</span><span class="info-card-desc">Guarda el producto en el listado de alertas.</span></div>
         </div>
-        <button onclick="cerrarInfo('infoResult')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] italic mt-4 flex-shrink-0 active:scale-95">CERRAR</button>
+        <button onclick="cerrarInfo('infoResult')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[11px] italic mt-4 flex-shrink-0 active:scale-95 tracking-widest">CERRAR</button>
     </div>
 
     <!-- INFO ALERTAS -->
@@ -192,41 +152,17 @@
                 <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">PANEL <span class="text-blue-400">ALERTAS</span></h2>
                 <p class="text-white/30 text-[8px] font-bold uppercase tracking-widest">Guía de uso</p>
             </div>
-            <button onclick="cerrarInfo('infoGestion')" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-black"><i class="fas fa-times"></i></button>
+            <button onclick="cerrarInfo('infoGestion')" class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-black active:scale-90"><i class="fas fa-times"></i></button>
         </div>
-        <div class="info-grid">
-            <div class="info-card">
-                <span class="info-card-icon">📋</span>
-                <span class="info-card-title">Listado</span>
-                <span class="info-card-desc">Productos con tareas marcadas durante la jornada.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">📄</span>
-                <span class="info-card-title">PDF</span>
-                <span class="info-card-desc">Exporta planilla con tareas, stock y fotos adjuntas.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">🏪</span>
-                <span class="info-card-title">Auditoría</span>
-                <span class="info-card-desc">Reporte de auditoría interna de la tienda Maitencillo.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">🚶</span>
-                <span class="info-card-title">Caminata</span>
-                <span class="info-card-desc">Reporte de caminata de compras por la tienda.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">💬</span>
-                <span class="info-card-title">WhatsApp</span>
-                <span class="info-card-desc">Copia resumen al portapapeles para enviar por WhatsApp.</span>
-            </div>
-            <div class="info-card">
-                <span class="info-card-icon">🗑</span>
-                <span class="info-card-title">Vaciar</span>
-                <span class="info-card-desc">Borra toda la lista para comenzar una nueva jornada.</span>
-            </div>
+        <div class="info-grid" style="grid-template-rows:1fr 1fr 1fr;">
+            <div class="info-card"><span class="info-card-icon">📋</span><span class="info-card-title">Listado</span><span class="info-card-desc">Productos con tareas marcadas durante la jornada.</span></div>
+            <div class="info-card"><span class="info-card-icon">📄</span><span class="info-card-title">PDF</span><span class="info-card-desc">Planilla con tareas, stock y fotos adjuntas.</span></div>
+            <div class="info-card"><span class="info-card-icon">🏪</span><span class="info-card-title">Auditoría</span><span class="info-card-desc">Reporte de auditoría interna Maitencillo.</span></div>
+            <div class="info-card"><span class="info-card-icon">🚶</span><span class="info-card-title">Caminata</span><span class="info-card-desc">Reporte de caminata de compras.</span></div>
+            <div class="info-card"><span class="info-card-icon">💬</span><span class="info-card-title">WhatsApp</span><span class="info-card-desc">Copia resumen al portapapeles para WhatsApp.</span></div>
+            <div class="info-card"><span class="info-card-icon">🗑</span><span class="info-card-title">Vaciar</span><span class="info-card-desc">Borra toda la lista para nueva jornada.</span></div>
         </div>
-        <button onclick="cerrarInfo('infoGestion')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] italic mt-4 flex-shrink-0 active:scale-95">CERRAR</button>
+        <button onclick="cerrarInfo('infoGestion')" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[11px] italic mt-4 flex-shrink-0 active:scale-95 tracking-widest">CERRAR</button>
     </div>
 
     <!-- PANTALLA HOME -->
@@ -398,14 +334,9 @@
     let auditorName = localStorage.getItem('ultron_auditor_name') || "";
     let tipoReporte = 'auditoria';
 
-    // ── LLUVIA DE ICONOS ──────────────────────────────────────
     function crearLluviaIconos() {
         const bg = document.getElementById('loginBg');
-        const iconos = [
-            'fa-boxes','fa-tag','fa-broom','fa-clipboard-check',
-            'fa-map-marker-alt','fa-camera','fa-cubes','fa-save',
-            'fa-file-pdf','fa-search','fa-clipboard-list','fa-shopping-cart'
-        ];
+        const iconos = ['fa-boxes','fa-tag','fa-broom','fa-clipboard-check','fa-map-marker-alt','fa-camera','fa-cubes','fa-save','fa-file-pdf','fa-search','fa-clipboard-list','fa-shopping-cart'];
         for (let i = 0; i < 28; i++) {
             const el = document.createElement('i');
             el.className = `fas ${iconos[Math.floor(Math.random()*iconos.length)]} rain-icon`;
@@ -417,13 +348,8 @@
         }
     }
 
-    // ── PANTALLAS INFO ────────────────────────────────────────
-    function abrirInfo(id) {
-        document.getElementById(id).classList.add('active');
-    }
-    function cerrarInfo(id) {
-        document.getElementById(id).classList.remove('active');
-    }
+    function abrirInfo(id) { document.getElementById(id).classList.add('active'); }
+    function cerrarInfo(id) { document.getElementById(id).classList.remove('active'); }
 
     window.onload = async () => {
         crearLluviaIconos();
