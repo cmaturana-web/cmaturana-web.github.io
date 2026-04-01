@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GESTOR DE COMPRAS - v58.0</title>
+    <title>GESTOR DE COMPRAS - v59.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -128,7 +128,6 @@
             </div>
             <div class="bg-slate-50/80 p-4 rounded-[2.2rem] border border-slate-100 space-y-3 flex-grow max-h-fit">
                 <div id="checklistArea" class="grid grid-cols-2 gap-2">
-                    <!-- MIN. STK — verde, solo numeros, va ANTES de PRECIO -->
                     <label class="check-item check-green cursor-pointer" id="minStkLabel" onclick="toggleMinStk(); return false;">
                         <div id="minStkDiv" class="bg-white flex flex-col items-center gap-0.5 w-full">
                             <i id="minStkIcon" class="fas fa-cubes text-slate-300"></i>
@@ -219,6 +218,7 @@
 
 <script>
     const ADMIN_CLAVE = "219610";
+    const WORKER_URL  = "https://round-sound-c782.cmaturana.workers.dev";
     const USUARIOS_DEFAULT = [
         { nombre: "CARLOS MATURANA", clave: "CM1" },
         { nombre: "NURY NEGRETE",    clave: "NN2" },
@@ -228,23 +228,50 @@
         { nombre: "BRAYAN RODRIGUEZ",clave: "BR6" },
         { nombre: "RODRIGO OYANEDEL",clave: "RO7" },
     ];
-    let USUARIOS_SISTEMA = JSON.parse(localStorage.getItem('ultron_usuarios') || 'null') || [...USUARIOS_DEFAULT];
 
-    const API_URL = "https://round-sound-c782.cmaturana.workers.dev/?codigo=";
+    let USUARIOS_SISTEMA = [];
+    const API_URL = WORKER_URL + "/?codigo=";
     let html5QrCode, currentProduct = null, currentBase64 = "";
-    let historial  = JSON.parse(localStorage.getItem('ultron_history')    || '[]');
-    let gestionados= JSON.parse(localStorage.getItem('ultron_gestionados')|| '[]');
-    let auditorName= localStorage.getItem('ultron_auditor_name') || "";
+    let historial   = JSON.parse(localStorage.getItem('ultron_history')    || '[]');
+    let gestionados = JSON.parse(localStorage.getItem('ultron_gestionados')|| '[]');
+    let auditorName = localStorage.getItem('ultron_auditor_name') || "";
     let tipoReporte = 'auditoria';
 
-    window.onload = () => {
+    // ── INICIO ────────────────────────────────────────────────
+    window.onload = async () => {
+        mostrarPantalla('loader');
+        await cargarUsuariosDesdeWorker();
         cargarSelectorUsuarios();
         if (!auditorName) { mostrarPantalla('introScreen'); }
         else { actualizarAuditorDisplay(); mostrarPantalla('homeScreen'); }
-        actualizarHistorial(); actualizarBadge();
+        actualizarHistorial();
+        actualizarBadge();
     };
 
-    // ── USUARIOS ──────────────────────────────────────────────
+    // ── USUARIOS DESDE WORKER ─────────────────────────────────
+    async function cargarUsuariosDesdeWorker() {
+        try {
+            const res = await fetch(WORKER_URL + '/usuarios');
+            const data = await res.json();
+            USUARIOS_SISTEMA = data.length ? data : [...USUARIOS_DEFAULT];
+        } catch(e) {
+            USUARIOS_SISTEMA = [...USUARIOS_DEFAULT];
+        }
+    }
+
+    async function guardarUsuariosEnWorker() {
+        try {
+            await fetch(WORKER_URL + '/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(USUARIOS_SISTEMA)
+            });
+        } catch(e) {
+            alert("Error al guardar usuarios en la nube");
+        }
+    }
+
+    // ── SELECTOR USUARIOS ─────────────────────────────────────
     function cargarSelectorUsuarios() {
         const select = document.getElementById('auditorSelect');
         select.innerHTML = '<option value="" disabled selected>SELECCIONAR USUARIO</option>';
@@ -257,8 +284,9 @@
             select.appendChild(opt);
         });
     }
-    function guardarUsuarios() {
-        localStorage.setItem('ultron_usuarios', JSON.stringify(USUARIOS_SISTEMA));
+
+    async function guardarUsuarios() {
+        await guardarUsuariosEnWorker();
         cargarSelectorUsuarios();
         renderTablaUsuarios();
     }
@@ -300,28 +328,28 @@
                 <button onclick="eliminarUsuario(${i})" class="bg-red-600 text-white text-[9px] font-black px-3 py-2 rounded-xl active:scale-90"><i class="fas fa-trash"></i></button>
             </div>`).join('');
     }
-    function agregarUsuario() {
+    async function agregarUsuario() {
         const nombre = document.getElementById('adminNombre').value.trim().toUpperCase();
         const clave  = document.getElementById('adminClave').value.trim();
         if (!nombre || !clave) return alert("Completa nombre y clave");
         if (USUARIOS_SISTEMA.find(u => u.nombre === nombre)) return alert("Usuario ya existe");
         USUARIOS_SISTEMA.push({ nombre, clave });
-        guardarUsuarios();
+        await guardarUsuarios();
         document.getElementById('adminNombre').value = '';
         document.getElementById('adminClave').value  = '';
     }
-    function eliminarUsuario(i) {
+    async function eliminarUsuario(i) {
         if (!confirm("¿Eliminar usuario " + USUARIOS_SISTEMA[i].nombre + "?")) return;
         USUARIOS_SISTEMA.splice(i, 1);
-        guardarUsuarios();
+        await guardarUsuarios();
     }
-    function editarUsuario(i) {
+    async function editarUsuario(i) {
         const u = USUARIOS_SISTEMA[i];
         const nuevoNombre = prompt("Nuevo nombre (vacío = mantener):", u.nombre);
         if (nuevoNombre !== null && nuevoNombre.trim()) USUARIOS_SISTEMA[i].nombre = nuevoNombre.trim().toUpperCase();
         const nuevaClave = prompt("Nueva clave (vacío = mantener):", u.clave);
         if (nuevaClave !== null && nuevaClave.trim()) USUARIOS_SISTEMA[i].clave = nuevaClave.trim();
-        guardarUsuarios();
+        await guardarUsuarios();
     }
 
     // ── NAVEGACIÓN ────────────────────────────────────────────
@@ -340,7 +368,6 @@
         document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false);
         document.getElementById('inputUbi').classList.add('hidden');
         document.getElementById('inputUbi').value = '';
-        // Limpiar MIN. STK
         resetMinStk();
         mostrarPantalla('homeScreen');
     }
@@ -449,212 +476,91 @@
         const doc  = new jsPDF('l', 'mm', 'a4');
         const azul = [0, 31, 63];
         const rojo = [220, 38, 38];
-        const tituloDoc = tipoReporte === 'caminata'
-            ? "PLANILLA CAMINATA DE COMPRAS"
-            : "PLANILLA AUDITORIA MAITENCILLO";
-
-        const pageW = doc.internal.pageSize.getWidth();   // 297mm
-        const pageH = doc.internal.pageSize.getHeight();  // 210mm
-
-        // ─────────────────────────────────────────
-        // HELPER: dibuja encabezado azul en pagina
-        // ─────────────────────────────────────────
+        const tituloDoc = tipoReporte === 'caminata' ? "PLANILLA CAMINATA DE COMPRAS" : "PLANILLA AUDITORIA MAITENCILLO";
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
         const mkHeader = (d, texto) => {
-            d.setFillColor(...azul);
-            d.rect(10, 10, pageW - 20, 10, 'F');
-            d.setTextColor(255, 255, 255);
-            d.setFontSize(13);
-            d.setFont(undefined, 'bold');
+            d.setFillColor(...azul); d.rect(10, 10, pageW - 20, 10, 'F');
+            d.setTextColor(255, 255, 255); d.setFontSize(13); d.setFont(undefined, 'bold');
             d.text(texto, pageW / 2, 17, { align: 'center' });
         };
-
-        // ─────────────────────────────────────────
-        // PAGINAS DE TABLA (1, 2, 3... segun necesidad)
-        // ─────────────────────────────────────────
         mkHeader(doc, tituloDoc);
-
         doc.autoTable({
             startY: 22, theme: 'grid',
             body: [
-                [{content:'Tienda',      styles:{fillColor:azul,textColor:255}}, 'MAITENCILLO'],
-                [{content:'Responsable', styles:{fillColor:azul,textColor:255}}, auditorName.toUpperCase()],
-                [{content:'Fecha',       styles:{fillColor:azul,textColor:255}}, new Date().toLocaleDateString()]
+                [{content:'Tienda',styles:{fillColor:azul,textColor:255}},'MAITENCILLO'],
+                [{content:'Responsable',styles:{fillColor:azul,textColor:255}},auditorName.toUpperCase()],
+                [{content:'Fecha',styles:{fillColor:azul,textColor:255}},new Date().toLocaleDateString()]
             ],
             margin: { left: 10, right: 10 }
         });
-
         const body = gestionados.map((g, i) => [
             i + 1, g.codigo,
             g.descontinuado ? g.nombre + ' [DESCONTINUADO]' : g.nombre,
             g.minStk && g.minStk !== "" ? g.minStk : "",
-            g.tareas.includes("PRECIO")            ? "X"       : "",
-            g.tareas.includes("REPOSICIÓN")         ? "X"       : "",
-            g.tareas.includes("LIMPIEZA")           ? "X"       : "",
+            g.tareas.includes("PRECIO") ? "X" : "",
+            g.tareas.includes("REPOSICIÓN") ? "X" : "",
+            g.tareas.includes("LIMPIEZA") ? "X" : "",
             g.tareas.includes("REVISAR EXISTENCIA") ? "REVISAR" : "",
             g.ubicacion || ""
         ]);
-
         doc.autoTable({
             startY: doc.lastAutoTable.finalY + 3,
             head: [["N","SKU","DESCRIPCION","MIN.STK","PRECIO","REP","LIMP","EXIST","UBICACION"]],
-            body: body,
-            theme: 'grid',
+            body: body, theme: 'grid',
             headStyles: { fillColor: azul, fontSize: 8 },
             bodyStyles: { fontSize: 7 },
             margin: { left: 10, right: 10 },
-            // Encabezado en cada pagina extra de la tabla
-            didDrawPage: function(data) {
-                if (data.pageNumber > 1) {
-                    mkHeader(doc, tituloDoc + " (cont.)");
-                }
-            },
+            didDrawPage: function(data) { if (data.pageNumber > 1) mkHeader(doc, tituloDoc + " (cont.)"); },
             didParseCell: function(data) {
                 if (data.section !== 'body') return;
-                if (data.cell.raw === "X") {
-                    data.cell.styles.textColor  = rojo;
-                    data.cell.styles.fontStyle  = 'bold';
-                    data.cell.styles.halign     = 'center';
-                    data.cell.styles.fontSize   = 12;
-                    data.cell.styles.fillColor  = [255, 235, 235];
-                }
-                // MIN. STK — verde si tiene valor
-                if (data.column.index === 3 && data.cell.raw !== "" && data.cell.raw !== "MIN.STK") {
-                    data.cell.styles.textColor  = [22, 163, 74];
-                    data.cell.styles.fontStyle  = 'bold';
-                    data.cell.styles.halign     = 'center';
-                    data.cell.styles.fontSize   = 10;
-                    data.cell.styles.fillColor  = [240, 253, 244];
-                }
-                if (data.cell.raw === "REVISAR") {
-                    data.cell.styles.textColor  = [146, 64, 14];
-                    data.cell.styles.fontStyle  = 'bold';
-                    data.cell.styles.halign     = 'center';
-                    data.cell.styles.fontSize   = 7;
-                    data.cell.styles.fillColor  = [255, 251, 235];
-                }
-                if (typeof data.cell.raw === 'string' && data.cell.raw.includes('[DESCONTINUADO]')) {
-                    data.cell.styles.textColor = rojo;
-                    data.cell.styles.fontStyle = 'bold';
-                }
+                if (data.cell.raw === "X") { data.cell.styles.textColor=rojo; data.cell.styles.fontStyle='bold'; data.cell.styles.halign='center'; data.cell.styles.fontSize=12; data.cell.styles.fillColor=[255,235,235]; }
+                if (data.column.index === 3 && data.cell.raw !== "" && data.cell.raw !== "MIN.STK") { data.cell.styles.textColor=[22,163,74]; data.cell.styles.fontStyle='bold'; data.cell.styles.halign='center'; data.cell.styles.fontSize=10; data.cell.styles.fillColor=[240,253,244]; }
+                if (data.cell.raw === "REVISAR") { data.cell.styles.textColor=[146,64,14]; data.cell.styles.fontStyle='bold'; data.cell.styles.halign='center'; data.cell.styles.fontSize=7; data.cell.styles.fillColor=[255,251,235]; }
+                if (typeof data.cell.raw === 'string' && data.cell.raw.includes('[DESCONTINUADO]')) { data.cell.styles.textColor=rojo; data.cell.styles.fontStyle='bold'; }
             }
         });
-
-        // ─────────────────────────────────────────
-        // PAGINAS DE FOTOS: siempre despues de la tabla
-        // 4 fotos por pagina en grilla 2x2
-        // Cada foto ocupa un cuadrante fijo — NO se estira
-        // ─────────────────────────────────────────
         const conFotos = gestionados.filter(g => g.fotoBase64);
-
         if (conFotos.length > 0) {
-            // Dimensiones de cada cuadrante (pagina landscape 297x210mm)
-            // Margenes: 10mm. Area util: 277 x 190mm
-            // 2 columnas x 2 filas = 4 cuadrantes
-            const margen  = 10;
-            const areaW   = pageW - margen * 2;   // 277mm
-            const areaH   = pageH - margen * 2;   // 190mm
-            const celdaW  = areaW / 2;             // 138.5mm por columna
-            const celdaH  = areaH / 2;             // 95mm por fila
-            const padFoto = 4;                     // espacio interno en cada celda
-            const labelH  = 10;                    // altura reservada para texto
-            // Foto ocupa la celda menos el padding y el label
-            const fotoMaxW = celdaW - padFoto * 2;         // ~130mm
-            const fotoMaxH = celdaH - padFoto * 2 - labelH; // ~77mm
-
-            // Posiciones de los 4 cuadrantes (col, fila)
-            const cuadrantes = [
-                { col: 0, fila: 0 }, // superior izquierdo
-                { col: 1, fila: 0 }, // superior derecho
-                { col: 0, fila: 1 }, // inferior izquierdo
-                { col: 1, fila: 1 }, // inferior derecho
-            ];
-
-            const mkHeaderFotos = (d) => mkHeader(d, "ANEXO: RESPALDO FOTOGRAFICO");
-
-            // Dividir fotos en grupos de 4
-            for (let i = 0; i < conFotos.length; i += 4) {
-                doc.addPage();
-                mkHeaderFotos(doc);
-
-                const grupo = conFotos.slice(i, i + 4);
-
-                grupo.forEach((item, idx) => {
-                    const { col, fila } = cuadrantes[idx];
-                    const xBase = margen + col * celdaW;
-                    const yBase = margen + fila * celdaH + 12; // +12 por header azul
-
-                    // Numero y SKU — fuente grande
-                    const numP = gestionados.indexOf(item) + 1;
-                    doc.setTextColor(0, 31, 63);
-                    doc.setFontSize(11);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('N ' + numP + ' - SKU: ' + item.codigo, xBase + padFoto, yBase + 6);
-
-                    // Nombre del producto
-                    doc.setFontSize(9);
-                    doc.setTextColor(60, 60, 60);
-                    doc.setFont(undefined, 'normal');
-                    const nm = item.nombre && item.nombre.length > 45
-                        ? item.nombre.substring(0, 45) + '...'
-                        : (item.nombre || '');
-                    doc.text(nm, xBase + padFoto, yBase + 11);
-
-                    // Calcular dimensiones reales de la foto manteniendo proporcion
-                    let fW = fotoMaxW;
-                    let fH = fotoMaxH;
-                    try {
-                        const props = doc.getImageProperties(item.fotoBase64);
-                        const ratio = props.width / props.height;
-                        if (ratio > fotoMaxW / fotoMaxH) {
-                            // mas ancha que alta: limitar por ancho
-                            fH = fW / ratio;
-                        } else {
-                            // mas alta que ancha: limitar por alto
-                            fW = fH * ratio;
-                        }
-                    } catch(e) {}
-
-                    // Centrar la foto en el cuadrante
-                    const xFoto = xBase + padFoto + (fotoMaxW - fW) / 2;
-                    const yFoto = yBase + labelH + padFoto;
-
-                    try {
-                        doc.addImage(item.fotoBase64, 'JPEG', xFoto, yFoto, fW, fH);
-                    } catch(e) {}
-
-                    // Borde del cuadrante (opcional, ayuda a ver los 4 espacios)
-                    doc.setDrawColor(220, 220, 220);
-                    doc.setLineWidth(0.3);
-                    doc.rect(xBase + 1, yBase, celdaW - 2, celdaH - 2);
+            const margen=10, areaW=pageW-margen*2, areaH=pageH-margen*2;
+            const celdaW=areaW/2, celdaH=areaH/2, padFoto=4, labelH=10;
+            const fotoMaxW=celdaW-padFoto*2, fotoMaxH=celdaH-padFoto*2-labelH;
+            const cuadrantes=[{col:0,fila:0},{col:1,fila:0},{col:0,fila:1},{col:1,fila:1}];
+            const mkHeaderFotos=(d)=>mkHeader(d,"ANEXO: RESPALDO FOTOGRAFICO");
+            for (let i=0; i<conFotos.length; i+=4) {
+                doc.addPage(); mkHeaderFotos(doc);
+                conFotos.slice(i,i+4).forEach((item,idx)=>{
+                    const {col,fila}=cuadrantes[idx];
+                    const xBase=margen+col*celdaW, yBase=margen+fila*celdaH+12;
+                    const numP=gestionados.indexOf(item)+1;
+                    doc.setTextColor(0,31,63); doc.setFontSize(11); doc.setFont(undefined,'bold');
+                    doc.text('N '+numP+' - SKU: '+item.codigo,xBase+padFoto,yBase+6);
+                    doc.setFontSize(9); doc.setTextColor(60,60,60); doc.setFont(undefined,'normal');
+                    const nm=item.nombre&&item.nombre.length>45?item.nombre.substring(0,45)+'...':(item.nombre||'');
+                    doc.text(nm,xBase+padFoto,yBase+11);
+                    let fW=fotoMaxW, fH=fotoMaxH;
+                    try { const props=doc.getImageProperties(item.fotoBase64); const ratio=props.width/props.height; if(ratio>fotoMaxW/fotoMaxH){fH=fW/ratio;}else{fW=fH*ratio;} } catch(e){}
+                    const xFoto=xBase+padFoto+(fotoMaxW-fW)/2, yFoto=yBase+labelH+padFoto;
+                    try { doc.addImage(item.fotoBase64,'JPEG',xFoto,yFoto,fW,fH); } catch(e){}
+                    doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.rect(xBase+1,yBase,celdaW-2,celdaH-2);
                 });
             }
         }
-
-        // ── Pie de página en todas las hojas ──
-        const totalPages = doc.internal.getNumberOfPages();
-        const pageW2 = doc.internal.pageSize.getWidth();
-        const pageH2 = doc.internal.pageSize.getHeight();
-        for (let p = 1; p <= totalPages; p++) {
-            doc.setPage(p);
-            doc.setFillColor(...azul);
-            doc.rect(0, pageH2 - 10, pageW2, 10, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(8);
-            doc.setFont(undefined, 'normal');
-            doc.text(`Responsable: ${auditorName.toUpperCase()}`, 15, pageH2 - 3);
-            doc.text(`Página ${p} de ${totalPages}`, pageW2 - 15, pageH2 - 3, { align: 'right' });
-            const labelCentro = tipoReporte === 'caminata' ? 'Caminata de Compras' : 'Auditoría Maitencillo';
-            doc.text(`${labelCentro} - ${new Date().toLocaleDateString()}`, pageW2 / 2, pageH2 - 3, { align: 'center' });
+        const totalPages=doc.internal.getNumberOfPages();
+        const pageW2=doc.internal.pageSize.getWidth(), pageH2=doc.internal.pageSize.getHeight();
+        for (let p=1;p<=totalPages;p++) {
+            doc.setPage(p); doc.setFillColor(...azul); doc.rect(0,pageH2-10,pageW2,10,'F');
+            doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont(undefined,'normal');
+            doc.text(`Responsable: ${auditorName.toUpperCase()}`,15,pageH2-3);
+            doc.text(`Página ${p} de ${totalPages}`,pageW2-15,pageH2-3,{align:'right'});
+            const labelCentro=tipoReporte==='caminata'?'Caminata de Compras':'Auditoría Maitencillo';
+            doc.text(`${labelCentro} - ${new Date().toLocaleDateString()}`,pageW2/2,pageH2-3,{align:'center'});
         }
-
-        const fecha = new Date().toLocaleDateString('es-CL').replace(/\//g, '-');
-        const nombreArchivo = tipoReporte === 'caminata' ? `Caminata de Compras ${fecha}` : `Auditoria Maitencillo ${fecha}`;
+        const fecha=new Date().toLocaleDateString('es-CL').replace(/\//g,'-');
+        const nombreArchivo=tipoReporte==='caminata'?`Caminata de Compras ${fecha}`:`Auditoria Maitencillo ${fecha}`;
         doc.save(`${nombreArchivo}.pdf`);
-
-        gestionados = [];
-        localStorage.setItem('ultron_gestionados', '[]');
-        actualizarBadge();
-        cerrarModalGestion();
+        gestionados=[]; localStorage.setItem('ultron_gestionados','[]');
+        actualizarBadge(); cerrarModalGestion();
     }
 
     // ── HISTORIAL ─────────────────────────────────────────────
@@ -666,34 +572,25 @@
         actualizarHistorial();
     }
     function limpiarHistorial() {
-        if (confirm("¿Borrar todo el historial?")) {
-            historial = []; localStorage.setItem('ultron_history','[]'); actualizarHistorial();
-        }
+        if (confirm("¿Borrar todo el historial?")) { historial=[]; localStorage.setItem('ultron_history','[]'); actualizarHistorial(); }
     }
     function borrarItemHistorial(event, codigo) {
         event.stopPropagation();
-        if (confirm("¿Borrar item?")) {
-            historial = historial.filter(h => h.codigo !== codigo);
-            localStorage.setItem('ultron_history', JSON.stringify(historial));
-            actualizarHistorial();
-        }
+        if (confirm("¿Borrar item?")) { historial=historial.filter(h=>h.codigo!==codigo); localStorage.setItem('ultron_history',JSON.stringify(historial)); actualizarHistorial(); }
     }
     function actualizarHistorial() {
         const lista = document.getElementById('listaHistorial');
-        if (historial.length === 0) {
-            lista.innerHTML = '<p class="text-slate-300 italic text-[11px] text-center py-6 font-black uppercase">Sin registros</p>';
-            return;
-        }
+        if (historial.length === 0) { lista.innerHTML='<p class="text-slate-300 italic text-[11px] text-center py-6 font-black uppercase">Sin registros</p>'; return; }
         lista.innerHTML = historial.map(h => `
             <div class="flex items-center gap-2 mb-2">
-                <div onclick="buscarStock('${h.codigo}')" class="flex-grow ${h.descontinuado ? 'bg-red-50 border-red-200' : 'bg-white border-slate-100'} p-4 rounded-[1.5rem] flex justify-between items-center shadow-sm active:scale-95 transition-all border text-left">
+                <div onclick="buscarStock('${h.codigo}')" class="flex-grow ${h.descontinuado?'bg-red-50 border-red-200':'bg-white border-slate-100'} p-4 rounded-[1.5rem] flex justify-between items-center shadow-sm active:scale-95 transition-all border text-left">
                     <div class="w-2/3">
                         <p class="text-[8px] font-black text-slate-400 mb-0.5 uppercase italic">#${h.codigo}</p>
                         <p class="text-[10px] font-black uppercase leading-tight">${h.nombre}</p>
-                        ${h.descontinuado ? '<span class="badge-desc"><i class="fas fa-ban mr-1"></i>DESCONTINUADO</span>' : ''}
-                        <span class="text-[9px] font-black ${h.descontinuado || parseInt(h.stock) <= 0 ? 'text-red-500' : 'text-slate-400'} uppercase block mt-0.5">STK: ${h.stock}</span>
+                        ${h.descontinuado?'<span class="badge-desc"><i class="fas fa-ban mr-1"></i>DESCONTINUADO</span>':''}
+                        <span class="text-[9px] font-black ${h.descontinuado||parseInt(h.stock)<=0?'text-red-500':'text-slate-400'} uppercase block mt-0.5">STK: ${h.stock}</span>
                     </div>
-                    <div class="${h.descontinuado ? 'text-red-600' : 'text-blue-600'} font-black text-sm">$${Number(h.precio).toLocaleString('es-CL')}</div>
+                    <div class="${h.descontinuado?'text-red-600':'text-blue-600'} font-black text-sm">$${Number(h.precio).toLocaleString('es-CL')}</div>
                 </div>
                 <button onclick="borrarItemHistorial(event,'${h.codigo}')" class="bg-red-100 text-red-500 w-10 h-14 rounded-2xl flex items-center justify-center active:bg-red-500 active:text-white transition-all"><i class="fas fa-trash-alt text-xs"></i></button>
             </div>`).join('');
@@ -711,101 +608,70 @@
     }
     function renderListaReporte() {
         const lista = document.getElementById('listaReporte');
-        lista.innerHTML = gestionados.map((g, i) => `
+        lista.innerHTML = gestionados.map((g,i) => `
             <div class="flex items-start gap-2 mb-2">
-                <div class="flex-grow ${g.descontinuado ? 'bg-red-500/10 border-red-500/40' : 'bg-white/10 border-white/10'} p-4 rounded-[1.5rem] border text-left relative overflow-hidden shadow-sm">
+                <div class="flex-grow ${g.descontinuado?'bg-red-500/10 border-red-500/40':'bg-white/10 border-white/10'} p-4 rounded-[1.5rem] border text-left relative overflow-hidden shadow-sm">
                     <div class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl">${i+1}</div>
                     <p class="font-black text-[11px] uppercase w-4/5 text-white">${g.nombre}</p>
-                    ${g.descontinuado ? '<span class="badge-desc"><i class="fas fa-ban mr-1"></i>DESCONTINUADO</span>' : ''}
+                    ${g.descontinuado?'<span class="badge-desc"><i class="fas fa-ban mr-1"></i>DESCONTINUADO</span>':''}
                     <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">#${g.codigo} | STK: ${g.stock}</p>
                     <div class="flex flex-wrap gap-2 mt-3">
-                        ${g.tareas.map(t => `<span class="bg-red-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">${t}</span>`).join('')}${g.minStk ? `<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">MIN. STK: ${g.minStk}</span>` : ''}
-                        ${g.fotoBase64 ? '<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">📸 RESPALDO FOTOGRÁFICO</span>' : ''}
+                        ${g.tareas.map(t=>`<span class="bg-red-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">${t}</span>`).join('')}
+                        ${g.minStk?`<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">MIN. STK: ${g.minStk}</span>`:''}
+                        ${g.fotoBase64?'<span class="bg-green-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">📸 RESPALDO FOTOGRÁFICO</span>':''}
                     </div>
                 </div>
                 <button onclick="eliminarAlerta(${i})" class="bg-red-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center active:scale-90 flex-shrink-0 mt-1 shadow-lg"><i class="fas fa-trash-alt text-xs"></i></button>
             </div>`).join('');
     }
     function eliminarAlerta(i) {
-        gestionados.splice(i, 1);
-        localStorage.setItem('ultron_gestionados', JSON.stringify(gestionados));
-        actualizarBadge();
-        renderListaReporte();
+        gestionados.splice(i,1);
+        localStorage.setItem('ultron_gestionados',JSON.stringify(gestionados));
+        actualizarBadge(); renderListaReporte();
     }
-    function cerrarModalGestion() { document.getElementById('modalGestion').style.display = 'none'; }
+    function cerrarModalGestion() { document.getElementById('modalGestion').style.display='none'; }
     function vaciarReporte() {
-        if (confirm("¿Borrar todo?")) {
-            gestionados = []; localStorage.setItem('ultron_gestionados','[]');
-            actualizarBadge(); cerrarModalGestion();
-        }
+        if (confirm("¿Borrar todo?")) { gestionados=[]; localStorage.setItem('ultron_gestionados','[]'); actualizarBadge(); cerrarModalGestion(); }
     }
     function compartirReporte() {
-        const t = gestionados.map((g,i) => `${i+1}. ${g.descontinuado?'🚫 DESCONTINUADO: ':''}${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 ${g.tareas.join(' | ')}`).join('\n\n');
-        navigator.clipboard.writeText(`GESTOR DE COMPRAS\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`).then(() => {
+        const t=gestionados.map((g,i)=>`${i+1}. ${g.descontinuado?'🚫 DESCONTINUADO: ':''}${g.nombre} (#${g.codigo})\n📦 STK: ${g.stock}\n🚨 ${g.tareas.join(' | ')}`).join('\n\n');
+        navigator.clipboard.writeText(`GESTOR DE COMPRAS\nAuditor: ${auditorName.toUpperCase()}\n\n${t}`).then(()=>{
             alert("Copiado ✓");
-            gestionados = [];
-            localStorage.setItem('ultron_gestionados', '[]');
-            actualizarBadge();
-            cerrarModalGestion();
+            gestionados=[]; localStorage.setItem('ultron_gestionados','[]');
+            actualizarBadge(); cerrarModalGestion();
         });
     }
 
-    // ── MIN. STK ──────────────────────────────────────────────────
+    // ── MIN. STK ──────────────────────────────────────────────
     function toggleMinStk() {
-        var inp  = document.getElementById('inputMinStk');
-        var lbl  = document.getElementById('minStkLabel');
-        var icon = document.getElementById('minStkIcon');
+        var inp=document.getElementById('inputMinStk'), lbl=document.getElementById('minStkLabel'), icon=document.getElementById('minStkIcon');
         if (inp.classList.contains('hidden')) {
-            inp.classList.remove('hidden');
-            icon.className = 'fas fa-cubes text-green-500';
-            lbl.style.borderColor = '#22c55e';
-            lbl.style.backgroundColor = '#f0fdf4';
-            setTimeout(function(){ inp.focus(); }, 80);
+            inp.classList.remove('hidden'); icon.className='fas fa-cubes text-green-500';
+            lbl.style.borderColor='#22c55e'; lbl.style.backgroundColor='#f0fdf4';
+            setTimeout(function(){ inp.focus(); },80);
         } else {
-            if (inp.value.trim() === '') {
-                inp.classList.add('hidden');
-                icon.className = 'fas fa-cubes text-slate-300';
-                lbl.style.borderColor = '';
-                lbl.style.backgroundColor = '';
-            }
+            if (inp.value.trim()==='') { inp.classList.add('hidden'); icon.className='fas fa-cubes text-slate-300'; lbl.style.borderColor=''; lbl.style.backgroundColor=''; }
         }
     }
-    function ocultarTecladoMinStk() {
-        // Ocultar teclado en movil haciendo blur al input
-        var inp = document.getElementById('inputMinStk');
-        inp.blur();
-        // En iOS a veces hay que hacer esto ademas
-        document.activeElement && document.activeElement.blur();
-    }
+    function ocultarTecladoMinStk() { var inp=document.getElementById('inputMinStk'); inp.blur(); document.activeElement&&document.activeElement.blur(); }
     function onMinStkInput(el) {
-        el.value = el.value.replace(/[^0-9]/g, '');
-        var lbl  = document.getElementById('minStkLabel');
-        var icon = document.getElementById('minStkIcon');
-        if (el.value !== '') {
-            lbl.style.borderColor = '#22c55e';
-            lbl.style.backgroundColor = '#f0fdf4';
-            icon.className = 'fas fa-cubes text-green-500';
-        }
+        el.value=el.value.replace(/[^0-9]/g,'');
+        var lbl=document.getElementById('minStkLabel'), icon=document.getElementById('minStkIcon');
+        if (el.value!=='') { lbl.style.borderColor='#22c55e'; lbl.style.backgroundColor='#f0fdf4'; icon.className='fas fa-cubes text-green-500'; }
     }
     function resetMinStk() {
-        var inp  = document.getElementById('inputMinStk');
-        var lbl  = document.getElementById('minStkLabel');
-        var icon = document.getElementById('minStkIcon');
-        inp.value = '';
-        inp.classList.add('hidden');
-        icon.className = 'fas fa-cubes text-slate-300';
-        lbl.style.borderColor = '';
-        lbl.style.backgroundColor = '';
+        var inp=document.getElementById('inputMinStk'), lbl=document.getElementById('minStkLabel'), icon=document.getElementById('minStkIcon');
+        inp.value=''; inp.classList.add('hidden'); icon.className='fas fa-cubes text-slate-300'; lbl.style.borderColor=''; lbl.style.backgroundColor='';
     }
 
-        // ── ESCÁNER ───────────────────────────────────────────────
+    // ── ESCÁNER ───────────────────────────────────────────────
     function abrirEscanner() {
         document.getElementById('scannerWrapper').classList.remove('hidden');
         html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode:"environment" }, { fps:20, qrbox:200 }, (text) => { cerrarEscanner(); buscarStock(text); });
+        html5QrCode.start({facingMode:"environment"},{fps:20,qrbox:200},(text)=>{cerrarEscanner();buscarStock(text);});
     }
     function cerrarEscanner() {
-        if (html5QrCode) { html5QrCode.stop().then(() => document.getElementById('scannerWrapper').classList.add('hidden')).catch(() => document.getElementById('scannerWrapper').classList.add('hidden')); }
+        if (html5QrCode) { html5QrCode.stop().then(()=>document.getElementById('scannerWrapper').classList.add('hidden')).catch(()=>document.getElementById('scannerWrapper').classList.add('hidden')); }
         else document.getElementById('scannerWrapper').classList.add('hidden');
     }
 </script>
