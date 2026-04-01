@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GESTOR DE COMPRAS - v59.0</title>
+    <title>GESTOR DE COMPRAS - v61.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,8 +38,6 @@
         .check-red input:checked + div i { color: #dc2626; }
         .check-green input:checked + div { border-color: #22c55e; background-color: #f0fdf4; }
         .check-green input:checked + div i { color: #16a34a; }
-        .minstk-active { border-color: #22c55e !important; background-color: #f0fdf4 !important; }
-        .minstk-active span { color: #16a34a !important; }
         #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; }
         .bg-descontinuado { background-color: #dc2626 !important; }
         .badge-desc { display:inline-block; background:#dc2626; color:#fff; font-size:8px; font-weight:900; padding:2px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:0.05em; margin-top:3px; }
@@ -85,11 +83,27 @@
                     <button onclick="cerrarSesion()" class="text-red-500 text-[8px] font-bold active:scale-90">[SALIR]</button>
                 </div>
             </div>
-            <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all">
-                <i class="fas fa-clipboard-list text-lg"></i>
-                <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white hidden">0</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleInfoHome()" class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all font-black text-lg">?</button>
+                <button onclick="abrirModalGestion()" class="relative bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all">
+                    <i class="fas fa-clipboard-list text-lg"></i>
+                    <span id="badgeGestion" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white hidden">0</span>
+                </button>
+            </div>
         </div>
+
+        <!-- PANEL INFO HOME -->
+        <div id="panelInfoHome" style="display:none;" class="flex-col gap-2 bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4 flex-shrink-0">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-blue-500 text-[9px] font-black uppercase tracking-widest">¿Cómo usar esta pantalla?</span>
+                <button onclick="toggleInfoHome()" class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-[10px] font-black">✕</button>
+            </div>
+            <p class="text-[11px] text-blue-800 leading-relaxed">🔍 <span class="font-black">BUSCAR</span> — Escribe o escanea un código de barras para consultar stock y precio en tiempo real.</p>
+            <p class="text-[11px] text-blue-800 leading-relaxed">📷 <span class="font-black">CÁMARA</span> — Activa el escáner de código de barras con la cámara del celular.</p>
+            <p class="text-[11px] text-blue-800 leading-relaxed">📋 <span class="font-black">ALERTAS</span> — Toca el ícono del portapapeles para ver el listado de alertas guardadas y generar reportes.</p>
+            <p class="text-[11px] text-blue-800 leading-relaxed">🕐 <span class="font-black">HISTORIAL</span> — Últimos 10 productos consultados. Toca uno para volver a buscarlo rápidamente.</p>
+        </div>
+
         <div class="bg-white p-1 rounded-[2rem] shadow-sm flex items-center mb-5 border border-slate-200">
             <input id="codigoInput" type="number" inputmode="numeric" placeholder="ESCANEAR PRODUCTO..." class="flex-grow p-3 text-base font-bold bg-transparent outline-none w-full text-slate-700" onkeypress="if(event.key==='Enter') buscarStock()">
             <button onclick="abrirEscanner()" class="bg-slate-50 text-slate-400 w-10 h-10 rounded-xl flex items-center justify-center mr-1"><i class="fas fa-camera"></i></button>
@@ -133,8 +147,7 @@
                             <i id="minStkIcon" class="fas fa-cubes text-slate-300"></i>
                             <span class="uppercase text-[8px] font-black">MIN. STK</span>
                             <input id="inputMinStk" type="number" inputmode="numeric" min="0"
-                                placeholder="0"
-                                onclick="event.stopPropagation()"
+                                placeholder="0" onclick="event.stopPropagation()"
                                 oninput="onMinStkInput(this)"
                                 onkeydown="if(event.key==='Enter'||event.key==='Go'){this.blur();event.preventDefault();}"
                                 onblur="ocultarTecladoMinStk()"
@@ -160,23 +173,54 @@
                 <input id="inputUbi" type="text" placeholder="¿Dónde está?" class="hidden w-full p-4 bg-white rounded-2xl border-2 border-blue-100 text-sm font-bold text-blue-900 outline-none fade-in">
                 <div id="fotoStatus" class="hidden text-center"><p class="text-[9px] text-green-600 font-black uppercase"><i class="fas fa-check-circle"></i> Imagen Guardada</p></div>
             </div>
-            <div class="flex gap-3 mt-auto mb-2 text-center">
-                <button onclick="irAHome()" class="w-[35%] bg-slate-200 text-slate-600 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95">CERRAR</button>
+
+            <!-- PANEL INFO RESULTADO -->
+            <div id="panelInfoResult" style="display:none;" class="flex-col gap-2 bg-blue-50 border border-blue-100 rounded-2xl p-4 mt-3 flex-shrink-0">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-blue-500 text-[9px] font-black uppercase tracking-widest">¿Cómo usar esta pantalla?</span>
+                    <button onclick="toggleInfoResult()" class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-[10px] font-black">✕</button>
+                </div>
+                <p class="text-[11px] text-blue-800 leading-relaxed">📦 <span class="font-black">MIN. STK</span> — Define el stock mínimo recomendado para el producto.</p>
+                <p class="text-[11px] text-blue-800 leading-relaxed">🏷 <span class="font-black">TAREAS</span> — Marca lo que necesita atención: precio, reposición, limpieza o revisar existencia.</p>
+                <p class="text-[11px] text-blue-800 leading-relaxed">📍 <span class="font-black">UBICACIÓN</span> — Indica dónde está el producto en la tienda.</p>
+                <p class="text-[11px] text-blue-800 leading-relaxed">📸 <span class="font-black">FOTO PDF</span> — Toma una foto que se adjuntará al reporte PDF.</p>
+                <p class="text-[11px] text-blue-800 leading-relaxed">💾 <span class="font-black">GUARDAR ALERTA</span> — Guarda el producto con las tareas marcadas en el listado de alertas.</p>
+            </div>
+
+            <div class="flex gap-3 mt-3 mb-2 text-center">
+                <button onclick="irAHome()" class="w-[30%] bg-slate-200 text-slate-600 font-black py-5 rounded-[1.5rem] uppercase text-[10px] active:scale-95">CERRAR</button>
                 <button onclick="guardarYGestionar()" class="flex-grow bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase text-[10px] italic flex items-center justify-center gap-2 active:scale-95">
                     <i class="fas fa-save"></i> GUARDAR ALERTA
                 </button>
+                <button onclick="toggleInfoResult()" class="bg-blue-600 text-white font-black w-14 rounded-[1.5rem] shadow-xl text-lg flex items-center justify-center active:scale-95 flex-shrink-0">?</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL ALERTAS/REPORTE -->
     <div id="modalGestion">
-        <div class="flex justify-between items-center mb-6 w-full">
-            <h2 class="text-xl font-black italic uppercase tracking-tighter">LISTADO ALERTAS</h2>
+        <div class="flex justify-between items-center mb-4 w-full flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter">LISTADO ALERTAS</h2>
+                <button onclick="toggleInfoGestion()" class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">?</button>
+            </div>
             <button onclick="cerrarModalGestion()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
+
+        <!-- PANEL INFO GESTION -->
+        <div id="panelInfoGestion" style="display:none;" class="flex-col gap-2 bg-white/5 border border-white/10 rounded-2xl p-4 mb-4 flex-shrink-0">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-blue-400 text-[9px] font-black uppercase tracking-widest">¿Cómo usar este panel?</span>
+                <button onclick="toggleInfoGestion()" class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white text-[10px] font-black">✕</button>
+            </div>
+            <p class="text-[11px] text-white/80 leading-relaxed">📋 <span class="text-white font-black">LISTADO DE ALERTAS</span> — Aquí se acumulan todos los productos que marcaste con tareas pendientes durante la jornada.</p>
+            <p class="text-[11px] text-white/80 leading-relaxed">📄 <span class="text-white font-black">GENERAR PDF</span> — Exporta todas las alertas en una planilla profesional con tabla de productos, tareas marcadas y fotos de respaldo. Elige entre Auditoría Maitencillo o Caminata de Compras antes de generar.</p>
+            <p class="text-[11px] text-white/80 leading-relaxed">💬 <span class="text-white font-black">WHATSAPP</span> — Copia un resumen de texto con todos los productos y alertas al portapapeles, listo para pegar directamente en WhatsApp.</p>
+            <p class="text-[11px] text-white/80 leading-relaxed">🗑 <span class="text-white font-black">VACIAR</span> — Borra toda la lista de alertas para comenzar una nueva jornada.</p>
+        </div>
+
         <div id="listaReporte" class="flex-grow overflow-y-auto space-y-3 pb-4"></div>
-        <div class="flex flex-col gap-3 mt-4">
+        <div class="flex flex-col gap-3 mt-4 flex-shrink-0">
             <div class="flex gap-2">
                 <button id="btnTipoAuditoria" onclick="setTipoReporte('auditoria')" class="flex-1 py-3 rounded-2xl text-[9px] font-black uppercase border-2 border-blue-500 bg-blue-600 text-white transition-all active:scale-95">AUDITORÍA MAITENCILLO</button>
                 <button id="btnTipoCaminata" onclick="setTipoReporte('caminata')" class="flex-1 py-3 rounded-2xl text-[9px] font-black uppercase border-2 border-white/20 bg-white/10 text-white/50 transition-all active:scale-95">CAMINATA DE COMPRAS</button>
@@ -237,7 +281,6 @@
     let auditorName = localStorage.getItem('ultron_auditor_name') || "";
     let tipoReporte = 'auditoria';
 
-    // ── INICIO ────────────────────────────────────────────────
     window.onload = async () => {
         mostrarPantalla('loader');
         await cargarUsuariosDesdeWorker();
@@ -248,15 +291,12 @@
         actualizarBadge();
     };
 
-    // ── USUARIOS DESDE WORKER ─────────────────────────────────
     async function cargarUsuariosDesdeWorker() {
         try {
             const res = await fetch(WORKER_URL + '/usuarios');
             const data = await res.json();
             USUARIOS_SISTEMA = data.length ? data : [...USUARIOS_DEFAULT];
-        } catch(e) {
-            USUARIOS_SISTEMA = [...USUARIOS_DEFAULT];
-        }
+        } catch(e) { USUARIOS_SISTEMA = [...USUARIOS_DEFAULT]; }
     }
 
     async function guardarUsuariosEnWorker() {
@@ -266,12 +306,9 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(USUARIOS_SISTEMA)
             });
-        } catch(e) {
-            alert("Error al guardar usuarios en la nube");
-        }
+        } catch(e) { alert("Error al guardar usuarios en la nube"); }
     }
 
-    // ── SELECTOR USUARIOS ─────────────────────────────────────
     function cargarSelectorUsuarios() {
         const select = document.getElementById('auditorSelect');
         select.innerHTML = '<option value="" disabled selected>SELECCIONAR USUARIO</option>';
@@ -291,7 +328,6 @@
         renderTablaUsuarios();
     }
 
-    // ── LOGIN ─────────────────────────────────────────────────
     function loginSistema() {
         const user = document.getElementById('auditorSelect').value;
         const pass = document.getElementById('passwordInput').value.trim();
@@ -308,14 +344,8 @@
         }
     }
 
-    // ── ADMIN ─────────────────────────────────────────────────
-    function abrirPanelAdmin() {
-        document.getElementById('modalAdmin').style.display = 'flex';
-        renderTablaUsuarios();
-    }
-    function cerrarPanelAdmin() {
-        document.getElementById('modalAdmin').style.display = 'none';
-    }
+    function abrirPanelAdmin() { document.getElementById('modalAdmin').style.display = 'flex'; renderTablaUsuarios(); }
+    function cerrarPanelAdmin() { document.getElementById('modalAdmin').style.display = 'none'; }
     function renderTablaUsuarios() {
         const lista = document.getElementById('adminUserList');
         lista.innerHTML = USUARIOS_SISTEMA.map((u, i) => `
@@ -352,7 +382,6 @@
         await guardarUsuarios();
     }
 
-    // ── NAVEGACIÓN ────────────────────────────────────────────
     function mostrarPantalla(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
@@ -368,6 +397,7 @@
         document.querySelectorAll('#checklistArea input').forEach(c => c.checked = false);
         document.getElementById('inputUbi').classList.add('hidden');
         document.getElementById('inputUbi').value = '';
+        document.getElementById('panelInfoResult').style.display = 'none';
         resetMinStk();
         mostrarPantalla('homeScreen');
     }
@@ -375,6 +405,26 @@
         const i = document.getElementById('inputUbi');
         if (document.getElementById('checkUbi').checked) { i.classList.remove('hidden'); i.focus(); }
         else { i.classList.add('hidden'); i.value = ""; }
+    }
+
+    // ── PANELES INFO ──────────────────────────────────────────
+    function toggleInfoHome() {
+        const p = document.getElementById('panelInfoHome');
+        const v = p.style.display === 'flex';
+        p.style.display = v ? 'none' : 'flex';
+        if (!v) p.style.flexDirection = 'column';
+    }
+    function toggleInfoResult() {
+        const p = document.getElementById('panelInfoResult');
+        const v = p.style.display === 'flex';
+        p.style.display = v ? 'none' : 'flex';
+        if (!v) p.style.flexDirection = 'column';
+    }
+    function toggleInfoGestion() {
+        const p = document.getElementById('panelInfoGestion');
+        const v = p.style.display === 'flex';
+        p.style.display = v ? 'none' : 'flex';
+        if (!v) p.style.flexDirection = 'column';
     }
 
     // ── FOTO ──────────────────────────────────────────────────
@@ -443,7 +493,6 @@
         } catch(e) { alert("Producto no encontrado"); mostrarPantalla('homeScreen'); }
     }
 
-    // ── GUARDAR ALERTA ────────────────────────────────────────
     function guardarYGestionar() {
         const tareas    = Array.from(document.querySelectorAll('#checklistArea input[data-tarea]:checked')).map(c => c.getAttribute('data-tarea'));
         const minStkVal = document.getElementById('inputMinStk').value.trim();
@@ -456,7 +505,6 @@
         irAHome();
     }
 
-    // ── TIPO REPORTE ──────────────────────────────────────────
     function setTipoReporte(tipo) {
         tipoReporte = tipo;
         const btnA = document.getElementById('btnTipoAuditoria');
@@ -563,7 +611,6 @@
         actualizarBadge(); cerrarModalGestion();
     }
 
-    // ── HISTORIAL ─────────────────────────────────────────────
     function guardarEnHistorial(item) {
         historial = historial.filter(h => h.codigo !== item.codigo);
         historial.unshift({ ...item });
@@ -596,7 +643,6 @@
             </div>`).join('');
     }
 
-    // ── REPORTE MODAL ─────────────────────────────────────────
     function actualizarBadge() {
         const b = document.getElementById('badgeGestion');
         b.innerText = gestionados.length;
@@ -629,7 +675,10 @@
         localStorage.setItem('ultron_gestionados',JSON.stringify(gestionados));
         actualizarBadge(); renderListaReporte();
     }
-    function cerrarModalGestion() { document.getElementById('modalGestion').style.display='none'; }
+    function cerrarModalGestion() {
+        document.getElementById('modalGestion').style.display='none';
+        document.getElementById('panelInfoGestion').style.display='none';
+    }
     function vaciarReporte() {
         if (confirm("¿Borrar todo?")) { gestionados=[]; localStorage.setItem('ultron_gestionados','[]'); actualizarBadge(); cerrarModalGestion(); }
     }
@@ -642,7 +691,6 @@
         });
     }
 
-    // ── MIN. STK ──────────────────────────────────────────────
     function toggleMinStk() {
         var inp=document.getElementById('inputMinStk'), lbl=document.getElementById('minStkLabel'), icon=document.getElementById('minStkIcon');
         if (inp.classList.contains('hidden')) {
@@ -664,7 +712,6 @@
         inp.value=''; inp.classList.add('hidden'); icon.className='fas fa-cubes text-slate-300'; lbl.style.borderColor=''; lbl.style.backgroundColor='';
     }
 
-    // ── ESCÁNER ───────────────────────────────────────────────
     function abrirEscanner() {
         document.getElementById('scannerWrapper').classList.remove('hidden');
         html5QrCode = new Html5Qrcode("reader");
