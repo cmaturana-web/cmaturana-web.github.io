@@ -3,91 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador Inventario - Higuerillas</title>
+    <title>Inventario Higuerillas Pro</title>
+    
+    <!-- Librerías Externas -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Librerías para Leer Excel y Escanear QR/Barra -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    
+
     <style>
-        body { background-color: #f8f9fa; font-family: sans-serif; }
-        .header { background: #002060; color: white; padding: 20px; text-align: center; border-bottom: 5px solid #ffcc00; }
-        .card-resultado { display: none; margin-top: 20px; border-left: 8px solid #002060; }
-        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-top: 10px; display: none; }
-        .btn-scanner { background-color: #ffcc00; color: #002060; font-weight: bold; }
+        :root { --azul: #002060; --amarillo: #ffcc00; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header { background: var(--azul); color: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--amarillo); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn-primary { background-color: var(--azul); border: none; }
+        .btn-amarillo { background-color: var(--amarillo); color: var(--azul); font-weight: bold; border: none; width: 100%; padding: 15px; border-radius: 10px; }
+        .resumen-box { background: #fffce5; border: 2px solid var(--amarillo); border-radius: 10px; padding: 15px; }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; display: none; background: black; }
+        .badge-dif { font-size: 1.2rem; padding: 10px; width: 100%; }
+        #resultado-card { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h4>FERRETERÍA HIGUERILLAS</h4>
-    <p class="mb-0">Consulta de Inventario Real</p>
+    <h3 class="mb-0">FERRETERÍA HIGUERILLAS</h3>
+    <small>Buscador de Inventario Inteligente</small>
 </div>
 
 <div class="container mt-4">
-    <!-- PASO 1: CARGAR EXCEL -->
-    <div id="paso1" class="card p-4 shadow-sm text-center">
-        <h5>1. Carga tu Planilla Excel</h5>
-        <p class="text-muted small">Sube el archivo para empezar a consultar.</p>
-        <input type="file" id="input-excel" class="form-control" accept=".xlsx, .xls, .csv">
+    
+    <!-- PASO 1: CARGA DE ARCHIVO -->
+    <div id="seccion-carga" class="card p-4 text-center">
+        <h5 class="mb-3">1. Cargar Planilla de Inventario</h5>
+        <p class="text-muted small">Selecciona el archivo Excel (Segunda Hoja) para activar el buscador.</p>
+        <input type="file" id="archivoExcel" class="form-control" accept=".xlsx, .xls, .csv">
+        <div id="status-carga" class="mt-2 fw-bold text-success"></div>
     </div>
 
-    <!-- PASO 2: BUSCADOR Y ESCÁNER (Oculto hasta que se cargue el archivo) -->
-    <div id="paso2" style="display:none;">
-        <div class="card p-3 shadow-sm mt-3">
-            <h5>2. Buscar Producto</h5>
+    <!-- PASO 2: BUSCADOR -->
+    <div id="seccion-busqueda" style="display: none;">
+        <div class="card p-3">
+            <h5 class="mb-3">2. Buscar Producto</h5>
             
-            <div class="input-group mb-2">
-                <input type="text" id="codigo-manual" class="form-control" placeholder="Escribe el código aquí...">
-                <button class="btn btn-primary" onclick="buscarManual()">Buscar</button>
+            <!-- Buscador Manual -->
+            <div class="input-group mb-3">
+                <input type="text" id="input-manual" class="form-control form-control-lg" placeholder="Ingrese código manual...">
+                <button class="btn btn-primary" onclick="buscarManual()">BUSCAR</button>
             </div>
 
-            <button class="btn btn-scanner w-100 p-3" onclick="iniciarEscaneo()">
-                📷 ABRIR ESCÁNER DE CÁMARA
+            <!-- Botón Escáner -->
+            <button class="btn btn-amarillo mb-3" onclick="toggleCamara()">
+                📷 ESCANEAR CÓDIGO DE BARRAS
             </button>
-            
+
+            <!-- Contenedor Cámara -->
             <div id="reader"></div>
-            <button id="btn-cerrar-camara" class="btn btn-danger btn-sm w-100 mt-2" style="display:none;" onclick="detenerEscaneo()">Cerrar Cámara</button>
+            <button id="btn-stop" class="btn btn-danger w-100 mt-2" style="display:none;" onclick="detenerEscaneo()">Cerrar Cámara</button>
         </div>
 
-        <!-- RESULTADOS -->
-        <div id="resultado" class="card card-resultado p-4 shadow mb-5">
-            <h4 id="res-nombre" class="text-primary">Nombre del Producto</h4>
-            <hr>
-            <div class="row">
-                <div class="col-6"><strong>Código:</strong> <span id="res-codigo">-</span></div>
-                <div class="col-6 text-end"><strong>Folio:</strong> <span id="res-folio">-</span></div>
+        <!-- TARJETA DE RESULTADOS -->
+        <div id="resultado-card" class="card p-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <h3 id="view-nombre" class="text-primary fw-bold">Nombre del Producto</h3>
+                <span id="view-folio" class="badge bg-secondary">Folio: -</span>
             </div>
-            <div class="mt-3 p-3 bg-light rounded text-center">
-                <div class="row">
-                    <div class="col-4 border-end">
-                        <small>STOCK FÍSICO</small><br>
-                        <h4 id="res-fisico" class="mb-0">0</h4>
+            <p id="view-codigo" class="text-muted">Código: -</p>
+            
+            <div class="resumen-box mt-2">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <small class="text-uppercase">Físico</small>
+                        <h2 id="view-fisico" class="mb-0 fw-bold">0</h2>
                     </div>
-                    <div class="col-4 border-end">
-                        <small>SISTEMA</small><br>
-                        <h4 id="res-sistema" class="mb-0">0</h4>
+                    <div class="col-4 border-start border-end">
+                        <small class="text-uppercase">Sistema</small>
+                        <h2 id="view-sistema" class="mb-0 fw-bold">0</h2>
                     </div>
                     <div class="col-4">
-                        <small>DIFERENCIA</small><br>
-                        <h4 id="res-dif" class="mb-0 text-danger">0</h4>
+                        <small class="text-uppercase">Diferencia</small>
+                        <h2 id="view-dif" class="mb-0 fw-bold text-danger">0</h2>
                     </div>
                 </div>
             </div>
-            <div class="mt-3">
-                <strong>Responsable:</strong> <span id="res-user">-</span><br>
-                <strong>Categoría:</strong> <span id="res-cat">-</span>
+
+            <div class="mt-4 row">
+                <div class="col-6">
+                    <label class="small text-muted">Responsable:</label>
+                    <p id="view-user" class="fw-bold">-</p>
+                </div>
+                <div class="col-6 text-end">
+                    <label class="small text-muted">Categoría:</label>
+                    <p id="view-cat" class="fw-bold">-</p>
+                </div>
             </div>
+            
+            <button class="btn btn-outline-secondary w-100 mt-3" onclick="limpiarPantalla()">NUEVA BÚSQUEDA</button>
         </div>
     </div>
 </div>
 
 <script>
-    let datosInventario = [];
-    let html5QrCode;
+    let dbInventario = [];
+    let scanner = null;
 
-    // LÓGICA PARA LEER EL EXCEL
-    document.getElementById('input-excel').addEventListener('change', function(e) {
+    // --- 1. PROCESAR EXCEL ---
+    document.getElementById('archivoExcel').addEventListener('change', function(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
 
@@ -95,72 +116,125 @@
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             
-            // Suponemos que los datos están en la "Segunda Hoja" (Index 1)
-            // Si están en la primera, cambia el 1 por un 0.
+            // Según tus fotos, los datos están en la SEGUNDA HOJA (índice 1)
+            // Probamos primero la 2da hoja, si falla usamos la 1ra.
             const sheetName = workbook.SheetNames[1] || workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             
-            // Convertir a JSON
-            datosInventario = XLSX.utils.sheet_to_json(worksheet);
+            // Convertimos a JSON
+            const rawData = XLSX.utils.sheet_to_json(worksheet);
             
-            if(datosInventario.length > 0) {
-                alert("✅ Planilla cargada: " + datosInventario.length + " productos encontrados.");
-                document.getElementById('paso1').style.display = 'none';
-                document.getElementById('paso2').style.display = 'block';
+            // "Normalizamos" los datos para que no importen mayúsculas o espacios en las columnas
+            dbInventario = rawData.map(fila => {
+                let nuevaFila = {};
+                for (let clave in fila) {
+                    // Convertimos el nombre de la columna a algo fácil de leer internamente
+                    let claveLimpia = clave.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                    nuevaFila[claveLimpia] = fila[clave];
+                }
+                return nuevaFila;
+            });
+
+            if(dbInventario.length > 0) {
+                document.getElementById('status-carga').innerText = "✅ Planilla lista (" + dbInventario.length + " productos)";
+                document.getElementById('seccion-carga').style.display = 'none';
+                document.getElementById('seccion-busqueda').style.display = 'block';
+            } else {
+                alert("El archivo parece estar vacío o en el formato incorrecto.");
             }
         };
         reader.readAsArrayBuffer(file);
     });
 
-    // FUNCIÓN DE BÚSQUEDA
-    function buscarProducto(codigo) {
-        // Buscamos en el JSON por el código de producto
-        // Ajusta 'CÓDIGO PRODUCTO' al nombre exacto de tu columna en Excel
-        const encontrado = datosInventario.find(item => 
-            String(item['CÓDIGO PRODUCTO'] || item['CODIGO']).trim() === String(codigo).trim()
-        );
+    // --- 2. LÓGICA DE BÚSQUEDA ---
+    function ejecutarBusqueda(codigoIngresado) {
+        if (!codigoIngresado) return;
+        
+        const codigoLimpio = String(codigoIngresado).trim().toLowerCase();
+
+        // Buscamos en toda la fila (en cualquier columna que contenga el código)
+        const encontrado = dbInventario.find(fila => {
+            return Object.values(fila).some(valor => 
+                String(valor).trim().toLowerCase() === codigoLimpio
+            );
+        });
 
         if (encontrado) {
-            document.getElementById('resultado').style.display = 'block';
-            document.getElementById('res-nombre').innerText = encontrado['DESCRIPCIÓN PRODUCTO'] || 'Sin descripción';
-            document.getElementById('res-codigo').innerText = encontrado['CÓDIGO PRODUCTO'] || '-';
-            document.getElementById('res-fisico').innerText = encontrado['CONTEO TOTAL'] || '0';
-            document.getElementById('res-sistema').innerText = encontrado['STOCK'] || '0';
-            document.getElementById('res-dif').innerText = encontrado['DIFERENCIA EN UNIDADES'] || '0';
-            document.getElementById('res-cat').innerText = encontrado['CATEGORIA'] || '-';
-            
-            // Vibrar el celular al encontrar (si el móvil lo permite)
-            if (navigator.vibrate) navigator.vibrate(200);
+            mostrarResultados(encontrado);
             detenerEscaneo();
         } else {
-            alert("❌ Código " + codigo + " no encontrado en esta planilla.");
+            alert("❌ Código '" + codigoIngresado + "' no encontrado.\nRevisa si el código es correcto.");
         }
     }
 
-    function buscarManual() {
-        const cod = document.getElementById('codigo-manual').value;
-        if(cod) buscarProducto(cod);
+    function mostrarResultados(item) {
+        document.getElementById('resultado-card').style.display = 'block';
+        
+        // Mapeo inteligente buscando nombres similares (CÓDIGO PRODUCTO, CODIGO, etc)
+        document.getElementById('view-nombre').innerText = item['DESCRIPCION PRODUCTO'] || item['DESCRIPCION'] || "Sin descripción";
+        document.getElementById('view-codigo').innerText = "Código: " + (item['CODIGO PRODUCTO'] || item['CODIGO'] || "N/A");
+        document.getElementById('view-fisico').innerText = item['CONTEO TOTAL'] || "0";
+        document.getElementById('view-sistema').innerText = item['STOCK TOTAL'] || item['STOCK'] || "0";
+        document.getElementById('view-dif').innerText = item['DIFERENCIA EN UNIDADES'] || "0";
+        document.getElementById('view-user').innerText = item['INVENTARIO CONTADO POR'] || "Loreto Olivares";
+        document.getElementById('view-cat').innerText = item['CATEGORIA'] || "General";
+        document.getElementById('view-folio').innerText = "Folio: " + (item['FOLIO'] || "2026100");
+
+        // Color de diferencia
+        const dif = parseInt(item['DIFERENCIA EN UNIDADES'] || 0);
+        document.getElementById('view-dif').className = (dif === 0) ? "mb-0 fw-bold text-success" : "mb-0 fw-bold text-danger";
+
+        // Scroll suave al resultado
+        document.getElementById('resultado-card').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // LÓGICA DEL ESCÁNER
+    function buscarManual() {
+        const cod = document.getElementById('input-manual').value;
+        ejecutarBusqueda(cod);
+    }
+
+    function limpiarPantalla() {
+        document.getElementById('resultado-card').style.display = 'none';
+        document.getElementById('input-manual').value = "";
+    }
+
+    // --- 3. LÓGICA DE CÁMARA ---
+    function toggleCamara() {
+        const readerDiv = document.getElementById('reader');
+        if (readerDiv.style.display === 'block') {
+            detenerEscaneo();
+        } else {
+            iniciarEscaneo();
+        }
+    }
+
     function iniciarEscaneo() {
         document.getElementById('reader').style.display = 'block';
-        document.getElementById('btn-cerrar-camara').style.display = 'block';
+        document.getElementById('btn-stop').style.display = 'block';
         
-        html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+        scanner = new Html5Qrcode("reader");
+        const config = { 
+            fps: 15, 
+            qrbox: { width: 280, height: 180 },
+            aspectRatio: 1.0 
+        };
 
-        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-            buscarProducto(decodedText);
-        });
+        scanner.start(
+            { facingMode: "environment" }, 
+            config, 
+            (decodedText) => {
+                ejecutarBusqueda(decodedText);
+            },
+            (error) => { /* Ignorar errores de escaneo continuo */ }
+        ).catch(err => alert("Error de cámara: " + err));
     }
 
     function detenerEscaneo() {
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
+        if (scanner) {
+            scanner.stop().then(() => {
                 document.getElementById('reader').style.display = 'none';
-                document.getElementById('btn-cerrar-camara').style.display = 'none';
-            });
+                document.getElementById('btn-stop').style.display = 'none';
+            }).catch(err => console.log(err));
         }
     }
 </script>
