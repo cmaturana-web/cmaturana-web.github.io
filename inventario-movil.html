@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Inventario PRO · Móvil</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1B3A6B;--blue-mid:#2E5BA8;--blue-lt:#E6EFF8;--blue-xlt:#F0F6FF;
+  --green:#27500A;--green-bg:#EAF3DE;--green-mid:#3a7a14;
+  --amber:#633806;--amber-bg:#FAEEDA;
+  --danger:#791F1F;--danger-bg:#FCEBEB;
+  --text:#1a1a1a;--muted:#888780;--bg:#F5F3EF;--card:#fff;
+  --border:rgba(0,0,0,0.08);--r:16px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow:hidden;}
+
+.screen{display:none;height:100vh;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* HEADER */
+.hdr{background:var(--blue);color:#fff;padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;}
+.hdr-inner{padding:14px 18px 16px;}
+.hdr-logo{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.logo-mark{width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-name{font-size:15px;font-weight:500;}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-end;}
+.hdr-title{font-size:21px;font-weight:500;}
+.hdr-sub{font-size:11px;opacity:0.6;margin-top:3px;}
+.folio-pill{background:rgba(255,255,255,0.15);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;font-family:"DM Mono",monospace;}
+
+/* NAV */
+.nav{background:var(--card);border-top:0.5px solid var(--border);display:flex;padding:8px 0 max(12px,env(safe-area-inset-bottom));flex-shrink:0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 0;font-family:inherit;}
+.ni.act{color:var(--blue);}
+
+/* BODY */
+.body{flex:1;overflow-y:auto;padding:16px 16px 20px;-webkit-overflow-scrolling:touch;}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;}
+.card+.card{margin-top:12px;}
+.card-title{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:13px;border-radius:var(--r);border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:center;transition:opacity .15s;}
+.btn:active{opacity:.75;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-outline{background:transparent;border:0.5px solid rgba(0,0,0,0.15);color:var(--text);}
+.btn-danger{background:transparent;border:0.5px solid var(--danger);color:var(--danger);}
+.btn-success{background:var(--green-mid);color:#fff;}
+
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;color:var(--muted);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:0.4px;}
+.form-input{width:100%;border:0.5px solid rgba(0,0,0,0.12);border-radius:var(--rs);padding:11px 14px;font-size:15px;font-family:inherit;color:var(--text);background:#fff;outline:none;}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,58,107,0.1);}
+
+/* SEARCH */
+.search-wrap{padding:10px 16px 6px;flex-shrink:0;}
+.search-box{background:#fff;border:0.5px solid var(--border);border-radius:var(--rs);display:flex;align-items:center;gap:8px;padding:10px 14px;}
+.search-box input{border:none;background:transparent;font-size:14px;color:var(--text);flex:1;outline:none;font-family:inherit;}
+.search-box input::placeholder{color:var(--muted);}
+.scan-btn{background:var(--blue);border:none;border-radius:8px;padding:7px 11px;cursor:pointer;color:#fff;display:flex;align-items:center;}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;padding:4px 16px 8px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.ftab{padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.ftab.act{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* PRODUCT LIST */
+.prod-list{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);overflow:hidden;}
+.prod-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;}
+.prod-row:last-child{border-bottom:none;}
+.prod-row:active{background:var(--bg);}
+.prod-avatar{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;}
+.prod-info{flex:1;min-width:0;}
+.prod-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prod-code{font-size:10px;color:var(--muted);margin-top:2px;font-family:"DM Mono",monospace;}
+.prod-status{flex-shrink:0;}
+.badge{font-size:9px;padding:3px 8px;border-radius:20px;font-weight:500;}
+.badge-pend{background:var(--amber-bg);color:var(--amber);}
+.badge-ok{background:var(--green-bg);color:var(--green);}
+.badge-diff{background:var(--danger-bg);color:var(--danger);}
+
+/* PROGRESS */
+.prog-wrap{background:rgba(255,255,255,0.2);border-radius:6px;height:5px;overflow:hidden;margin-top:8px;}
+.prog-fill{background:#fff;height:100%;border-radius:6px;transition:width .4s;}
+.prog-dark{background:#E8E5DF;border-radius:6px;height:6px;overflow:hidden;}
+.prog-dark-fill{background:var(--blue);height:100%;border-radius:6px;transition:width .4s;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.sheet{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);padding-bottom:max(20px,env(safe-area-inset-bottom));}
+.overlay.open .sheet{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;background:rgba(0,0,0,0.12);border-radius:2px;margin:12px auto 0;}
+.sheet-header{padding:16px 20px 0;display:flex;justify-content:space-between;align-items:center;}
+.sheet-title{font-size:17px;font-weight:500;}
+.sheet-close{background:var(--bg);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:var(--muted);}
+.sheet-body{padding:16px 20px;}
+
+/* CONTEO */
+.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.field-box{background:var(--bg);border:0.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+.field-box label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:8px;font-weight:500;}
+.field-box input{width:100%;border:none;outline:none;font-size:26px;font-weight:500;text-align:center;font-family:"DM Mono",monospace;color:var(--text);background:transparent;}
+.field-btns{display:flex;gap:6px;margin-top:8px;justify-content:center;}
+.field-btn{width:34px;height:34px;border:0.5px solid var(--border);background:#fff;border-radius:8px;font-size:18px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat-card{background:var(--bg);border-radius:12px;padding:14px;}
+.stat-val{font-size:24px;font-weight:500;}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* UBIC */
+.ubic-tag{display:inline-flex;align-items:center;background:var(--blue-lt);color:var(--blue);font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;margin:2px;}
+
+/* ALERTS */
+.alert{border-radius:var(--rs);padding:10px 14px;font-size:12px;margin-bottom:10px;line-height:1.5;}
+.alert-info{background:#E6F1FB;color:#0C447C;}
+.alert-warn{background:var(--amber-bg);color:var(--amber);}
+.alert-danger{background:var(--danger-bg);color:var(--danger);}
+
+/* CAMERA */
+.cam{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column;}
+.cam video{flex:1;object-fit:cover;width:100%;}
+.cam-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.scan-frame{width:220px;height:140px;position:relative;}
+.sc{position:absolute;width:22px;height:22px;border-color:#fff;border-style:solid;}
+.sc.tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:5px 0 0 0;}
+.sc.tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 5px 0 0;}
+.sc.bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 5px;}
+.sc.br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 5px 0;}
+.scan-line{position:absolute;left:4px;right:4px;height:2px;background:#2E5BA8;animation:scanMove 2s ease-in-out infinite;}
+@keyframes scanMove{0%,100%{top:10px;}50%{top:calc(100% - 12px);}}
+.cam-top{position:absolute;top:0;left:0;right:0;padding:max(44px,env(safe-area-inset-top)) 20px 16px;background:linear-gradient(rgba(0,0,0,0.5),transparent);}
+
+/* INFO ROW */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.info-row:last-child{border-bottom:none;}
+.info-key{color:var(--muted);font-size:12px;}
+.info-val{font-weight:500;}
+
+/* MISC */
+.divider{height:0.5px;background:var(--border);margin:14px 0;}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA INICIO -->
+<div class="screen active" id="s-inicio">
+  <div class="hdr">
+    <div class="hdr-inner">
+      <div class="hdr-logo">
+        <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <span class="logo-name">Inventario <span style="opacity:.7">PRO</span></span>
+        <span style="margin-left:auto;font-size:10px;opacity:.5;font-family:'DM Mono',monospace">Higuerillas</span>
+      </div>
+      <div class="hdr-row">
+        <div>
+          <div class="hdr-title" id="ini-titulo">Sin inventario</div>
+          <div class="hdr-sub" id="ini-sub">Carga un inventario para comenzar</div>
+        </div>
+        <div id="ini-prog-wrap" style="display:none;">
+          <div style="text-align:right;margin-bottom:4px;font-size:12px;font-weight:500;" id="ini-prog-txt">0/0</div>
+          <div class="prog-wrap" style="width:80px;"><div class="prog-fill" id="ini-prog-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="card-title">Cargar inventario</div>
+      <div class="form-group">
+        <label class="form-label">Folio</label>
+        <input class="form-input" id="ini-folio" placeholder="Ej: 2026100" type="text"
+               style="font-family:'DM Mono',monospace;font-size:18px;text-align:center;letter-spacing:1px;"
+               onkeydown="if(event.key==='Enter')cargarPorFolio()" />
+      </div>
+      <button class="btn btn-primary" onclick="cargarPorFolio()">Cargar inventario</button>
+      <div style="margin-top:10px;text-align:center;font-size:12px;color:var(--muted);">— o —</div>
+      <button class="btn btn-outline" style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="abrirCamaraQR()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4h4M17 14h4m-4 4v4"/></svg>
+        Escanear QR del PC
+      </button>
+    </div>
+    <div class="card" id="ini-acciones" style="display:none;">
+      <div class="card-title">Inventario activo</div>
+      <div id="ini-inv-info"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+        <button class="btn btn-outline" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="recargarDesdeNube()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Recargar inventario
+        </button>
+        <button class="btn btn-danger" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="abrirModal('modal-detener')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Detener inventario
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ni act" onclick="navTo('s-inicio',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="ni" onclick="navTo('s-productos',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Productos</button>
+    <button class="ni" onclick="navTo('s-resumen',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
+  </div>
+</div>
+
+<!-- PANTALLA PRODUCTOS -->
+<div class="screen" id="s-productos">
+  <div class="hdr">
+    <div class="hdr-inner">
+      <div class="hdr-logo">
+        <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <span class="logo-name">Productos</span>
+        <span class="folio-pill" id="prod-folio-pill" style="margin-left:auto;">—</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" id="prod-prog" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar código o descripción..." id="prod-search" oninput="filtrarProductos()" />
+      <button class="scan-btn" onclick="abrirCamaraScanner()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="filters">
+    <button class="ftab act" id="ftab-todos" onclick="setFiltro('todos')">Todos</button>
+    <button class="ftab" id="ftab-pendientes" onclick="setFiltro('pendientes')">Pendientes</button>
+    <button class="ftab" id="ftab-contados" onclick="setFiltro('contados')">Contados</button>
+    <button class="ftab" id="ftab-diferencias" onclick="setFiltro('diferencias')">Con diferencia</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+    <div id="prod-list" class="prod-list"></div>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="navTo('s-inicio',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="ni act" onclick="navTo('s-productos',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Productos</button>
+    <button class="ni" onclick="navTo('s-resumen',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
+  </div>
+</div>
+
+<!-- PANTALLA RESUMEN -->
+<div class="screen" id="s-resumen">
+  <div class="hdr">
+    <div class="hdr-inner">
+      <div class="hdr-logo">
+        <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <span class="logo-name">Resumen</span>
+        <span class="folio-pill" id="res-folio-pill" style="margin-left:auto;">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="body"><div id="res-body"><div class="empty">Sin inventario activo</div></div></div>
+  <div class="nav">
+    <button class="ni" onclick="navTo('s-inicio',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="ni" onclick="navTo('s-productos',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Productos</button>
+    <button class="ni act" onclick="navTo('s-resumen',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
+  </div>
+</div>
+
+<!-- CÁMARA QR -->
+<div class="cam" id="cam-qr">
+  <video id="cam-qr-video" autoplay playsinline muted></video>
+  <div class="cam-ui">
+    <div class="scan-frame"><div class="sc tl"></div><div class="sc tr"></div><div class="sc bl"></div><div class="sc br"></div><div class="scan-line"></div></div>
+    <div style="color:rgba(255,255,255,.75);font-size:13px;margin-top:16px;">Apunta al QR del PC</div>
+  </div>
+  <div class="cam-top"><button onclick="cerrarCamaraQR()" style="background:rgba(0,0,0,.5);border:none;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;">✕ Cancelar</button></div>
+</div>
+
+<!-- CÁMARA SCANNER -->
+<div class="cam" id="cam-scan">
+  <video id="cam-scan-video" autoplay playsinline muted></video>
+  <div class="cam-ui">
+    <div class="scan-frame"><div class="sc tl"></div><div class="sc tr"></div><div class="sc bl"></div><div class="sc br"></div><div class="scan-line"></div></div>
+    <div style="color:rgba(255,255,255,.75);font-size:13px;margin-top:16px;">Apunta al código de barras</div>
+  </div>
+  <div class="cam-top"><button onclick="cerrarCamaraScanner()" style="background:rgba(0,0,0,.5);border:none;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;">✕ Cancelar</button></div>
+</div>
+
+<!-- MODAL CONTEO -->
+<div class="overlay" id="modal-conteo">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div><div class="sheet-title" id="mc-nombre">Producto</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;" id="mc-codigo">—</div></div>
+      <button class="sheet-close" onclick="cerrarModalConteo()">×</button>
+    </div>
+    <div class="sheet-body">
+      <div style="display:flex;justify-content:space-between;background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+        <span style="font-size:12px;color:var(--muted);">Stock sistema</span>
+        <span style="font-size:13px;font-weight:500;" id="mc-stock">—</span>
+      </div>
+      <div id="mc-previos" style="display:none;margin-bottom:14px;"></div>
+      <div class="fields-grid" id="mc-campos"></div>
+      <div class="form-group" style="margin-top:4px;">
+        <label class="form-label">Ubicación <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="mc-ubicacion" placeholder="Ej: RACK 1, VITRINA..." autocomplete="off" />
+      </div>
+      <div id="mc-resultado" style="border-radius:10px;padding:10px 14px;margin-bottom:14px;display:none;"></div>
+      <button class="btn btn-primary" onclick="guardarConteo()">Guardar conteo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FINALIZAR -->
+<div class="overlay" id="modal-finalizar">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><div class="sheet-title">Finalizar inventario</div><button class="sheet-close" onclick="cerrarModal('modal-finalizar')">×</button></div>
+    <div class="sheet-body">
+      <div class="alert alert-warn">Esta acción enviará los resultados al PC. Ingresa el folio como confirmación.</div>
+      <div class="form-group" style="margin-top:10px;">
+        <label class="form-label">Folio de confirmación</label>
+        <input class="form-input" id="fin-folio" placeholder="Ingresa el folio"
+               style="font-family:'DM Mono',monospace;text-align:center;font-size:18px;"
+               onkeydown="if(event.key==='Enter')confirmarFinalizar()" />
+      </div>
+      <div id="fin-error" style="display:none;" class="alert alert-danger">Folio incorrecto.</div>
+      <button class="btn btn-success" onclick="confirmarFinalizar()" style="margin-top:4px;">Confirmar y enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETENER -->
+<div class="overlay" id="modal-detener">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><div class="sheet-title">Detener inventario</div><button class="sheet-close" onclick="cerrarModal('modal-detener')">×</button></div>
+    <div class="sheet-body">
+      <div class="alert alert-danger">Se perderán todos los conteos. ¿Estás seguro?</div>
+      <button class="btn btn-danger" onclick="detenerInventario()" style="margin-top:10px;margin-bottom:8px;">Sí, detener inventario</button>
+      <button class="btn btn-outline" onclick="cerrarModal('modal-detener')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const WORKER_URL = 'https://inventario-api.cmaturana.workers.dev';
+const CAMPOS_SALA   = ['Sala','Almacenamiento','Dañado','Serv. técnico'];
+const CAMPOS_BODEGA = ['Bodega','Almacenamiento','Dañado','Serv. técnico'];
+const COLORS = ['#1B3A6B','#2980B9','#27AE60','#8E44AD','#E67E22','#16A085','#2C3E50','#D35400'];
+
+let state = { inventory:null, conteos:{}, currentProduct:null, filtro:'todos',
+              camQRStream:null, camQRReader:null, camScanStream:null, camScanReader:null };
+
+// ── INIT ──
+window.addEventListener('load', function() {
+  const saved = localStorage.getItem('ipro_active');
+  if (saved) { try { const d=JSON.parse(saved); state.inventory=d.inventory; state.conteos=d.conteos||{}; } catch(e){} }
+  actualizarUI();
+});
+
+// ── NAV ──
+function navTo(id, btn) {
+  // Ocultar todas las pantallas explícitamente
+  ['s-inicio','s-productos','s-resumen'].forEach(function(sid) {
+    var el = document.getElementById(sid);
+    if (el) { el.style.display = 'none'; el.classList.remove('active'); }
+  });
+  // Mostrar la pantalla destino
+  var target = document.getElementById(id);
+  if (target) { target.style.display = 'flex'; target.classList.add('active'); }
+  // Actualizar nav activo
+  document.querySelectorAll('.ni').forEach(function(n) { n.classList.remove('act'); });
+  document.querySelectorAll('.ni').forEach(function(n) {
+    var oc = n.getAttribute('onclick') || '';
+    if (oc.indexOf("'"+id+"'") !== -1) n.classList.add('act');
+  });
+  if (id === 's-productos') renderProductos();
+  if (id === 's-resumen') renderResumen();
+}
+
+// ── UI ──
+function actualizarUI() {
+  const inv = state.inventory;
+  if (!inv) {
+    document.getElementById('ini-titulo').textContent='Sin inventario';
+    document.getElementById('ini-sub').textContent='Carga un inventario para comenzar';
+    document.getElementById('ini-acciones').style.display='none';
+    document.getElementById('ini-prog-wrap').style.display='none';
+    document.getElementById('prod-folio-pill').textContent='—';
+    document.getElementById('res-folio-pill').textContent='—';
+    return;
+  }
+  const total=inv.productos.length, cnt=Object.keys(state.conteos).length;
+  const pct=total?Math.round(cnt/total*100):0;
+  document.getElementById('ini-titulo').textContent=inv.categoria||'Inventario';
+  document.getElementById('ini-sub').textContent='Folio '+inv.folio+(inv.tienda?' · '+inv.tienda:'');
+  document.getElementById('ini-acciones').style.display='block';
+  document.getElementById('ini-prog-wrap').style.display='block';
+  document.getElementById('ini-prog-txt').textContent=cnt+'/'+total+' ('+pct+'%)';
+  document.getElementById('ini-prog-bar').style.width=pct+'%';
+  document.getElementById('prod-folio-pill').textContent='Folio '+inv.folio;
+  document.getElementById('res-folio-pill').textContent='Folio '+inv.folio;
+  document.getElementById('prod-prog').style.width=pct+'%';
+  document.getElementById('ini-inv-info').innerHTML=
+    '<div class="info-row"><span class="info-key">Folio</span><span class="info-val" style="font-family:monospace">'+inv.folio+'</span></div>'+
+    '<div class="info-row"><span class="info-key">Categoría</span><span class="info-val">'+(inv.categoria||'—')+'</span></div>'+
+    '<div class="info-row"><span class="info-key">Tienda</span><span class="info-val">'+(inv.tienda||'—')+'</span></div>'+
+    '<div class="info-row"><span class="info-key">Productos</span><span class="info-val">'+total+'</span></div>';
+}
+
+// ── CARGA ──
+async function cargarPorFolio() {
+  const folio = document.getElementById('ini-folio').value.trim();
+  if (!folio) { showToast('Ingresa el folio'); return; }
+  showToast('Buscando...');
+  const data = await fetchCloud(folio);
+  if (data) { cargarInventario(data); }
+  else {
+    const saved = localStorage.getItem('ipro_inv_'+folio);
+    if (saved) { try { cargarInventario(JSON.parse(saved)); showToast('⚠ Desde caché'); return; } catch(e){} }
+    showToast('Folio '+folio+' no encontrado');
+  }
+}
+
+function cargarInventario(data) {
+  state.inventory=data; state.conteos={};
+  localStorage.setItem('ipro_inv_'+data.folio, JSON.stringify(data));
+  saveState(); actualizarUI();
+  showToast('✓ '+data.productos.length+' productos cargados');
+  document.getElementById('ini-folio').value='';
+}
+
+async function recargarDesdeNube() {
+  if (!state.inventory) return;
+  showToast('Recargando...');
+  const data = await fetchCloud(state.inventory.folio);
+  if (data) { const c=state.conteos; state.inventory=data; state.conteos=c; saveState(); actualizarUI(); showToast('✓ Actualizado'); }
+  else showToast('⚠ Sin conexión');
+}
+
+async function fetchCloud(folio) {
+  try {
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),10000);
+    const res=await fetch(WORKER_URL+'?folio='+encodeURIComponent(folio),{signal:ctrl.signal,mode:'cors'});
+    clearTimeout(t); if(!res.ok)return null; return await res.json();
+  } catch(e) { return null; }
+}
+
+function detenerInventario() {
+  state.inventory=null; state.conteos={};
+  localStorage.removeItem('ipro_active');
+  cerrarModal('modal-detener'); actualizarUI();
+  showToast('Inventario detenido');
+}
+
+// ── PRODUCTOS ──
+function setFiltro(f) {
+  state.filtro=f;
+  ['todos','pendientes','contados','diferencias'].forEach(t=>document.getElementById('ftab-'+t).classList.toggle('act',t===f));
+  renderProductos();
+}
+function filtrarProductos() { renderProductos(); }
+
+function renderProductos() {
+  const el=document.getElementById('prod-list');
+  if(!state.inventory){el.innerHTML='<div class="empty">Sin inventario activo.</div>';return;}
+  const q=(document.getElementById('prod-search').value||'').toLowerCase();
+  let prods=state.inventory.productos.filter(p=>p.descripcion.toLowerCase().includes(q)||String(p.codigo).toLowerCase().includes(q));
+  if(state.filtro==='pendientes') prods=prods.filter(p=>!state.conteos[p.codigo]);
+  if(state.filtro==='contados')   prods=prods.filter(p=>!!state.conteos[p.codigo]);
+  if(state.filtro==='diferencias') prods=prods.filter(p=>{const c=state.conteos[p.codigo];return c&&calcTotal(c)!==(p.stock||0);});
+  if(!prods.length){el.innerHTML='<div class="empty">Sin resultados</div>';return;}
+  el.innerHTML=prods.map(p=>{
+    const c=state.conteos[p.codigo];
+    const tot=c?calcTotal(c):null;
+    const diff=tot!==null?tot-(p.stock||0):null;
+    const color=getColor(p.descripcion);
+    const init=p.descripcion.substring(0,2).toUpperCase();
+    const badge=!c?'<span class="badge badge-pend">Pendiente</span>':
+                diff===0?'<span class="badge badge-ok">✓ '+tot+' unid.</span>':
+                '<span class="badge badge-diff">⚠ '+(diff>0?'+':'')+diff+'</span>';
+    const ubics=c?[...new Set(c.entradas.map(e=>e.ubicacion).filter(Boolean))]:[];
+    const ubicTags=ubics.map(u=>'<span class="ubic-tag">'+u+'</span>').join('');
+    return '<div class="prod-row" onclick="abrirConteo(\''+p.codigo+'\')">'+
+      '<div class="prod-avatar" style="background:'+color+'">'+init+'</div>'+
+      '<div class="prod-info"><div class="prod-name">'+p.descripcion+'</div><div class="prod-code">'+p.codigo+'</div>'+
+      (ubicTags?'<div style="margin-top:4px;">'+ubicTags+'</div>':'')+
+      '</div><div class="prod-status">'+badge+'</div></div>';
+  }).join('');
+}
+
+// ── CONTEO ──
+function abrirConteo(codigo) {
+  const prod=state.inventory.productos.find(p=>String(p.codigo)===String(codigo));
+  if(!prod)return;
+  state.currentProduct=prod;
+  document.getElementById('mc-nombre').textContent=prod.descripcion;
+  document.getElementById('mc-codigo').textContent='Cód: '+prod.codigo;
+  document.getElementById('mc-stock').textContent=prod.stock?prod.stock+' unidades':'—';
+  document.getElementById('mc-ubicacion').value='';
+  const campos=state.inventory.campos||CAMPOS_SALA;
+  document.getElementById('mc-campos').innerHTML=campos.map(campo=>{
+    const id='campo-'+campo.replace(/\W/g,'_');
+    return '<div class="field-box"><label>'+campo+'</label>'+
+      '<input type="number" min="0" id="'+id+'" oninput="actualizarResultado()" inputmode="numeric" />'+
+      '<div class="field-btns">'+
+        '<button class="field-btn" onclick="ajustar(\''+campo.replace(/\W/g,'_')+'\',-1)">−</button>'+
+        '<button class="field-btn" onclick="ajustar(\''+campo.replace(/\W/g,'_')+'\',1)">+</button>'+
+      '</div></div>';
+  }).join('');
+  const c=state.conteos[prod.codigo];
+  const prevEl=document.getElementById('mc-previos');
+  if(c&&c.entradas.length>0){
+    prevEl.style.display='block';
+    prevEl.innerHTML='<div class="alert alert-info"><b>Conteos anteriores — total: '+calcTotal(c)+' unid.</b>'+
+      c.entradas.map((en,i)=>'<div style="margin-top:4px;font-size:11px;"><b>Conteo '+(i+1)+'</b>'+
+        (en.ubicacion?' · <span class="ubic-tag">'+en.ubicacion+'</span>':'')+
+        ' · '+Object.entries(en.campos).map(([k,v])=>k+': '+v).join(' · ')+'</div>').join('')+'</div>';
+  } else { prevEl.style.display='none'; }
+  document.getElementById('mc-resultado').style.display='none';
+  abrirModal('modal-conteo');
+}
+
+function ajustar(id,delta){
+  const el=document.getElementById('campo-'+id); if(!el)return;
+  el.value=Math.max(0,(parseInt(el.value)||0)+delta)||'';
+  actualizarResultado();
+}
+
+function actualizarResultado(){
+  const prod=state.currentProduct; if(!prod)return;
+  const campos=state.inventory.campos||CAMPOS_SALA;
+  let total=0;
+  campos.forEach(c=>{const el=document.getElementById('campo-'+c.replace(/\W/g,'_'));if(el)total+=parseInt(el.value)||0;});
+  const prevTotal=state.conteos[prod.codigo]?calcTotal(state.conteos[prod.codigo]):0;
+  const tot=total+prevTotal, diff=tot-(prod.stock||0);
+  const el=document.getElementById('mc-resultado');
+  if(total>0){
+    el.style.display='block';
+    el.style.background=diff===0?'var(--green-bg)':diff<0?'var(--danger-bg)':'var(--blue-lt)';
+    el.style.color=diff===0?'var(--green)':diff<0?'var(--danger)':'var(--blue-mid)';
+    el.innerHTML='<b>Esta entrada: '+total+' unid.'+(prevTotal?' + prev: '+prevTotal+' = total: '+tot:'')+'</b>'+
+      (prod.stock?'<div style="font-size:12px;margin-top:2px;">Diferencia: '+(diff>=0?'+':'')+diff+' unid.</div>':'');
+  } else { el.style.display='none'; }
+}
+
+function guardarConteo(){
+  const prod=state.currentProduct; if(!prod)return;
+  const campos=state.inventory.campos||CAMPOS_SALA;
+  const vals={}; let total=0;
+  campos.forEach(c=>{const el=document.getElementById('campo-'+c.replace(/\W/g,'_'));const v=parseInt(el?.value)||0;vals[c]=v;total+=v;});
+  const ubicacion=document.getElementById('mc-ubicacion').value.trim();
+  if(!ubicacion){showToast('Ingresa la ubicación');return;}
+  if(!state.conteos[prod.codigo]) state.conteos[prod.codigo]={entradas:[]};
+  state.conteos[prod.codigo].entradas.push({campos:vals,ubicacion,timestamp:new Date().toISOString()});
+  state.conteos[prod.codigo].timestamp=new Date().toISOString();
+  saveState(); actualizarUI(); cerrarModalConteo(); renderProductos();
+  showToast('✓ Conteo guardado');
+}
+
+function cerrarModalConteo(){cerrarModal('modal-conteo');state.currentProduct=null;}
+
+// ── RESUMEN ──
+function renderResumen(){
+  const el=document.getElementById('res-body');
+  if(!state.inventory){el.innerHTML='<div class="empty">Sin inventario activo</div>';return;}
+  const prods=state.inventory.productos;
+  const total=prods.length,cnt=Object.keys(state.conteos).length;
+  let diffs=0,neto=0;
+  prods.forEach(p=>{const c=state.conteos[p.codigo];if(c){const t=calcTotal(c);neto+=t*(p.costoUnitario||0);if(t!==(p.stock||0))diffs++;}});
+  const pct=total?Math.round(cnt/total*100):0;
+  el.innerHTML='<div class="stats-grid">'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--green-mid)">'+cnt+'</div><div class="stat-lbl">Contados</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--amber)">'+(total-cnt)+'</div><div class="stat-lbl">Pendientes</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--danger)">'+diffs+'</div><div class="stat-lbl">Con diferencia</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="font-size:18px;">$'+Math.round(neto).toLocaleString('es-CL')+'</div><div class="stat-lbl">Total contado</div></div>'+
+  '</div>'+
+  '<div class="card" style="margin-top:12px;"><div class="card-title">Avance</div>'+
+    '<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;"><span>'+cnt+'/'+total+'</span><b>'+pct+'%</b></div>'+
+    '<div class="prog-dark"><div class="prog-dark-fill" style="width:'+pct+'%"></div></div></div>'+
+  '<div style="margin-top:16px;"><button class="btn btn-success" onclick="abrirModalFinalizar()">Finalizar inventario</button></div>';
+}
+
+function abrirModalFinalizar(){
+  document.getElementById('fin-folio').value='';
+  document.getElementById('fin-error').style.display='none';
+  abrirModal('modal-finalizar');
+}
+
+async function confirmarFinalizar(){
+  const input=document.getElementById('fin-folio').value.trim();
+  if(String(input)!==String(state.inventory.folio)){document.getElementById('fin-error').style.display='block';return;}
+  cerrarModal('modal-finalizar'); showToast('Enviando...');
+  try{
+    const res=await fetch(WORKER_URL+'?folio=result_'+state.inventory.folio,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({inventory:state.inventory,conteos:state.conteos,fechaConteo:new Date().toISOString()})
+    });
+    const json=await res.json();
+    showToast(json.ok?'✓ Resultados enviados al PC':'⚠ Error al enviar');
+  }catch(e){showToast('⚠ Sin conexión al Worker');}
+}
+
+// ── CÁMARA (carga ZXing solo cuando se necesita) ──
+function cargarZXing(cb){
+  if(window.ZXing){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js';
+  s.onload=cb;
+  s.onerror=function(){showToast('No se pudo cargar el escáner');};
+  document.head.appendChild(s);
+}
+
+function abrirCamaraQR(){
+  cargarZXing(function(){
+    document.getElementById('cam-qr').style.display='flex';
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(function(stream){
+      state.camQRStream=stream;
+      const video=document.getElementById('cam-qr-video'); video.srcObject=stream;
+      const reader=new ZXing.BrowserQRCodeReader(); state.camQRReader=reader;
+      reader.decodeFromVideoElement(video,function(result){
+        if(result){cerrarCamaraQR();document.getElementById('ini-folio').value=result.getText().trim();cargarPorFolio();}
+      });
+    }).catch(function(){cerrarCamaraQR();showToast('No se pudo acceder a la cámara');});
+  });
+}
+
+function cerrarCamaraQR(){
+  if(state.camQRStream){state.camQRStream.getTracks().forEach(t=>t.stop());state.camQRStream=null;}
+  if(state.camQRReader){try{state.camQRReader.reset();}catch(e){}state.camQRReader=null;}
+  document.getElementById('cam-qr').style.display='none';
+}
+
+function abrirCamaraScanner(){
+  cargarZXing(function(){
+    document.getElementById('cam-scan').style.display='flex';
+    const hints=new Map(); hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+    const reader=new ZXing.BrowserMultiFormatReader(hints); state.camScanReader=reader;
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(function(stream){
+      state.camScanStream=stream;
+      const video=document.getElementById('cam-scan-video'); video.srcObject=stream;
+      reader.decodeFromVideoElement(video,function(result){
+        if(result){cerrarCamaraScanner();buscarYAbrirProducto(result.getText().trim());}
+      });
+    }).catch(function(){cerrarCamaraScanner();showToast('No se pudo acceder a la cámara');});
+  });
+}
+
+function cerrarCamaraScanner(){
+  if(state.camScanStream){state.camScanStream.getTracks().forEach(t=>t.stop());state.camScanStream=null;}
+  if(state.camScanReader){try{state.camScanReader.reset();}catch(e){}state.camScanReader=null;}
+  document.getElementById('cam-scan').style.display='none';
+}
+
+function buscarYAbrirProducto(code){
+  if(!state.inventory){showToast('No hay inventario');return;}
+  const prod=state.inventory.productos.find(p=>String(p.codigo)===String(code));
+  if(prod){abrirConteo(prod.codigo);}
+  else{showToast('Código '+code+' no encontrado');document.getElementById('prod-search').value=code;filtrarProductos();}
+}
+
+// ── MODALES ──
+function abrirModal(id){
+  const m=document.getElementById(id); m.classList.add('open');
+  m.addEventListener('click',function h(e){if(e.target===m){cerrarModal(id);m.removeEventListener('click',h);}});
+}
+function cerrarModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── UTILS ──
+function calcTotal(c){return c.entradas.reduce((a,en)=>a+Object.values(en.campos).reduce((x,y)=>x+(parseInt(y)||0),0),0);}
+function getColor(str){let h=0;for(let i=0;i<str.length;i++)h=str.charCodeAt(i)+((h<<5)-h);return COLORS[Math.abs(h)%COLORS.length];}
+function saveState(){localStorage.setItem('ipro_active',JSON.stringify({inventory:state.inventory,conteos:state.conteos}));}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+</script>
+</body>
+</html>
