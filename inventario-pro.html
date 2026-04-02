@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Inventario PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
+<style>
+:root {
+  --red: #C0392B;
+  --red-dark: #962d22;
+  --red-light: #FAECE7;
+  --red-border: rgba(192,57,43,0.25);
+  --green: #27500A;
+  --green-bg: #EAF3DE;
+  --amber: #633806;
+  --amber-bg: #FAEEDA;
+  --danger-bg: #FCEBEB;
+  --danger: #791F1F;
+  --text: #1a1a1a;
+  --text-muted: #888780;
+  --bg: #F5F3EF;
+  --card: #FFFFFF;
+  --border: rgba(0,0,0,0.08);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+/* ========== LAYOUT ========== */
+#app { min-height: 100vh; }
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ========== DETECT MODE ========== */
+.pc-only { display: none; }
+.mobile-only { display: none; }
+body.is-pc .pc-only { display: flex; }
+body.is-pc .mobile-only { display: none !important; }
+body.is-mobile .mobile-only { display: flex; }
+body.is-mobile .pc-only { display: none !important; }
+
+/* ========== HEADER ========== */
+.hdr { background: var(--red); color: #fff; padding: 14px 18px 18px; flex-shrink: 0; }
+.hdr-logo { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+.logo-mark { width: 28px; height: 28px; background: rgba(255,255,255,0.18); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.logo-name { font-size: 15px; font-weight: 500; }
+.logo-pro { font-size: 9px; background: rgba(255,255,255,0.22); padding: 2px 6px; border-radius: 4px; margin-left: 4px; letter-spacing: 0.5px; }
+.hdr-title { font-size: 20px; font-weight: 500; }
+.hdr-sub { font-size: 11px; opacity: 0.65; margin-top: 3px; }
+.hdr-row { display: flex; justify-content: space-between; align-items: flex-end; }
+.hdr-badge { background: rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 12px; text-align: center; }
+.hdr-badge-n { font-size: 18px; font-weight: 500; }
+.hdr-badge-l { font-size: 9px; opacity: 0.7; }
+.back-btn { background: rgba(255,255,255,0.18); border: none; color: #fff; font-size: 13px; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-family: inherit; margin-bottom: 8px; display: inline-block; }
+
+/* ========== NAV ========== */
+.nav { background: #fff; border-top: 0.5px solid var(--border); display: flex; padding: 8px 0 max(12px, env(safe-area-inset-bottom)); flex-shrink: 0; }
+.ni { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 3px 0; font-family: inherit; }
+.ni.act { color: var(--red); }
+.ni-icon { font-size: 18px; }
+
+/* ========== CARDS ========== */
+.card { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 14px; }
+.card + .card { margin-top: 10px; }
+.card-title { font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+/* ========== SCROLLABLE BODY ========== */
+.body { flex: 1; overflow-y: auto; padding: 14px; padding-bottom: 20px; }
+
+/* ========== BUTTONS ========== */
+.btn { display: block; width: 100%; padding: 12px; border-radius: var(--radius); border: none; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; text-align: center; transition: opacity 0.15s; }
+.btn:active { opacity: 0.8; }
+.btn-primary { background: var(--red); color: #fff; }
+.btn-outline { background: transparent; border: 0.5px solid rgba(0,0,0,0.15); color: var(--text); }
+.btn-sm { padding: 8px 14px; font-size: 12px; border-radius: var(--radius-sm); }
+
+/* ========== UPLOAD ZONE ========== */
+.upload-zone { border: 1.5px dashed var(--red-border); border-radius: var(--radius); padding: 28px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--red-light); cursor: pointer; transition: background 0.2s; }
+.upload-zone:hover { background: #f5ddd8; }
+.upload-icon { width: 44px; height: 44px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
+/* ========== FORM ========== */
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-input { width: 100%; border: 0.5px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: inherit; color: var(--text); background: #fff; outline: none; }
+.form-input:focus { border-color: var(--red); }
+
+/* ========== INFO ROWS ========== */
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+.info-row:last-child { border-bottom: none; }
+.info-key { color: var(--text-muted); }
+.info-val { font-weight: 500; }
+
+/* ========== PRODUCT ROWS ========== */
+.prod-list { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; }
+.prod-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s; }
+.prod-row:last-child { border-bottom: none; }
+.prod-row:active { background: var(--bg); }
+.prod-dot { width: 36px; height: 36px; border-radius: 10px; background: var(--text-muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: #fff; }
+.prod-info { flex: 1; min-width: 0; }
+.prod-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-code { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.prod-right { text-align: right; flex-shrink: 0; }
+.prod-qty { font-size: 16px; font-weight: 500; }
+.prod-unit { font-size: 10px; color: var(--text-muted); }
+.badge { font-size: 9px; padding: 2px 7px; border-radius: 20px; display: inline-block; margin-top: 3px; }
+.badge-ok { background: var(--green-bg); color: var(--green); }
+.badge-pend { background: var(--amber-bg); color: var(--amber); }
+.badge-diff { background: var(--danger-bg); color: var(--danger); }
+
+/* ========== SEARCH ========== */
+.search-wrap { padding: 10px 14px 4px; }
+.search-box { background: #fff; border: 0.5px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; gap: 8px; padding: 9px 12px; }
+.search-box input { border: none; background: transparent; font-size: 13px; color: var(--text); flex: 1; outline: none; font-family: inherit; }
+.search-box input::placeholder { color: var(--text-muted); }
+
+/* ========== SCANNER ========== */
+.cam-wrap { background: #111; position: relative; overflow: hidden; }
+#video { width: 100%; display: block; }
+.cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.scan-frame { width: 200px; height: 130px; position: relative; }
+.scan-corner { position: absolute; width: 20px; height: 20px; border-color: var(--red); border-style: solid; }
+.scan-corner.tl { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+.scan-corner.tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+.scan-corner.bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+.scan-corner.br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+.scan-line { position: absolute; left: 4px; right: 4px; height: 2px; background: var(--red); animation: scanMove 2s ease-in-out infinite; }
+@keyframes scanMove { 0%,100% { top: 10px; } 50% { top: calc(100% - 12px); } }
+.cam-tip { color: rgba(255,255,255,0.8); font-size: 12px; text-align: center; }
+.cam-actions { display: flex; gap: 8px; padding: 10px 14px; }
+
+/* ========== CONTEO FORM ========== */
+.prod-hero { background: var(--red); padding: 12px 16px 16px; color: #fff; }
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
+.field-box { background: #fff; border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; }
+.field-box label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; display: block; margin-bottom: 6px; }
+.field-box input { width: 100%; border: none; outline: none; font-size: 24px; font-weight: 500; text-align: center; font-family: 'DM Mono', monospace; color: var(--text); background: transparent; }
+.result-pill { margin: 0 14px 8px; border-radius: var(--radius-sm); padding: 8px 12px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; }
+
+/* ========== QR AREA ========== */
+.qr-box { background: #1a1a1a; border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.qr-inner { background: #fff; padding: 10px; border-radius: 8px; }
+#qrcode canvas, #qrcode-result canvas { border-radius: 4px; }
+.qr-title { color: #fff; font-size: 13px; font-weight: 500; text-align: center; }
+.qr-sub { color: #888; font-size: 10px; text-align: center; }
+
+/* ========== PC LAYOUT ========== */
+.pc-app { max-width: 960px; margin: 0 auto; padding: 20px; }
+.pc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.pc-logo-wrap { display: flex; align-items: center; gap: 10px; }
+.pc-logo-block { width: 36px; height: 36px; background: var(--red); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.pc-app-name { font-size: 18px; font-weight: 500; }
+.pc-app-name span { color: var(--red); }
+.pc-nav { display: flex; gap: 6px; }
+.pc-nav-btn { padding: 7px 16px; border-radius: 20px; border: 0.5px solid var(--border); background: transparent; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--text-muted); transition: all 0.15s; }
+.pc-nav-btn.act { background: var(--red); color: #fff; border-color: var(--red); }
+.pc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pc-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.pc-card { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 18px; }
+.pc-card-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+.step-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: var(--red); color: #fff; border-radius: 50%; font-size: 10px; font-weight: 500; margin-right: 6px; }
+
+/* historial */
+.hist-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--border); }
+.hist-row:last-child { border-bottom: none; }
+.hist-icon { width: 40px; height: 40px; background: var(--red-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hist-info { flex: 1; }
+.hist-name { font-size: 13px; font-weight: 500; }
+.hist-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.hist-right { text-align: right; }
+.hist-total { font-size: 13px; font-weight: 500; }
+.hist-status { font-size: 10px; margin-top: 2px; }
+
+/* ajustes */
+.setting-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 0.5px solid var(--border); }
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 13px; font-weight: 500; }
+.setting-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ========== ALERTS ========== */
+.alert { border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; margin-bottom: 10px; }
+.alert-warn { background: var(--amber-bg); color: var(--amber); }
+.alert-ok { background: var(--green-bg); color: var(--green); }
+.alert-err { background: var(--danger-bg); color: var(--danger); }
+
+/* ========== MODAL ========== */
+.modal-wrap { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; justify-content: center; z-index: 100; }
+.modal { background: #fff; border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 16px; font-weight: 500; margin-bottom: 14px; }
+.modal-close { float: right; background: var(--bg); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; line-height: 28px; text-align: center; }
+
+/* ========== METRICS ========== */
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; }
+.metric-val { font-size: 22px; font-weight: 500; }
+.metric-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ========== DIVIDER ========== */
+.divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+.divider-line { flex: 1; height: 0.5px; background: var(--border); }
+.divider-txt { font-size: 11px; color: var(--text-muted); }
+
+/* ========== TOAST ========== */
+#toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 200; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ========== SPINNER ========== */
+.spinner { width: 36px; height: 36px; border: 3px solid var(--red-light); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+  .pc-grid, .pc-grid-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ==================== MOBILE SCREENS ==================== -->
+
+<!-- MOBILE: INICIO -->
+<div class="screen mobile-only" id="m-home">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="logo-mark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
+      <span class="logo-name">Inventario <span style="opacity:0.8">PRO</span></span>
+    </div>
+    <div class="hdr-row">
+      <div>
+        <div class="hdr-title" id="m-cat-name">Sin inventario</div>
+        <div class="hdr-sub" id="m-folio-sub">Carga un QR o folio para comenzar</div>
+      </div>
+      <div class="hdr-badge" id="m-progress-badge" style="display:none">
+        <div class="hdr-badge-n" id="m-progress-n">0/0</div>
+        <div class="hdr-badge-l">contados</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="m-no-inv" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;">
+    <div style="width:60px;height:60px;background:var(--red-light);border-radius:18px;display:flex;align-items:center;justify-content:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4h4M17 14h4m-4 4v4"/></svg>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:16px;font-weight:500;margin-bottom:6px;">Sin inventario activo</div>
+      <div style="font-size:13px;color:var(--text-muted);">Escanea el QR del PC o ingresa el folio para cargar los productos</div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('m-scan-qr')">Cargar inventario</button>
+    <button class="btn btn-outline" onclick="goTo('m-settings')">Ajustes</button>
+  </div>
+
+  <div id="m-with-inv" style="display:none;flex:1;flex-direction:column;">
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar producto..." id="m-search" oninput="filterMobileList()" />
+      </div>
+    </div>
+    <div style="padding:4px 14px 6px;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;">Productos</div>
+    <div class="prod-list" style="margin:0 14px;flex:1;overflow-y:auto;" id="m-prod-list"></div>
+  </div>
+
+  <div class="nav">
+    <button class="ni act" onclick="navMobile('m-home')"><span class="ni-icon">📦</span><span>Inventario</span></button>
+    <button class="ni" onclick="navMobile('m-scan')"><span class="ni-icon">📷</span><span>Escanear</span></button>
+    <button class="ni" onclick="navMobile('m-summary')"><span class="ni-icon">📊</span><span>Resumen</span></button>
+  </div>
+</div>
+
+<!-- MOBILE: SCAN QR INICIO -->
+<div class="screen mobile-only" id="m-scan-qr">
+  <div class="hdr">
+    <button class="back-btn" onclick="goTo('m-home')">← Volver</button>
+    <div class="hdr-title">Cargar inventario</div>
+    <div class="hdr-sub">Escanea el QR generado en el PC</div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="card-title">Escanear QR del PC</div>
+      <div id="qr-reader-wrap" style="border-radius:10px;overflow:hidden;background:#111;min-height:200px;display:flex;align-items:center;justify-content:center;">
+        <div class="spinner"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="startQRScan()">Activar cámara</button>
+    </div>
+    <div class="divider"><div class="divider-line"></div><span class="divider-txt">o ingresa el folio manualmente</span><div class="divider-line"></div></div>
+    <div class="card">
+      <div class="card-title">Ingresar folio</div>
+      <div class="form-group">
+        <input class="form-input" id="m-folio-input" placeholder="Ej: 2026100" type="text" style="font-family:'DM Mono',monospace;font-size:18px;text-align:center;letter-spacing:2px;" />
+      </div>
+      <button class="btn btn-primary" onclick="loadByFolio()">Cargar folio</button>
+    </div>
+    <div class="alert alert-warn" style="margin-top:10px;">
+      <strong>Plan B:</strong> Si el QR no funciona, pide al PC que exporte el archivo y compártelo por WhatsApp o correo. Luego toca "Importar archivo".
+    </div>
+    <div style="margin-top:8px;">
+      <label class="btn btn-outline" style="cursor:pointer;">
+        Importar archivo de inventario
+        <input type="file" accept=".json" style="display:none" onchange="importInventoryFile(event)" />
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE: SCAN PRODUCTO -->
+<div class="screen mobile-only" id="m-scan">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+      <span class="logo-name">Escanear producto</span>
+    </div>
+  </div>
+  <div class="cam-wrap" style="height:240px;">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="cam-overlay">
+      <div class="scan-frame">
+        <div class="scan-corner tl"></div><div class="scan-corner tr"></div>
+        <div class="scan-corner bl"></div><div class="scan-corner br"></div>
+        <div class="scan-line"></div>
+      </div>
+      <div class="cam-tip">Apunta al código de barras</div>
+    </div>
+  </div>
+  <div class="cam-actions">
+    <button class="btn btn-outline btn-sm" style="flex:1" onclick="stopCamera();goTo('m-home')">Cancelar</button>
+    <button class="btn btn-outline btn-sm" style="flex:1" onclick="openListModal()">Ver lista completa</button>
+  </div>
+  <div style="padding:0 14px;">
+    <div class="divider"><div class="divider-line"></div><span class="divider-txt">o ingresa código manualmente</span><div class="divider-line"></div></div>
+    <div style="display:flex;gap:8px;">
+      <input class="form-input" id="manual-code" placeholder="Código de barras..." style="flex:1;font-family:'DM Mono',monospace;" />
+      <button class="btn btn-primary btn-sm" style="white-space:nowrap;width:auto;padding:0 16px;" onclick="searchManual()">Buscar</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="stopCamera();navMobile('m-home')"><span class="ni-icon">📦</span><span>Inventario</span></button>
+    <button class="ni act"><span class="ni-icon">📷</span><span>Escanear</span></button>
+    <button class="ni" onclick="stopCamera();navMobile('m-summary')"><span class="ni-icon">📊</span><span>Resumen</span></button>
+  </div>
+</div>
+
+<!-- MOBILE: CONTEO -->
+<div class="screen mobile-only" id="m-conteo">
+  <div class="prod-hero">
+    <button class="back-btn" onclick="goTo('m-scan')">← Escanear otro</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div id="c-dot" style="width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:#fff;" id="c-name">Producto</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.65);margin-top:2px;" id="c-code">Código</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;background:rgba(255,255,255,0.12);border-radius:8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:11px;color:rgba(255,255,255,0.7);">Stock sistema</span>
+      <span style="font-size:14px;font-weight:500;color:#fff;" id="c-stock">—</span>
+    </div>
+  </div>
+
+  <div class="fields-grid" id="conteo-fields"></div>
+
+  <div style="padding:0 14px;">
+    <div class="result-pill" id="c-total-pill" style="background:var(--green-bg);color:var(--green);">
+      <span>Total contado</span><span id="c-total">0 unidades</span>
+    </div>
+    <div class="result-pill" id="c-diff-pill" style="background:var(--bg);color:var(--text-muted);">
+      <span>Diferencia vs sistema</span><span id="c-diff">—</span>
+    </div>
+  </div>
+
+  <div style="padding:14px;">
+    <button class="btn btn-primary" onclick="saveConteo()">Guardar conteo</button>
+  </div>
+</div>
+
+<!-- MOBILE: NUEVO PRODUCTO -->
+<div class="screen mobile-only" id="m-new-prod">
+  <div class="hdr">
+    <button class="back-btn" onclick="goTo('m-scan')">← Volver</button>
+    <div class="hdr-title">Producto no encontrado</div>
+    <div class="hdr-sub">Agrégalo como producto nuevo</div>
+  </div>
+  <div class="body">
+    <div class="alert alert-warn">El código escaneado no existe en la planilla. Puedes agregarlo manualmente.</div>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Código</label>
+        <input class="form-input" id="np-code" readonly style="font-family:'DM Mono',monospace;background:var(--bg);" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción del producto</label>
+        <input class="form-input" id="np-desc" placeholder="Ej: Tinte Azul Marino 1L" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Costo unitario neto ($)</label>
+        <input class="form-input" id="np-cost" type="number" placeholder="0" />
+      </div>
+      <button class="btn btn-primary" onclick="addNewProduct()">Agregar y contar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE: RESUMEN -->
+<div class="screen mobile-only" id="m-summary">
+  <div class="hdr">
+    <div class="hdr-logo"><div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><span class="logo-name">Resumen</span></div>
+  </div>
+  <div class="body" id="m-summary-body">
+    <div class="metrics" style="margin-bottom:10px;">
+      <div class="metric"><div class="metric-val" id="ms-contados" style="color:var(--green)">0</div><div class="metric-lbl">Contados</div></div>
+      <div class="metric"><div class="metric-val" id="ms-pendientes" style="color:var(--amber)">0</div><div class="metric-lbl">Pendientes</div></div>
+      <div class="metric"><div class="metric-val" id="ms-total" style="font-size:14px">$0</div><div class="metric-lbl">Total neto</div></div>
+      <div class="metric"><div class="metric-val" id="ms-diffs" style="color:var(--danger)">0</div><div class="metric-lbl">Con diferencia</div></div>
+    </div>
+    <div class="card" id="ms-qr-section" style="display:none;">
+      <div class="card-title">QR de resultados para el PC</div>
+      <div class="qr-box">
+        <div class="qr-inner" id="qrcode-result"></div>
+        <div class="qr-title" id="ms-qr-folio">Folio —</div>
+        <div class="qr-sub">Escanéalo desde el PC para cerrar el inventario</div>
+      </div>
+      <button class="btn btn-outline" style="margin-top:10px;" onclick="exportResultFile()">Enviar archivo (plan B)</button>
+    </div>
+    <div class="card" id="ms-incomplete-note" style="margin-top:10px;">
+      <div class="alert-warn alert">Completa todos los productos para generar el QR de resultados.</div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="navMobile('m-home')"><span class="ni-icon">📦</span><span>Inventario</span></button>
+    <button class="ni" onclick="navMobile('m-scan')"><span class="ni-icon">📷</span><span>Escanear</span></button>
+    <button class="ni act"><span class="ni-icon">📊</span><span>Resumen</span></button>
+  </div>
+</div>
+
+<!-- MOBILE: AJUSTES -->
+<div class="screen mobile-only" id="m-settings">
+  <div class="hdr">
+    <button class="back-btn" onclick="goTo('m-home')">← Volver</button>
+    <div class="hdr-title">Ajustes</div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="card-title">Mi información</div>
+      <div class="form-group">
+        <label class="form-label">Nombre del contador</label>
+        <input class="form-input" id="m-counter-name" placeholder="Tu nombre" />
+      </div>
+      <button class="btn btn-primary btn-sm" style="width:auto;padding:8px 20px;" onclick="saveMobileSettings()">Guardar</button>
+    </div>
+    <div class="card" style="margin-top:10px;">
+      <div class="card-title">Inventario activo</div>
+      <button class="btn btn-outline" onclick="clearMobileInventory()" style="color:var(--danger);border-color:var(--danger);">Limpiar conteo activo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PC SCREENS ==================== -->
+
+<!-- PC: MAIN -->
+<div class="screen pc-only" id="pc-main">
+  <div style="background:var(--red);padding:14px 0;">
+    <div class="pc-app" style="padding-top:0;padding-bottom:0;">
+      <div class="pc-header" style="margin-bottom:0;">
+        <div class="pc-logo-wrap">
+          <div class="pc-logo-block"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+          <div>
+            <div class="pc-app-name" style="color:#fff;">Inventario <span style="color:rgba(255,255,255,0.7)">PRO</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.55);">Sistema de toma de inventario</div>
+          </div>
+        </div>
+        <div class="pc-nav">
+          <button class="pc-nav-btn" style="background:rgba(255,255,255,0.9);color:var(--text);" onclick="pcTab('nuevo')" id="pc-tab-nuevo">Nuevo inventario</button>
+          <button class="pc-nav-btn" style="color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.3);" onclick="pcTab('historial')" id="pc-tab-historial">Historial</button>
+          <button class="pc-nav-btn" style="color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.3);" onclick="pcTab('ajustes')" id="pc-tab-ajustes">Ajustes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pc-app">
+
+    <!-- TAB: NUEVO -->
+    <div id="tab-nuevo">
+      <div class="pc-grid" style="margin-top:0;">
+        <!-- LEFT -->
+        <div>
+          <div class="pc-card">
+            <div class="pc-card-title"><span class="step-num">1</span>Cargar planilla Excel</div>
+            <div class="upload-zone" onclick="document.getElementById('pc-file-input').click()">
+              <div class="upload-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
+              <div style="font-size:14px;font-weight:500;">Arrastra tu archivo aquí</div>
+              <div style="font-size:12px;color:var(--text-muted);">o haz clic para seleccionar · Formato .xlsx</div>
+              <input type="file" id="pc-file-input" accept=".xlsx,.xls" style="display:none" onchange="loadExcel(event)" />
+            </div>
+          </div>
+
+          <div class="pc-card" style="margin-top:12px;" id="pc-info-card" style="display:none">
+            <div class="pc-card-title"><span class="step-num">2</span>Verificar datos detectados</div>
+            <div id="pc-detected" style="display:none">
+              <div class="form-group">
+                <label class="form-label">Nombre de categoría</label>
+                <input class="form-input" id="pc-cat-name" placeholder="Ej: Sherwin Williams" />
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Aparecerá en el celular y en el reporte final</div>
+              </div>
+              <div id="pc-info-rows"></div>
+              <div style="margin-top:10px;" id="pc-prod-preview"></div>
+            </div>
+            <div id="pc-no-file" style="color:var(--text-muted);font-size:13px;">Carga un archivo Excel para ver los datos aquí.</div>
+          </div>
+
+          <div class="pc-card" style="margin-top:12px;">
+            <div class="pc-card-title"><span class="step-num" style="background:#1a1a1a">B</span>Importar resultados del celular</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Si el QR de resultados no funciona, importa el archivo enviado desde el celular.</div>
+            <label class="btn btn-outline" style="cursor:pointer;display:block;text-align:center;">
+              Importar archivo de resultados (.json)
+              <input type="file" accept=".json" style="display:none" onchange="importResults(event)" />
+            </label>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="pc-card" id="pc-qr-card">
+            <div class="pc-card-title"><span class="step-num">3</span>QR para el celular</div>
+            <div id="pc-qr-empty" style="text-align:center;padding:30px 0;color:var(--text-muted);font-size:13px;">
+              <div style="font-size:32px;margin-bottom:8px;">📱</div>
+              Carga el Excel primero para generar el QR
+            </div>
+            <div id="pc-qr-ready" style="display:none">
+              <div class="qr-box">
+                <div class="qr-inner" id="qrcode"></div>
+                <div class="qr-title" id="pc-qr-folio">—</div>
+                <div class="qr-sub" id="pc-qr-sub">—</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+                <button class="btn btn-primary btn-sm" onclick="printQR()">Imprimir QR</button>
+                <button class="btn btn-outline btn-sm" onclick="exportInventoryFile()">Exportar archivo (plan B)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pc-card" style="margin-top:12px;">
+            <div class="pc-card-title"><span class="step-num">4</span>Escanear QR de resultados</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Cuando el celular termine el conteo, escanea el QR de resultados con la cámara del PC.</div>
+            <button class="btn btn-primary btn-sm" onclick="startResultScan()" id="btn-scan-result">Activar cámara para escanear</button>
+            <div id="result-scan-wrap" style="display:none;margin-top:10px;border-radius:10px;overflow:hidden;"></div>
+            <div id="pc-result-display" style="display:none;margin-top:10px;"></div>
+          </div>
+
+          <div class="pc-card" style="margin-top:12px;background:var(--red-light);border-color:var(--red-border);">
+            <div class="pc-card-title" style="color:var(--red);">Plan B — si el QR no funciona</div>
+            <div style="font-size:12px;color:#712B13;margin-bottom:10px;">Exporta el archivo y compártelo con el celular por WhatsApp o correo. En el celular usa "Importar archivo".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: HISTORIAL -->
+    <div id="tab-historial" style="display:none">
+      <div class="pc-card" style="margin-top:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="pc-card-title" style="margin-bottom:0;">Inventarios guardados</div>
+          <button class="btn btn-outline btn-sm" style="width:auto;" onclick="exportAllHistory()">Exportar todo en Excel</button>
+        </div>
+        <div id="hist-list">
+          <div style="text-align:center;padding:30px 0;color:var(--text-muted);font-size:13px;">No hay inventarios guardados aún.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: AJUSTES -->
+    <div id="tab-ajustes" style="display:none">
+      <div class="pc-grid">
+        <div class="pc-card">
+          <div class="pc-card-title">Datos del usuario</div>
+          <div class="form-group">
+            <label class="form-label">Nombre del contador</label>
+            <input class="form-input" id="pc-counter" placeholder="Ej: Loreto Olivares" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre del validador</label>
+            <input class="form-input" id="pc-validator" placeholder="Ej: Enrique González" />
+          </div>
+          <button class="btn btn-primary btn-sm" style="width:auto;padding:8px 20px;" onclick="savePCSettings()">Guardar</button>
+        </div>
+        <div class="pc-card">
+          <div class="pc-card-title">Historial</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Exportar historial completo</div><div class="setting-sub">Descarga todos los inventarios en Excel</div></div>
+            <button class="btn btn-outline btn-sm" style="width:auto;" onclick="exportAllHistory()">Exportar</button>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label" style="color:var(--danger)">Borrar historial</div><div class="setting-sub">Elimina todos los registros guardados</div></div>
+            <button class="btn btn-outline btn-sm" style="width:auto;color:var(--danger);border-color:var(--danger);" onclick="clearHistory()">Borrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: LISTA COMPLETA -->
+<div id="list-modal" style="display:none" class="modal-wrap" onclick="if(event.target===this)closeListModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeListModal()">×</button>
+    <div class="modal-title">Seleccionar producto</div>
+    <div class="search-box" style="margin-bottom:12px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar..." id="modal-search" oninput="filterModalList()" style="border:none;outline:none;flex:1;font-family:inherit;font-size:14px;color:var(--text);background:transparent;" />
+    </div>
+    <div class="prod-list" id="modal-prod-list"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===================== STATE =====================
+let state = {
+  mode: 'auto',
+  inventory: null,
+  conteos: {},
+  currentProduct: null,
+  cameraStream: null,
+  barcodeReader: null,
+  qrReader: null
+};
+
+let settings = JSON.parse(localStorage.getItem('ipro_settings') || '{"counter":"","validator":"","mobileCounter":""}');
+let history = JSON.parse(localStorage.getItem('ipro_history') || '[]');
+
+// ===================== INIT =====================
+function init() {
+  detectMode();
+  loadSettings();
+  const saved = localStorage.getItem('ipro_active');
+  if (saved) {
+    try {
+      const d = JSON.parse(saved);
+      state.inventory = d.inventory;
+      state.conteos = d.conteos || {};
+    } catch(e) {}
+  }
+  if (document.body.classList.contains('is-mobile')) {
+    initMobile();
+  } else {
+    initPC();
+  }
+}
+
+function detectMode() {
+  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth < 768;
+  document.body.classList.add(mobile ? 'is-mobile' : 'is-pc');
+}
+
+function loadSettings() {
+  if (document.getElementById('pc-counter')) document.getElementById('pc-counter').value = settings.validator || '';
+  if (document.getElementById('pc-validator')) document.getElementById('pc-validator').value = settings.validator || '';
+  if (document.getElementById('m-counter-name')) document.getElementById('m-counter-name').value = settings.mobileCounter || '';
+}
+
+// ===================== NAVIGATION =====================
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(screenId);
+  if (el) el.classList.add('active');
+}
+
+function navMobile(screenId) {
+  if (screenId === 'm-scan') {
+    if (!state.inventory) { showToast('Carga un inventario primero'); goTo('m-scan-qr'); return; }
+    goTo('m-scan');
+    startCamera();
+    return;
+  }
+  if (screenId === 'm-summary') refreshSummary();
+  stopCamera();
+  goTo(screenId);
+  updateMobileHome();
+}
+
+function initMobile() {
+  updateMobileHome();
+  goTo('m-home');
+}
+
+function initPC() {
+  goTo('pc-main');
+  renderHistory();
+  document.getElementById('pc-no-file').style.display = 'block';
+  document.getElementById('pc-detected').style.display = 'none';
+}
+
+// ===================== MOBILE HOME =====================
+function updateMobileHome() {
+  const noInv = document.getElementById('m-no-inv');
+  const withInv = document.getElementById('m-with-inv');
+  const badge = document.getElementById('m-progress-badge');
+  if (!state.inventory) {
+    noInv.style.display = 'flex';
+    withInv.style.display = 'none';
+    badge.style.display = 'none';
+    document.getElementById('m-cat-name').textContent = 'Sin inventario';
+    document.getElementById('m-folio-sub').textContent = 'Carga un QR o folio para comenzar';
+    return;
+  }
+  noInv.style.display = 'none';
+  withInv.style.display = 'flex';
+  badge.style.display = 'block';
+  document.getElementById('m-cat-name').textContent = state.inventory.categoria || 'Inventario';
+  document.getElementById('m-folio-sub').textContent = `Folio ${state.inventory.folio} · ${state.inventory.tienda || ''}`;
+  const total = state.inventory.productos.length;
+  const counted = Object.keys(state.conteos).length;
+  document.getElementById('m-progress-n').textContent = `${counted}/${total}`;
+  renderMobileList(state.inventory.productos);
+}
+
+function filterMobileList() {
+  if (!state.inventory) return;
+  const q = document.getElementById('m-search').value.toLowerCase();
+  const filtered = state.inventory.productos.filter(p =>
+    p.descripcion.toLowerCase().includes(q) || String(p.codigo).includes(q)
+  );
+  renderMobileList(filtered);
+}
+
+function renderMobileList(prods) {
+  const el = document.getElementById('m-prod-list');
+  el.innerHTML = prods.map(p => {
+    const c = state.conteos[p.codigo];
+    const total = c ? Object.values(c.campos).reduce((a,b) => a + (parseInt(b)||0), 0) : 0;
+    const diff = c ? total - (p.stock || 0) : null;
+    const color = getColor(p.descripcion);
+    const initials = p.descripcion.substring(0,2).toUpperCase();
+    let badge = `<span class="badge badge-pend">● Pendiente</span>`;
+    if (c && diff === 0) badge = `<span class="badge badge-ok">✓ Contado · ${total} unid.</span>`;
+    else if (c && diff !== 0) badge = `<span class="badge badge-diff">⚠ Contado · dif: ${diff > 0 ? '+' : ''}${diff}</span>`;
+    return `<div class="prod-row" onclick="openConteo('${p.codigo}')">
+      <div class="prod-dot" style="background:${color}">${initials}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.descripcion}</div>
+        <div class="prod-code">${p.codigo}</div>
+        ${badge}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== CAMERA (BARCODE) =====================
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    state.cameraStream = stream;
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+    startBarcodeDetection(video);
+  } catch(e) {
+    showToast('No se pudo acceder a la cámara');
+  }
+}
+
+function stopCamera() {
+  if (state.cameraStream) {
+    state.cameraStream.getTracks().forEach(t => t.stop());
+    state.cameraStream = null;
+  }
+  if (state.barcodeReader) {
+    try { state.barcodeReader.reset(); } catch(e) {}
+    state.barcodeReader = null;
+  }
+}
+
+function startBarcodeDetection(video) {
+  try {
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    const reader = new ZXing.BrowserMultiFormatReader(hints);
+    state.barcodeReader = reader;
+    reader.decodeFromVideoElement(video, (result, err) => {
+      if (result) {
+        const code = result.getText();
+        stopCamera();
+        findProduct(code);
+      }
+    });
+  } catch(e) {
+    showToast('Error al iniciar el escáner');
+  }
+}
+
+function searchManual() {
+  const code = document.getElementById('manual-code').value.trim();
+  if (!code) return;
+  stopCamera();
+  findProduct(code);
+  document.getElementById('manual-code').value = '';
+}
+
+function findProduct(code) {
+  if (!state.inventory) { showToast('No hay inventario cargado'); return; }
+  const prod = state.inventory.productos.find(p => String(p.codigo) === String(code));
+  if (prod) {
+    openConteo(prod.codigo);
+  } else {
+    document.getElementById('np-code').value = code;
+    document.getElementById('np-desc').value = '';
+    document.getElementById('np-cost').value = '';
+    goTo('m-new-prod');
+  }
+}
+
+// ===================== CONTEO =====================
+function openConteo(codigo) {
+  if (!state.inventory) return;
+  const prod = state.inventory.productos.find(p => String(p.codigo) === String(codigo));
+  if (!prod) return;
+  state.currentProduct = prod;
+  document.getElementById('c-name').textContent = prod.descripcion;
+  document.getElementById('c-code').textContent = `Cód: ${prod.codigo} · Stock sistema: ${prod.stock || '—'}`;
+  document.getElementById('c-dot').style.background = getColor(prod.descripcion);
+  document.getElementById('c-stock').textContent = prod.stock ? `${prod.stock} unidades` : '—';
+  const campos = state.inventory.campos || ['Conteo', 'Exhibición', 'Dañado', 'Serv. técnico'];
+  const saved = state.conteos[prod.codigo]?.campos || {};
+  const fieldsEl = document.getElementById('conteo-fields');
+  fieldsEl.innerHTML = campos.map(campo => `
+    <div class="field-box">
+      <label>${campo}</label>
+      <input type="number" min="0" value="${saved[campo] || 0}" id="campo-${campo.replace(/\s/g,'_')}" oninput="updateTotals()" inputmode="numeric" />
+    </div>
+  `).join('');
+  updateTotals();
+  stopCamera();
+  goTo('m-conteo');
+}
+
+function updateTotals() {
+  const prod = state.currentProduct;
+  if (!prod) return;
+  const campos = state.inventory.campos || ['Conteo', 'Exhibición', 'Dañado', 'Serv. técnico'];
+  let total = 0;
+  campos.forEach(c => {
+    const el = document.getElementById('campo-' + c.replace(/\s/g,'_'));
+    if (el) total += parseInt(el.value) || 0;
+  });
+  document.getElementById('c-total').textContent = `${total} unidades`;
+  const stock = prod.stock || 0;
+  const diff = total - stock;
+  const diffEl = document.getElementById('c-diff');
+  const diffPill = document.getElementById('c-diff-pill');
+  if (stock) {
+    diffEl.textContent = diff === 0 ? 'Sin diferencia' : `${diff > 0 ? '+' : ''}${diff} unidades`;
+    diffPill.style.background = diff === 0 ? 'var(--green-bg)' : 'var(--danger-bg)';
+    diffPill.style.color = diff === 0 ? 'var(--green)' : 'var(--danger)';
+  } else {
+    diffEl.textContent = '—';
+    diffPill.style.background = 'var(--bg)';
+    diffPill.style.color = 'var(--text-muted)';
+  }
+}
+
+function saveConteo() {
+  const prod = state.currentProduct;
+  if (!prod) return;
+  const campos = state.inventory.campos || ['Conteo', 'Exhibición', 'Dañado', 'Serv. técnico'];
+  const vals = {};
+  campos.forEach(c => {
+    const el = document.getElementById('campo-' + c.replace(/\s/g,'_'));
+    vals[c] = parseInt(el?.value) || 0;
+  });
+  state.conteos[prod.codigo] = { campos: vals, timestamp: new Date().toISOString() };
+  saveActiveState();
+  showToast('✓ Conteo guardado');
+  updateMobileHome();
+  goTo('m-home');
+}
+
+function addNewProduct() {
+  const code = document.getElementById('np-code').value.trim();
+  const desc = document.getElementById('np-desc').value.trim();
+  const cost = parseFloat(document.getElementById('np-cost').value) || 0;
+  if (!desc) { showToast('Ingresa una descripción'); return; }
+  const newProd = { codigo: code, descripcion: desc, stock: 0, costoUnitario: cost };
+  state.inventory.productos.push(newProd);
+  saveActiveState();
+  openConteo(code);
+}
+
+// ===================== QR SCAN (LOAD INVENTORY) =====================
+let qrScanReader = null;
+function startQRScan() {
+  const wrap = document.getElementById('qr-reader-wrap');
+  wrap.innerHTML = '<video id="qr-video" style="width:100%;border-radius:10px;" autoplay playsinline muted></video>';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(stream => {
+    const video = document.getElementById('qr-video');
+    video.srcObject = stream;
+    state.cameraStream = stream;
+    const hints = new Map();
+    const reader = new ZXing.BrowserQRCodeReader(hints);
+    qrScanReader = reader;
+    reader.decodeFromVideoElement(video, (result, err) => {
+      if (result) {
+        const text = result.getText();
+        if (state.cameraStream) state.cameraStream.getTracks().forEach(t => t.stop());
+        try {
+          const data = JSON.parse(text);
+          loadInventoryData(data);
+        } catch(e) {
+          showToast('QR no válido');
+        }
+      }
+    });
+  }).catch(() => showToast('No se pudo acceder a la cámara'));
+}
+
+function loadByFolio() {
+  const folio = document.getElementById('m-folio-input').value.trim();
+  if (!folio) { showToast('Ingresa un folio'); return; }
+  const saved = localStorage.getItem('ipro_inv_' + folio);
+  if (saved) {
+    try { loadInventoryData(JSON.parse(saved)); }
+    catch(e) { showToast('Error al cargar folio'); }
+  } else {
+    showToast('Folio no encontrado. Usa QR o importa el archivo.');
+  }
+}
+
+function importInventoryFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      loadInventoryData(data);
+    } catch(er) { showToast('Archivo no válido'); }
+  };
+  reader.readAsText(file);
+}
+
+function loadInventoryData(data) {
+  state.inventory = data;
+  state.conteos = {};
+  saveActiveState();
+  showToast('✓ Inventario cargado: ' + (data.folio || ''));
+  updateMobileHome();
+  goTo('m-home');
+}
+
+// ===================== EXCEL LOADING (PC) =====================
+function loadExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      parseWorkbook(wb, file.name);
+    } catch(er) { showToast('Error al leer el archivo Excel'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseWorkbook(wb, filename) {
+  let productos = [];
+  let folio = '', tienda = '', categoria = '', totalNeto = 0;
+
+  // Try all sheets, prefer PLANILLA
+  const sheetName = wb.SheetNames.find(n => n.toUpperCase().includes('PLANILLA')) || wb.SheetNames[0];
+  const ws = wb.Sheets[sheetName];
+  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+
+  // --- Extract metadata scanning all rows ---
+  raw.forEach(row => {
+    if (!row) return;
+    row.forEach((cell, ci) => {
+      if (cell === null || cell === undefined) return;
+      const s = String(cell).toUpperCase().trim();
+      // FOLIO: value is in same row, last non-null cell or nearby
+      if (s === 'FOLIO') {
+        for (let k = ci + 1; k < row.length; k++) {
+          if (row[k] !== null && row[k] !== '') { folio = String(row[k]).trim(); break; }
+        }
+      }
+      // TIENDA
+      if (s === 'TIENDA') {
+        for (let k = ci + 1; k < row.length; k++) {
+          if (row[k] !== null && String(row[k]).trim() !== '') { tienda = String(row[k]).trim(); break; }
+        }
+      }
+      // CATEGORIA
+      if (s === 'CATEGORIA' || s === 'CATEGORÍA') {
+        for (let k = ci + 1; k < row.length; k++) {
+          const v = row[k];
+          if (v !== null && String(v).trim() !== '' && String(v).trim().toLowerCase() !== 'nan') {
+            categoria = String(v).trim(); break;
+          }
+        }
+      }
+    });
+  });
+
+  // --- Find header row (row with CÓDIGO and DESCRIPCIÓN and STOCK) ---
+  let headerRow = -1;
+  raw.forEach((row, ri) => {
+    if (!row) return;
+    const str = row.map(c => c ? String(c).toUpperCase() : '').join('|');
+    if ((str.includes('CÓDIGO') || str.includes('CODIGO')) &&
+        (str.includes('DESCRIPCIÓN') || str.includes('DESCRIPCION')) &&
+        str.includes('STOCK')) {
+      headerRow = ri;
+    }
+  });
+
+  if (headerRow < 0) {
+    showToast('No se encontró la estructura de productos en el Excel.');
+    return;
+  }
+
+  // --- Map column indexes from header ---
+  const headers = raw[headerRow].map(h => h ? String(h).toUpperCase().trim() : '');
+  const codeIdx   = headers.findIndex(h => h.includes('CÓDIGO') || h.includes('CODIGO'));
+  const descIdx   = headers.findIndex(h => h.includes('DESCRIPCIÓN') || h.includes('DESCRIPCION'));
+  const stockIdx  = headers.findIndex(h => h === 'STOCK');
+  const costoUIdx = headers.findIndex(h => h.includes('UNITARIO'));
+  const costoTIdx = headers.findIndex(h => h.includes('INVENTARIAR'));
+
+  // --- Parse product rows ---
+  for (let i = headerRow + 1; i < raw.length; i++) {
+    const row = raw[i];
+    if (!row) continue;
+    // Row must have a numeric index in column 0 (product rows)
+    const idx = row[0];
+    if (idx === null || idx === undefined || idx === '') continue;
+    if (isNaN(parseFloat(idx))) continue;
+
+    const code = row[codeIdx];
+    const desc = row[descIdx];
+    if (!code || !desc) continue;
+    const codeStr = String(code).trim();
+    const descStr = String(desc).trim();
+    if (!codeStr || !descStr) continue;
+    if (descStr.toUpperCase().includes('TOTAL') || descStr.toUpperCase().includes('VALOR')) continue;
+
+    const stock    = parseInt(row[stockIdx]) || 0;
+    const costoU   = parseFloat(row[costoUIdx]) || 0;
+    const costoT   = parseFloat(row[costoTIdx]) || 0;
+
+    productos.push({
+      codigo: codeStr,
+      descripcion: descStr,
+      stock,
+      costoUnitario: costoU,
+      costoTotal: costoT
+    });
+    totalNeto += costoT;
+  }
+
+  if (productos.length === 0) {
+    showToast('No se encontraron productos. Verifica el formato del Excel.');
+    return;
+  }
+
+  const inv = {
+    folio: folio || 'SIN-FOLIO',
+    tienda: tienda || '',
+    categoria: categoria || '',
+    totalNeto,
+    productos,
+    campos: ['Conteo', 'Exhibición', 'Dañado', 'Serv. técnico'],
+    fecha: new Date().toISOString(),
+    contador: settings.counter || '',
+    validador: settings.validator || ''
+  };
+
+  state.inventory = inv;
+  localStorage.setItem('ipro_inv_' + inv.folio, JSON.stringify(inv));
+  renderPCInfo(inv);
+  generateQR(inv);
+  document.getElementById('pc-no-file').style.display = 'none';
+  document.getElementById('pc-detected').style.display = 'block';
+  showToast(`✓ ${productos.length} productos cargados · Folio ${inv.folio}`);
+}
+
+function renderPCInfo(inv) {
+  document.getElementById('pc-cat-name').value = inv.categoria;
+  const rows = document.getElementById('pc-info-rows');
+  rows.innerHTML = `
+    <div class="info-row"><span class="info-key">Folio</span><span class="info-val" style="font-family:'DM Mono',monospace">${inv.folio}</span></div>
+    <div class="info-row"><span class="info-key">Tienda</span><span class="info-val">${inv.tienda || '—'}</span></div>
+    <div class="info-row"><span class="info-key">Productos</span><span class="info-val">${inv.productos.length}</span></div>
+    <div class="info-row"><span class="info-key">Total neto</span><span class="info-val" style="color:var(--green)">${fmtMoney(inv.totalNeto)}</span></div>
+    <div class="info-row"><span class="info-key">Total c/IVA</span><span class="info-val">${fmtMoney(inv.totalNeto * 1.19)}</span></div>
+  `;
+  const preview = document.getElementById('pc-prod-preview');
+  preview.innerHTML = `<div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Primeros productos</div>` +
+    inv.productos.slice(0,4).map(p => `<div class="info-row"><span class="info-key" style="font-family:'DM Mono',monospace;font-size:11px">${p.codigo}</span><span class="info-val" style="font-size:12px;max-width:60%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.descripcion}</span></div>`).join('') +
+    (inv.productos.length > 4 ? `<div style="font-size:11px;color:var(--text-muted);padding:6px 0">+ ${inv.productos.length - 4} productos más</div>` : '');
+}
+
+function generateQR(inv) {
+  document.getElementById('pc-qr-empty').style.display = 'none';
+  document.getElementById('pc-qr-ready').style.display = 'block';
+  const cat = document.getElementById('pc-cat-name').value || inv.categoria;
+  inv.categoria = cat;
+  const qrData = JSON.stringify(inv);
+  document.getElementById('qrcode').innerHTML = '';
+  if (qrData.length > 2000) {
+    // Too large for QR, show message
+    document.getElementById('qrcode').innerHTML = `<div style="padding:20px;text-align:center;font-size:12px;color:var(--danger)">El inventario es demasiado grande para un QR.<br>Usa el archivo de exportación (Plan B).</div>`;
+  } else {
+    new QRCode(document.getElementById('qrcode'), { text: qrData, width: 200, height: 200, colorDark: '#1a1a1a', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  }
+  document.getElementById('pc-qr-folio').textContent = `Folio ${inv.folio} · ${cat}`;
+  document.getElementById('pc-qr-sub').textContent = `${inv.productos.length} productos · ${inv.tienda || ''}`;
+  localStorage.setItem('ipro_inv_' + inv.folio, JSON.stringify(inv));
+}
+
+// ===================== RESULT SCAN (PC) =====================
+let resultScanReader = null;
+function startResultScan() {
+  const wrap = document.getElementById('result-scan-wrap');
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<video id="result-video" style="width:100%;border-radius:8px;max-height:240px;" autoplay playsinline muted></video>';
+  document.getElementById('btn-scan-result').textContent = 'Detener cámara';
+  document.getElementById('btn-scan-result').onclick = stopResultScan;
+  navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
+    const video = document.getElementById('result-video');
+    video.srcObject = stream;
+    state.cameraStream = stream;
+    const reader = new ZXing.BrowserQRCodeReader();
+    resultScanReader = reader;
+    reader.decodeFromVideoElement(video, (result, err) => {
+      if (result) {
+        stopResultScan();
+        try {
+          const data = JSON.parse(result.getText());
+          displayResults(data);
+        } catch(e) { showToast('QR de resultados no válido'); }
+      }
+    });
+  }).catch(() => showToast('No se pudo acceder a la cámara'));
+}
+
+function stopResultScan() {
+  if (state.cameraStream) { state.cameraStream.getTracks().forEach(t => t.stop()); state.cameraStream = null; }
+  document.getElementById('result-scan-wrap').style.display = 'none';
+  document.getElementById('btn-scan-result').textContent = 'Activar cámara para escanear';
+  document.getElementById('btn-scan-result').onclick = startResultScan;
+}
+
+function displayResults(data) {
+  const el = document.getElementById('pc-result-display');
+  el.style.display = 'block';
+  const { inventory, conteos, contador } = data;
+  if (!inventory || !conteos) { el.innerHTML = '<div class="alert alert-err">Datos de resultado no válidos.</div>'; return; }
+  let html = `<div class="alert alert-ok">✓ Resultados recibidos · Folio ${inventory.folio} · ${Object.keys(conteos).length} productos contados</div>`;
+  html += `<div class="prod-list" style="margin-top:10px;">`;
+  inventory.productos.forEach(p => {
+    const c = conteos[p.codigo];
+    const total = c ? Object.values(c.campos).reduce((a,b) => a+(parseInt(b)||0), 0) : null;
+    const diff = total !== null ? total - (p.stock || 0) : null;
+    html += `<div class="prod-row">
+      <div class="prod-dot" style="background:${getColor(p.descripcion)}">${p.descripcion.substring(0,2).toUpperCase()}</div>
+      <div class="prod-info"><div class="prod-name">${p.descripcion}</div><div class="prod-code">${p.codigo}</div></div>
+      <div class="prod-right">
+        ${total !== null ? `<div class="prod-qty">${total}</div><div class="prod-unit">unid.</div>` : '<span class="badge badge-pend">Pendiente</span>'}
+        ${diff !== null ? `<div style="font-size:11px;margin-top:2px;color:${diff===0?'var(--green)':'var(--danger)'}">${diff===0?'✓':diff>0?'+'+diff:diff}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<button class="btn btn-primary" style="margin-top:12px;" onclick="saveToHistory(${JSON.stringify(data).split('"').join("'")})">Guardar en historial y exportar Excel</button>`;
+  el.innerHTML = html;
+}
+
+function saveToHistory(dataStr) {
+  let data;
+  try { data = typeof dataStr === 'string' ? JSON.parse(dataStr.replace(/'/g,'"')) : dataStr; }
+  catch(e) { data = dataStr; }
+  history.unshift({ ...data, savedAt: new Date().toISOString() });
+  localStorage.setItem('ipro_history', JSON.stringify(history));
+  exportExcel(data);
+  renderHistory();
+  showToast('✓ Guardado en historial');
+}
+
+// ===================== PC TABS =====================
+function pcTab(tab) {
+  ['nuevo','historial','ajustes'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('pc-tab-'+t);
+    if (btn) {
+      btn.style.background = t === tab ? 'rgba(255,255,255,0.9)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--text)' : 'rgba(255,255,255,0.8)';
+    }
+  });
+  if (tab === 'historial') renderHistory();
+  if (tab === 'ajustes') loadSettings();
+}
+
+// ===================== HISTORY =====================
+function renderHistory() {
+  const el = document.getElementById('hist-list');
+  if (!el) return;
+  if (history.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--text-muted);font-size:13px;">No hay inventarios guardados aún.</div>';
+    return;
+  }
+  el.innerHTML = history.map((h, i) => {
+    const inv = h.inventory || h;
+    const conteos = h.conteos || {};
+    const counted = Object.keys(conteos).length;
+    const total = inv.productos ? inv.productos.length : 0;
+    const fecha = new Date(h.savedAt || inv.fecha).toLocaleDateString('es-CL');
+    const hasDiff = inv.productos ? inv.productos.some(p => {
+      const c = conteos[p.codigo];
+      if (!c) return false;
+      const tot = Object.values(c.campos).reduce((a,b)=>a+(parseInt(b)||0),0);
+      return tot !== p.stock;
+    }) : false;
+    return `<div class="hist-row">
+      <div class="hist-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="hist-info">
+        <div class="hist-name">${inv.categoria || 'Inventario'} · Folio ${inv.folio || '—'}</div>
+        <div class="hist-meta">${inv.tienda || ''} · ${fecha} · ${counted}/${total} productos</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-total">${fmtMoney(inv.totalNeto || 0)}</div>
+        <div class="hist-status" style="color:${hasDiff?'var(--danger)':'var(--green)'}">${hasDiff?'Con diferencias':'Sin diferencias'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (!confirm('¿Seguro que quieres borrar todo el historial?')) return;
+  history = [];
+  localStorage.removeItem('ipro_history');
+  renderHistory();
+  showToast('Historial borrado');
+}
+
+// ===================== SUMMARY (MOBILE) =====================
+function refreshSummary() {
+  if (!state.inventory) return;
+  const prods = state.inventory.productos;
+  const counted = Object.keys(state.conteos).length;
+  const pending = prods.length - counted;
+  let totalNeto = 0, diffs = 0;
+  prods.forEach(p => {
+    const c = state.conteos[p.codigo];
+    if (c) {
+      const tot = Object.values(c.campos).reduce((a,b)=>a+(parseInt(b)||0),0);
+      totalNeto += tot * (p.costoUnitario || 0);
+      if (tot !== p.stock) diffs++;
+    }
+  });
+  document.getElementById('ms-contados').textContent = counted;
+  document.getElementById('ms-pendientes').textContent = pending;
+  document.getElementById('ms-total').textContent = fmtMoney(totalNeto);
+  document.getElementById('ms-diffs').textContent = diffs;
+
+  const qrSection = document.getElementById('ms-qr-section');
+  const incNote = document.getElementById('ms-incomplete-note');
+
+  if (pending === 0) {
+    qrSection.style.display = 'block';
+    incNote.style.display = 'none';
+    generateResultQR();
+  } else {
+    qrSection.style.display = 'none';
+    incNote.style.display = 'block';
+  }
+}
+
+function generateResultQR() {
+  const resultData = {
+    inventory: state.inventory,
+    conteos: state.conteos,
+    contador: settings.mobileCounter || '',
+    fechaConteo: new Date().toISOString()
+  };
+  const json = JSON.stringify(resultData);
+  document.getElementById('qrcode-result').innerHTML = '';
+  document.getElementById('ms-qr-folio').textContent = `Folio ${state.inventory.folio}`;
+  if (json.length > 2000) {
+    document.getElementById('qrcode-result').innerHTML = `<div style="padding:16px;text-align:center;font-size:12px;color:var(--danger)">Inventario muy grande para QR.<br>Usa "Enviar archivo" (Plan B).</div>`;
+  } else {
+    new QRCode(document.getElementById('qrcode-result'), { text: json, width: 180, height: 180, colorDark: '#1a1a1a', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  }
+}
+
+// ===================== MODAL LISTA =====================
+function openListModal() {
+  if (!state.inventory) { showToast('No hay inventario cargado'); return; }
+  renderModalList(state.inventory.productos);
+  document.getElementById('list-modal').style.display = 'flex';
+}
+
+function closeListModal() {
+  document.getElementById('list-modal').style.display = 'none';
+}
+
+function filterModalList() {
+  const q = document.getElementById('modal-search').value.toLowerCase();
+  const filtered = state.inventory.productos.filter(p =>
+    p.descripcion.toLowerCase().includes(q) || String(p.codigo).includes(q)
+  );
+  renderModalList(filtered);
+}
+
+function renderModalList(prods) {
+  const el = document.getElementById('modal-prod-list');
+  el.innerHTML = prods.map(p => {
+    const c = state.conteos[p.codigo];
+    const color = getColor(p.descripcion);
+    return `<div class="prod-row" onclick="closeListModal();openConteo('${p.codigo}')">
+      <div class="prod-dot" style="background:${color}">${p.descripcion.substring(0,2).toUpperCase()}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.descripcion}</div>
+        <div class="prod-code">${p.codigo}</div>
+        ${c ? '<span class="badge badge-ok">✓ Contado</span>' : '<span class="badge badge-pend">● Pendiente</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== EXPORT / IMPORT =====================
+function exportInventoryFile() {
+  if (!state.inventory) { showToast('Carga un inventario primero'); return; }
+  download(JSON.stringify(state.inventory), `inventario_${state.inventory.folio}.json`, 'application/json');
+}
+
+function exportResultFile() {
+  const data = { inventory: state.inventory, conteos: state.conteos, contador: settings.mobileCounter || '', fechaConteo: new Date().toISOString() };
+  download(JSON.stringify(data), `resultados_${state.inventory.folio}.json`, 'application/json');
+}
+
+function importResults(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      displayResults(data);
+      showToast('✓ Resultados importados');
+    } catch(er) { showToast('Archivo no válido'); }
+  };
+  reader.readAsText(file);
+}
+
+function exportExcel(data) {
+  const inv = data.inventory || data;
+  const conteos = data.conteos || {};
+  const campos = inv.campos || ['Conteo', 'Exhibición', 'Dañado', 'Serv. técnico'];
+  const rows = [['#', 'Código', 'Descripción', 'Stock Sistema', ...campos, 'Total Contado', 'Diferencia', 'Costo Unitario', 'Total Neto Contado']];
+  inv.productos.forEach((p, i) => {
+    const c = conteos[p.codigo];
+    const vals = campos.map(campo => c?.campos[campo] || 0);
+    const total = vals.reduce((a,b) => a+b, 0);
+    const diff = total - (p.stock || 0);
+    rows.push([i+1, p.codigo, p.descripcion, p.stock || 0, ...vals, total, diff, p.costoUnitario || 0, total * (p.costoUnitario || 0)]);
+  });
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+  XLSX.writeFile(wb, `inventario_pro_${inv.folio}_resultado.xlsx`);
+}
+
+function exportAllHistory() {
+  if (history.length === 0) { showToast('No hay historial para exportar'); return; }
+  const wb = XLSX.utils.book_new();
+  history.forEach((h, i) => {
+    const inv = h.inventory || h;
+    const conteos = h.conteos || {};
+    const campos = inv.campos || ['Conteo', 'Exhibición', 'Dañado', 'Serv. técnico'];
+    const rows = [['Código', 'Descripción', 'Stock', ...campos, 'Total', 'Diferencia']];
+    (inv.productos || []).forEach(p => {
+      const c = conteos[p.codigo];
+      const vals = campos.map(campo => c?.campos[campo] || 0);
+      const total = vals.reduce((a,b)=>a+b,0);
+      rows.push([p.codigo, p.descripcion, p.stock || 0, ...vals, total, total - (p.stock||0)]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, `F${inv.folio || i+1}`.substring(0,31));
+  });
+  XLSX.writeFile(wb, 'historial_inventario_pro.xlsx');
+}
+
+function printQR() {
+  window.print();
+}
+
+// ===================== SETTINGS =====================
+function savePCSettings() {
+  settings.counter = document.getElementById('pc-counter').value;
+  settings.validator = document.getElementById('pc-validator').value;
+  localStorage.setItem('ipro_settings', JSON.stringify(settings));
+  showToast('✓ Ajustes guardados');
+}
+
+function saveMobileSettings() {
+  settings.mobileCounter = document.getElementById('m-counter-name').value;
+  localStorage.setItem('ipro_settings', JSON.stringify(settings));
+  showToast('✓ Nombre guardado');
+}
+
+function clearMobileInventory() {
+  if (!confirm('¿Limpiar el conteo activo?')) return;
+  state.inventory = null;
+  state.conteos = {};
+  localStorage.removeItem('ipro_active');
+  updateMobileHome();
+  goTo('m-home');
+  showToast('Conteo limpiado');
+}
+
+// ===================== UTILS =====================
+function saveActiveState() {
+  localStorage.setItem('ipro_active', JSON.stringify({ inventory: state.inventory, conteos: state.conteos }));
+}
+
+function fmtMoney(n) {
+  return '$' + Math.round(n).toLocaleString('es-CL');
+}
+
+function download(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+const COLORS = ['#C0392B','#2980B9','#27AE60','#8E44AD','#E67E22','#16A085','#2C3E50','#D35400','#1ABC9C','#E74C3C'];
+function getColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return COLORS[Math.abs(hash) % COLORS.length];
+}
+
+window.addEventListener('load', init);
+window.addEventListener('resize', () => {
+  if (!document.body.classList.contains('is-pc') && !document.body.classList.contains('is-mobile')) detectMode();
+});
+</script>
+</body>
+</html>
