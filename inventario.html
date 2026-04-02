@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario PRO · Ferretería Higuerillas</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#1B3A6B;font-family:"DM Sans",sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+  .logo{width:56px;height:56px;background:rgba(255,255,255,0.15);border-radius:16px;display:flex;align-items:center;justify-content:center;}
+  h1{color:#fff;font-size:22px;font-weight:600;}
+  p{color:rgba(255,255,255,0.5);font-size:13px;}
+  .spinner{width:28px;height:28px;border:2.5px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .links{display:flex;gap:12px;margin-top:8px;}
+  .link-btn{padding:10px 20px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;}
+  .link-movil{background:#fff;color:#1B3A6B;}
+  .link-pc{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="logo">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+    <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+  </svg>
+</div>
+<h1>Inventario PRO</h1>
+<p>Ferretería Higuerillas</p>
+<div class="spinner" id="spinner"></div>
+
+<!-- Botones manuales por si falla la detección -->
+<div class="links hidden" id="links">
+  <a class="link-btn link-movil" href="inventario-movil.html">📱 Abrir app móvil</a>
+  <a class="link-btn link-pc" href="inventario-pc.html">🖥 Abrir app PC</a>
+</div>
+
+<script>
+function esMobil() {
+  const ua = navigator.userAgent || '';
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)
+    || (window.innerWidth <= 768 && navigator.maxTouchPoints > 1);
+}
+
+setTimeout(function() {
+  if (esMobil()) {
+    window.location.replace('inventario-movil.html');
+  } else {
+    window.location.replace('inventario-pc.html');
+  }
+}, 600);
+
+// Si en 3 segundos no redirigió, mostrar botones manuales
+setTimeout(function() {
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('links').classList.remove('hidden');
+}, 3000);
+</script>
+</body>
+</html>
