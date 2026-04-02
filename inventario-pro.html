@@ -144,124 +144,154 @@ body.is-mobile .pc-only{display:none!important;}
 <body>
 <div id="app">
 
-<!-- ===== MOBILE: HOME ===== -->
+<!-- ===== MOBILE: APP PRINCIPAL (tabs) ===== -->
 <div class="screen mobile-only" id="m-home">
-  <div class="hdr">
-    <div class="hdr-logo">
-      <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-      <span class="logo-name">Inventario <span style="opacity:.75">PRO</span></span>
-    </div>
-    <div class="hdr-row">
-      <div><div class="hdr-title" id="m-cat-name">Sin inventario</div><div class="hdr-sub" id="m-folio-sub">Carga un inventario para comenzar</div></div>
-      <div class="hdr-badge" id="m-progress-badge" style="display:none"><div class="hdr-badge-n" id="m-progress-n">0/0</div><div class="hdr-badge-l">contados</div></div>
-    </div>
-  </div>
-  <div id="m-no-inv" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;">
-    <div style="width:64px;height:64px;background:var(--red-lt);border-radius:18px;display:flex;align-items:center;justify-content:center;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4h4M17 14h4m-4 4v4"/></svg></div>
-    <div style="text-align:center;"><div style="font-size:16px;font-weight:500;margin-bottom:6px;">Sin inventario activo</div><div style="font-size:13px;color:var(--muted);">Importa el archivo .json enviado desde el PC</div></div>
-    <button class="btn btn-primary" onclick="goTo('m-load')">Cargar inventario</button>
-    <button class="btn btn-outline" onclick="goTo('m-settings')">Ajustes</button>
-  </div>
-  <div id="m-with-inv" style="display:none;flex:1;flex-direction:column;min-height:0;">
-    <div class="search-wrap">
-      <div class="search-box">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar por nombre o código..." id="m-search" oninput="applyFilter()" />
+
+  <!-- HEADER -->
+  <div class="hdr" style="padding-bottom:0;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div>
+          <div class="hdr-title" id="m-cat-name" style="font-size:15px;">Inventario PRO</div>
+          <div class="hdr-sub" id="m-folio-sub">Sin inventario cargado</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div class="hdr-badge" id="m-progress-badge" style="display:none;padding:4px 10px;"><div class="hdr-badge-n" id="m-progress-n" style="font-size:14px;">0/0</div><div class="hdr-badge-l">contados</div></div>
+        <button onclick="goTo('m-settings')" style="background:rgba(255,255,255,0.18);border:none;color:#fff;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;">&#9881;</button>
       </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 14px 6px;">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;" id="m-count-lbl">0 productos</div>
-      <div style="display:flex;gap:4px;">
-        <button onclick="setFilter('todos')" id="ftab-todos" style="font-size:10px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);background:var(--red);color:#fff;cursor:pointer;">Todos</button>
-        <button onclick="setFilter('pendientes')" id="ftab-pendientes" style="font-size:10px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">Pendientes</button>
-        <button onclick="setFilter('contados')" id="ftab-contados" style="font-size:10px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">Contados</button>
+    <!-- PESTANAS -->
+    <div style="display:flex;gap:2px;">
+      <button id="tab-btn-lista" onclick="switchTab('lista')" style="flex:1;padding:8px 4px;border:none;border-radius:8px 8px 0 0;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;background:rgba(255,255,255,0.95);color:var(--red);">&#128230; Lista</button>
+      <button id="tab-btn-scan" onclick="switchTab('scan')" style="flex:1;padding:8px 4px;border:none;border-radius:8px 8px 0 0;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.8);">&#128247; Escanear</button>
+      <button id="tab-btn-resumen" onclick="switchTab('resumen')" style="flex:1;padding:8px 4px;border:none;border-radius:8px 8px 0 0;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.8);">&#128202; Resumen</button>
+    </div>
+  </div>
+
+  <!-- TAB: LISTA -->
+  <div id="tab-lista" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;">
+    <div id="m-no-inv" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;">
+      <div style="width:64px;height:64px;background:var(--red-lt);border-radius:18px;display:flex;align-items:center;justify-content:center;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4h4M17 14h4m-4 4v4"/></svg></div>
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:500;margin-bottom:6px;">Sin inventario activo</div><div style="font-size:13px;color:var(--muted);">Carga el archivo .json para comenzar</div></div>
+      <label class="btn btn-primary" style="cursor:pointer;text-align:center;width:100%;max-width:280px;">
+        &#128194; Cargar inventario (.json)
+        <input type="file" accept=".json,.txt" style="display:none" onchange="importInventoryFile(event)" />
+      </label>
+      <button class="btn btn-outline" style="max-width:280px;" onclick="goTo('m-load-qr')">Escanear QR del PC</button>
+    </div>
+    <div id="m-with-inv" style="display:none;flex:1;flex-direction:column;min-height:0;">
+      <div style="padding:10px 14px 4px;">
+        <div style="background:#fff;border:0.5px solid var(--border);border-radius:var(--rs);display:flex;align-items:center;gap:8px;padding:9px 12px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar producto o codigo..." id="m-search" oninput="applyFilter()" style="border:none;background:transparent;font-size:13px;color:var(--text);flex:1;outline:none;font-family:inherit;" />
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 14px 6px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;" id="m-count-lbl">0 productos</div>
+        <div style="display:flex;gap:4px;">
+          <button onclick="setFilter('todos')" id="ftab-todos" style="font-size:10px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);background:var(--red);color:#fff;cursor:pointer;">Todos</button>
+          <button onclick="setFilter('pendientes')" id="ftab-pendientes" style="font-size:10px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">Pendientes</button>
+          <button onclick="setFilter('contados')" id="ftab-contados" style="font-size:10px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">Contados</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:0 14px 20px;-webkit-overflow-scrolling:touch;">
+        <div class="prod-list" id="m-prod-list"></div>
       </div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:0 14px 8px;"><div class="prod-list" id="m-prod-list"></div></div>
   </div>
-  <div class="nav">
-    <button class="ni act" id="nav-home" onclick="navMobile('m-home')"><span class="ni-icon">📦</span><span>Inventario</span></button>
-    <button class="ni" id="nav-scan" onclick="navMobile('m-scan')"><span class="ni-icon">📷</span><span>Escanear</span></button>
-    <button class="ni" id="nav-summary" onclick="navMobile('m-summary')"><span class="ni-icon">📊</span><span>Resumen</span></button>
+
+  <!-- TAB: ESCANEAR -->
+  <div id="tab-scan" style="flex:1;display:none;flex-direction:column;min-height:0;">
+    <div id="scan-no-inv" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:12px;">
+      <div style="font-size:13px;color:var(--muted);text-align:center;">Primero carga un inventario en la pestana Lista</div>
+      <label class="btn btn-primary" style="cursor:pointer;text-align:center;">
+        &#128194; Cargar inventario (.json)
+        <input type="file" accept=".json,.txt" style="display:none" onchange="importInventoryFile(event)" />
+      </label>
+    </div>
+    <div id="scan-with-inv" style="display:none;flex:1;flex-direction:column;">
+      <div class="cam-wrap" style="flex:1;max-height:55vh;">
+        <video id="video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+        <div class="cam-overlay"><div class="scan-frame"><div class="scan-corner tl"></div><div class="scan-corner tr"></div><div class="scan-corner bl"></div><div class="scan-corner br"></div><div class="scan-line"></div></div><div class="cam-tip">Apunta al codigo de barras</div></div>
+      </div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">o ingresa el codigo manualmente</div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" id="manual-code" placeholder="Codigo de barras..." style="flex:1;" inputmode="numeric" />
+          <button class="btn btn-primary btn-sm" style="width:auto;padding:0 18px;" onclick="searchManual()">Buscar</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- TAB: RESUMEN -->
+  <div id="tab-resumen" style="flex:1;display:none;flex-direction:column;overflow-y:auto;padding:14px;gap:10px;">
+    <div class="metrics">
+      <div class="metric"><div class="metric-val" id="ms-contados" style="color:var(--green)">0</div><div class="metric-lbl">Contados</div></div>
+      <div class="metric"><div class="metric-val" id="ms-pendientes" style="color:var(--amber)">0</div><div class="metric-lbl">Pendientes</div></div>
+      <div class="metric"><div class="metric-val" id="ms-total" style="font-size:14px">$0</div><div class="metric-lbl">Total contado</div></div>
+      <div class="metric"><div class="metric-val" id="ms-diffs" style="color:var(--danger)">0</div><div class="metric-lbl">Con diferencia</div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Progreso</span><span id="ms-prog-txt" style="font-weight:500;">0/0</span></div>
+      <div class="prog-wrap"><div class="prog-fill" id="ms-prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Enviar resultados al PC</div>
+      <div class="alert alert-info">Exporta y envia el archivo al PC por WhatsApp o correo.</div>
+      <button class="btn btn-primary" onclick="exportResultFile()">Exportar resultados (.json)</button>
+      <div id="ms-qr-section" style="display:none;margin-top:12px;">
+        <div class="divider"><div class="divider-line"></div><span class="divider-txt">QR para inventarios pequenos</span><div class="divider-line"></div></div>
+        <div class="qr-box"><div class="qr-inner" id="qrcode-result"></div><div class="qr-title" id="ms-qr-folio">Folio --</div><div class="qr-sub">Escanealo desde el PC</div></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- ===== MOBILE: LOAD ===== -->
-<div class="screen mobile-only" id="m-load">
+<!-- ===== MOBILE: CARGAR QR ===== -->
+<div class="screen mobile-only" id="m-load-qr">
   <div class="hdr">
     <button class="back-btn" onclick="goTo('m-home')">← Volver</button>
-    <div class="hdr-title">Cargar inventario</div>
-    <div class="hdr-sub">Importa el archivo del PC</div>
+    <div class="hdr-title">Escanear QR del PC</div>
   </div>
   <div class="body">
     <div class="card">
-      <div class="card-title">Opción 1 · Importar archivo del PC (recomendado)</div>
-      <div class="alert alert-info">El PC genera un archivo .json — recíbelo por WhatsApp o correo.</div>
-      <label class="btn btn-primary" style="cursor:pointer;display:block;text-align:center;">
-        Seleccionar archivo (.json)
-        <input type="file" accept=".json" style="display:none" onchange="importInventoryFile(event)" />
-      </label>
+      <div class="card-title">Escanear QR del PC</div>
+      <div id="qr-reader-wrap" style="border-radius:10px;overflow:hidden;background:#111;min-height:140px;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;padding:16px;color:#888;font-size:12px;">Toca el boton para activar</div></div>
+      <button class="btn btn-outline" style="margin-top:10px;" onclick="startQRScan()">Activar camara para escanear QR</button>
     </div>
-    <div class="divider"><div class="divider-line"></div><span class="divider-txt">alternativas</span><div class="divider-line"></div></div>
+    <div class="divider"><div class="divider-line"></div><span class="divider-txt">o</span><div class="divider-line"></div></div>
     <div class="card">
-      <div class="card-title">Opción 2 · Escanear QR del PC</div>
-      <div id="qr-reader-wrap" style="border-radius:10px;overflow:hidden;background:#111;min-height:140px;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;padding:16px;color:#888;font-size:12px;">Toca el botón para activar</div></div>
-      <button class="btn btn-outline" style="margin-top:10px;" onclick="startQRScan()">Activar cámara para escanear QR</button>
-    </div>
-    <div class="card" style="margin-top:0;">
-      <div class="card-title">Opción 3 · Folio manual</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Solo si ya importaste el archivo antes en este celular.</div>
+      <div class="card-title">Folio guardado</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Solo si ya importaste antes en este celular.</div>
       <div style="display:flex;gap:8px;">
-        <input class="form-input" id="m-folio-input" placeholder="Ej: 2026100" type="text" style="flex:1;font-family:'DM Mono',monospace;font-size:16px;text-align:center;" />
+        <input class="form-input" id="m-folio-input" placeholder="Ej: 2026100" type="text" style="flex:1;font-size:16px;text-align:center;" />
         <button class="btn btn-primary btn-sm" style="width:auto;padding:0 16px;" onclick="loadByFolio()">Cargar</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== MOBILE: SCAN ===== -->
-<div class="screen mobile-only" id="m-scan">
-  <div class="hdr">
-    <div class="hdr-logo"><div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><span class="logo-name">Escanear producto</span></div>
-  </div>
-  <div class="cam-wrap"><video id="video" autoplay playsinline muted></video>
-    <div class="cam-overlay"><div class="scan-frame"><div class="scan-corner tl"></div><div class="scan-corner tr"></div><div class="scan-corner bl"></div><div class="scan-corner br"></div><div class="scan-line"></div></div><div class="cam-tip">Apunta al código de barras</div></div>
-  </div>
-  <div style="display:flex;gap:8px;padding:10px 14px;">
-    <button class="btn btn-outline btn-sm" style="flex:1" onclick="stopCamera();navMobile('m-home')">Cancelar</button>
-    <button class="btn btn-outline btn-sm" style="flex:1" onclick="openListModal()">Ver lista</button>
-  </div>
-  <div style="padding:0 14px;">
-    <div class="divider"><div class="divider-line"></div><span class="divider-txt">o ingresa código manualmente</span><div class="divider-line"></div></div>
-    <div style="display:flex;gap:8px;">
-      <input class="form-input" id="manual-code" placeholder="Código de barras..." style="flex:1;font-family:'DM Mono',monospace;" />
-      <button class="btn btn-primary btn-sm" style="width:auto;padding:0 16px;" onclick="searchManual()">Buscar</button>
-    </div>
-  </div>
-  <div class="nav">
-    <button class="ni" onclick="stopCamera();navMobile('m-home')"><span class="ni-icon">📦</span><span>Inventario</span></button>
-    <button class="ni act"><span class="ni-icon">📷</span><span>Escanear</span></button>
-    <button class="ni" onclick="stopCamera();navMobile('m-summary')"><span class="ni-icon">📊</span><span>Resumen</span></button>
-  </div>
-</div>
-
 <!-- ===== MOBILE: CONTEO ===== -->
 <div class="screen mobile-only" id="m-conteo">
   <div class="prod-hero">
-    <button class="back-btn" onclick="goTo('m-scan');startCamera()">← Escanear otro</button>
+    <button class="back-btn" onclick="backFromConteo()">← Volver</button>
     <div style="display:flex;align-items:center;gap:10px;">
       <div id="c-dot" style="width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.3);flex-shrink:0;"></div>
-      <div><div style="font-size:15px;font-weight:500;color:#fff;" id="c-name">Producto</div><div style="font-size:10px;color:rgba(255,255,255,.65);margin-top:2px;font-family:'DM Mono',monospace;" id="c-code">Código</div></div>
+      <div><div style="font-size:15px;font-weight:500;color:#fff;" id="c-name">Producto</div><div style="font-size:10px;color:rgba(255,255,255,.65);margin-top:2px;" id="c-code">Codigo</div></div>
     </div>
     <div style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:11px;color:rgba(255,255,255,.7);">Stock sistema</span>
-      <span style="font-size:14px;font-weight:500;color:#fff;" id="c-stock">—</span>
+      <span style="font-size:14px;font-weight:500;color:#fff;" id="c-stock">--</span>
     </div>
   </div>
   <div class="fields-grid" id="conteo-fields"></div>
   <div style="padding:0 14px;">
     <div class="result-pill" id="c-total-pill" style="background:var(--green-bg);color:var(--green);"><span>Total contado</span><span id="c-total">0 unidades</span></div>
-    <div class="result-pill" id="c-diff-pill" style="background:var(--bg);color:var(--muted);"><span>Diferencia vs sistema</span><span id="c-diff">—</span></div>
+    <div class="result-pill" id="c-diff-pill" style="background:var(--bg);color:var(--muted);"><span>Diferencia vs sistema</span><span id="c-diff">--</span></div>
   </div>
   <div style="padding:14px;"><button class="btn btn-primary" onclick="saveConteo()">Guardar conteo</button></div>
 </div>
@@ -269,48 +299,17 @@ body.is-mobile .pc-only{display:none!important;}
 <!-- ===== MOBILE: NUEVO PRODUCTO ===== -->
 <div class="screen mobile-only" id="m-new-prod">
   <div class="hdr">
-    <button class="back-btn" onclick="goTo('m-scan');startCamera()">← Volver</button>
-    <div class="hdr-title">Producto no encontrado</div><div class="hdr-sub">Agrégalo manualmente</div>
+    <button class="back-btn" onclick="switchTab('scan')">← Volver</button>
+    <div class="hdr-title">Producto no encontrado</div><div class="hdr-sub">Agregalo manualmente</div>
   </div>
   <div class="body">
-    <div class="alert alert-warn">El código no existe en la planilla. Puedes agregarlo.</div>
+    <div class="alert alert-warn">El codigo no existe en la planilla. Puedes agregarlo.</div>
     <div class="card">
-      <div class="form-group"><label class="form-label">Código</label><input class="form-input" id="np-code" readonly style="font-family:'DM Mono',monospace;background:var(--bg);" /></div>
-      <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" id="np-desc" placeholder="Ej: Tinte Azul Marino 1L" /></div>
+      <div class="form-group"><label class="form-label">Codigo</label><input class="form-input" id="np-code" readonly style="background:var(--bg);" /></div>
+      <div class="form-group"><label class="form-label">Descripcion</label><input class="form-input" id="np-desc" placeholder="Ej: Tinte Azul Marino 1L" /></div>
       <div class="form-group"><label class="form-label">Costo unitario neto ($)</label><input class="form-input" id="np-cost" type="number" placeholder="0" inputmode="numeric" /></div>
       <button class="btn btn-primary" onclick="addNewProduct()">Agregar y contar</button>
     </div>
-  </div>
-</div>
-
-<!-- ===== MOBILE: RESUMEN ===== -->
-<div class="screen mobile-only" id="m-summary">
-  <div class="hdr"><div class="hdr-logo"><div class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><span class="logo-name">Resumen</span></div></div>
-  <div class="body">
-    <div class="metrics" style="margin-bottom:10px;">
-      <div class="metric"><div class="metric-val" id="ms-contados" style="color:var(--green)">0</div><div class="metric-lbl">Contados</div></div>
-      <div class="metric"><div class="metric-val" id="ms-pendientes" style="color:var(--amber)">0</div><div class="metric-lbl">Pendientes</div></div>
-      <div class="metric"><div class="metric-val" id="ms-total" style="font-size:14px">$0</div><div class="metric-lbl">Total contado</div></div>
-      <div class="metric"><div class="metric-val" id="ms-diffs" style="color:var(--danger)">0</div><div class="metric-lbl">Con diferencia</div></div>
-    </div>
-    <div class="card" style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Progreso</span><span id="ms-prog-txt" style="font-weight:500;">0/0</span></div>
-      <div class="prog-wrap"><div class="prog-fill" id="ms-prog-fill" style="width:0%"></div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Enviar resultados al PC</div>
-      <div class="alert alert-info">Exporta el archivo y envíalo al PC por WhatsApp o correo.</div>
-      <button class="btn btn-primary" onclick="exportResultFile()" id="btn-export-result">Exportar resultados (.json)</button>
-      <div id="ms-qr-section" style="display:none;margin-top:12px;">
-        <div class="divider"><div class="divider-line"></div><span class="divider-txt">QR para inventarios pequeños</span><div class="divider-line"></div></div>
-        <div class="qr-box"><div class="qr-inner" id="qrcode-result"></div><div class="qr-title" id="ms-qr-folio">Folio —</div><div class="qr-sub">Escanéalo desde el PC</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="nav">
-    <button class="ni" onclick="navMobile('m-home')"><span class="ni-icon">📦</span><span>Inventario</span></button>
-    <button class="ni" onclick="navMobile('m-scan')"><span class="ni-icon">📷</span><span>Escanear</span></button>
-    <button class="ni act"><span class="ni-icon">📊</span><span>Resumen</span></button>
   </div>
 </div>
 
@@ -319,16 +318,21 @@ body.is-mobile .pc-only{display:none!important;}
   <div class="hdr"><button class="back-btn" onclick="goTo('m-home')">← Volver</button><div class="hdr-title">Ajustes</div></div>
   <div class="body">
     <div class="card">
-      <div class="card-title">Mi información</div>
+      <div class="card-title">Mi informacion</div>
       <div class="form-group"><label class="form-label">Nombre del contador</label><input class="form-input" id="m-counter-name" placeholder="Tu nombre" /></div>
       <button class="btn btn-primary btn-sm" style="width:auto;padding:8px 20px;" onclick="saveMobileSettings()">Guardar</button>
     </div>
     <div class="card" style="margin-top:10px;">
-      <div class="card-title">Inventario activo</div>
+      <div class="card-title">Cargar inventario</div>
+      <label class="btn btn-primary" style="cursor:pointer;text-align:center;display:block;margin-bottom:8px;">
+        &#128194; Cargar archivo .json
+        <input type="file" accept=".json,.txt" style="display:none" onchange="importInventoryFile(event)" />
+      </label>
       <button class="btn btn-danger" onclick="clearMobileInventory()">Limpiar conteo activo</button>
     </div>
   </div>
 </div>
+
 
 <!-- ===== PC: MAIN ===== -->
 <div class="screen pc-only" id="pc-main">
@@ -495,7 +499,7 @@ function init() {
   loadSettingsUI();
   const saved = localStorage.getItem('ipro_active');
   if (saved) { try { const d=JSON.parse(saved); state.inventory=d.inventory; state.conteos=d.conteos||{}; } catch(e){} }
-  if (mobile) { updateMobileHome(); goTo('m-home'); }
+  if (mobile) { goTo('m-home'); switchTab('lista'); }
   else { goTo('pc-main'); renderHistory(); }
 }
 
@@ -508,16 +512,42 @@ function loadSettingsUI() {
 
 function goTo(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); const el=document.getElementById(id); if(el)el.classList.add('active'); }
 
-function navMobile(id) {
-  ['nav-home','nav-scan','nav-summary'].forEach(n=>document.getElementById(n)?.classList.remove('act'));
-  if (id==='m-scan') {
-    if (!state.inventory) { showToast('Carga un inventario primero'); goTo('m-load'); return; }
-    document.getElementById('nav-scan')?.classList.add('act');
-    goTo('m-scan'); startCamera(); return;
+function navMobile(id) { goTo(id); }
+
+function switchTab(tab) {
+  ['lista','scan','resumen'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.style.display='none';
+  });
+  ['lista','scan','resumen'].forEach(t=>{
+    const btn=document.getElementById('tab-btn-'+t);
+    if(btn){ btn.style.background='rgba(255,255,255,0.18)'; btn.style.color='rgba(255,255,255,0.8)'; }
+  });
+  const active=document.getElementById('tab-'+tab);
+  if(active) active.style.display='flex';
+  const activeBtn=document.getElementById('tab-btn-'+tab);
+  if(activeBtn){ activeBtn.style.background='rgba(255,255,255,0.95)'; activeBtn.style.color='var(--red)'; }
+  if(tab==='scan'){
+    if(!state.inventory){
+      document.getElementById('scan-no-inv').style.display='flex';
+      document.getElementById('scan-with-inv').style.display='none';
+      stopCamera();
+    } else {
+      document.getElementById('scan-no-inv').style.display='none';
+      document.getElementById('scan-with-inv').style.display='flex';
+      startCamera();
+    }
+  } else {
+    stopCamera();
+    if(tab==='resumen') refreshSummary();
+    if(tab==='lista') updateMobileHome();
   }
-  if (id==='m-summary') { document.getElementById('nav-summary')?.classList.add('act'); refreshSummary(); }
-  if (id==='m-home') { document.getElementById('nav-home')?.classList.add('act'); updateMobileHome(); }
-  stopCamera(); goTo(id);
+  state.activeTab=tab;
+}
+
+function backFromConteo() {
+  goTo('m-home');
+  switchTab(state.activeTab||'lista');
 }
 
 function pcTab(tab) {
@@ -610,7 +640,7 @@ function openConteo(codigo) {
   const campos=state.inventory.campos||['Conteo','Exhibición','Dañado','Serv. técnico'];
   const saved=state.conteos[prod.codigo]?.campos||{};
   document.getElementById('conteo-fields').innerHTML=campos.map(campo=>'<div class="field-box"><label>'+campo+'</label><input type="number" min="0" value="'+(saved[campo]||0)+'" id="campo-'+campo.replace(/\W/g,'_')+'" oninput="updateTotals()" inputmode="numeric" /></div>').join('');
-  updateTotals(); stopCamera(); goTo('m-conteo');
+  updateTotals(); stopCamera(); goTo('m-conteo'); state.activeTab=state.activeTab||'lista';
 }
 
 function updateTotals() {
@@ -630,14 +660,14 @@ function saveConteo() {
   const vals={};
   campos.forEach(c=>{ const el=document.getElementById('campo-'+c.replace(/\W/g,'_')); vals[c]=parseInt(el?.value)||0; });
   state.conteos[prod.codigo]={campos:vals,timestamp:new Date().toISOString()};
-  saveActiveState(); showToast('✓ Conteo guardado'); updateMobileHome(); navMobile('m-home');
+  saveActiveState(); showToast('✓ Conteo guardado'); goTo('m-home'); switchTab(state.activeTab||'lista');
 }
 
 function addNewProduct() {
   const code=document.getElementById('np-code').value.trim(), desc=document.getElementById('np-desc').value.trim(), cost=parseFloat(document.getElementById('np-cost').value)||0;
   if (!desc) { showToast('Ingresa una descripción'); return; }
   state.inventory.productos.push({codigo:code,descripcion:desc,stock:0,costoUnitario:cost,costoTotal:0,esNuevo:true});
-  saveActiveState(); openConteo(code);
+  state.activeTab='scan'; saveActiveState(); openConteo(code);
 }
 
 // ===== QR SCAN (load inventory) =====
@@ -668,11 +698,11 @@ function importInventoryFile(event) {
 }
 
 function loadInventoryData(data) {
-  state.inventory=data; state.conteos={};
+  state.inventory=data; state.conteos={}; state.activeTab='lista';
   localStorage.setItem('ipro_inv_'+data.folio, JSON.stringify(data));
   saveActiveState();
   showToast('✓ '+data.productos.length+' productos · Folio '+data.folio);
-  updateMobileHome(); goTo('m-home');
+  goTo('m-home'); switchTab('lista');
 }
 
 // ===== EXCEL LOADING (PC) =====
@@ -1051,7 +1081,7 @@ function clearHistory() { if(!confirm('¿Borrar todo el historial?'))return; inv
 // ===== SETTINGS =====
 function savePCSettings() { settings.counter=document.getElementById('pc-counter').value; settings.validator=document.getElementById('pc-validator').value; localStorage.setItem('ipro_settings',JSON.stringify(settings)); showToast('✓ Ajustes guardados'); }
 function saveMobileSettings() { settings.mobileCounter=document.getElementById('m-counter-name').value; localStorage.setItem('ipro_settings',JSON.stringify(settings)); showToast('✓ Nombre guardado'); }
-function clearMobileInventory() { if(!confirm('¿Limpiar conteo activo?'))return; state.inventory=null; state.conteos={}; localStorage.removeItem('ipro_active'); updateMobileHome(); goTo('m-home'); showToast('Conteo limpiado'); }
+function clearMobileInventory() { if(!confirm('¿Limpiar conteo activo?'))return; state.inventory=null; state.conteos={}; localStorage.removeItem('ipro_active'); goTo('m-home'); switchTab('lista'); showToast('Conteo limpiado'); }
 
 // ===== UTILS =====
 function saveActiveState() { localStorage.setItem('ipro_active',JSON.stringify({inventory:state.inventory,conteos:state.conteos})); }
