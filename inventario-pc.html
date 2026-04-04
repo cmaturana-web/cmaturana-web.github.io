@@ -1892,7 +1892,7 @@ function limpiarHistorial() {
 
 function limpiarRegistroMaestro() {
   if (!confirm('¿Limpiar el registro maestro del servidor? Se borrarán todos los inventarios del Dashboard Maestro.')) return;
-  fetch(WORKER_URL + '/reset?clave=higuerillas2026')
+  fetch(WORKER_URL + '/reset?clave=charles')
     .then(r => r.json())
     .then(d => {
       if (d.ok) showToast('✓ Registro maestro limpiado');
