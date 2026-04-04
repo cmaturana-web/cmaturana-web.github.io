@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Maestro · Ferretería Higuerillas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#1B3A6B; --blue-mid:#2E5BA8; --blue-lt:#E6EFF8;
+  --green:#1E6B2E; --green-bg:#EAF3DE; --green-mid:#3a7a14;
+  --amber:#633806; --amber-bg:#FAEEDA;
+  --danger:#791F1F; --danger-bg:#FCEBEB;
+  --text:#1a1a1a; --muted:#888780; --bg:#F5F3EF; --card:#fff;
+  --border:rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--blue);display:flex;align-items:center;justify-content:center;z-index:100;}
+.login-box{background:#fff;border-radius:20px;padding:44px;width:100%;max-width:380px;text-align:center;}
+.login-logo{width:56px;height:56px;background:var(--blue);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.login-title{font-size:22px;font-weight:600;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.login-input{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;font-size:16px;font-family:inherit;outline:none;text-align:center;letter-spacing:2px;margin-bottom:12px;}
+.login-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,58,107,0.1);}
+.login-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+.login-btn:hover{background:var(--blue-mid);}
+.login-error{color:var(--danger);font-size:13px;margin-top:10px;display:none;}
+
+/* HEADER */
+.header{background:var(--blue);color:#fff;padding:0;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,0.15);}
+.header-inner{max-width:1400px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+.header-brand{display:flex;align-items:center;gap:12px;}
+.header-logo{width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.header-name{font-size:17px;font-weight:600;}
+.header-sub{font-size:11px;opacity:.6;margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:16px;}
+.poll-dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.poll-badge{display:flex;align-items:center;gap:7px;font-size:12px;opacity:.8;}
+.logout-btn{background:rgba(255,255,255,0.12);border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;}
+.logout-btn:hover{background:rgba(255,255,255,0.2);}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:28px;}
+
+/* SUMMARY BAR */
+.summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.summary-card{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:18px 22px;}
+.summary-val{font-size:32px;font-weight:600;line-height:1;}
+.summary-lbl{font-size:11px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* LOCALES GRID */
+.locales-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px;}
+
+/* LOCAL CARD */
+.local-card{background:var(--card);border-radius:16px;border:0.5px solid var(--border);overflow:hidden;}
+.local-header{padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.local-name{font-size:15px;font-weight:600;}
+.local-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.badge{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:600;flex-shrink:0;}
+.badge-activo{background:var(--green-bg);color:var(--green);}
+.badge-finalizado{background:var(--blue-lt);color:var(--blue-mid);}
+.badge-libre{background:var(--bg);color:var(--muted);}
+
+.local-body{padding:0 20px 18px;}
+
+/* Progress */
+.prog-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;}
+.prog-wrap{background:#E8E5DF;border-radius:6px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:6px;transition:width .6s ease;}
+
+.local-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.ls{background:var(--bg);border-radius:10px;padding:10px 12px;text-align:center;}
+.ls-val{font-size:20px;font-weight:600;}
+.ls-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* Empty local */
+.local-empty{padding:24px 20px;text-align:center;color:var(--muted);font-size:13px;}
+
+/* Inventarios del local */
+.inv-list{border-top:1px solid var(--border);}
+.inv-item{padding:12px 20px;border-bottom:0.5px solid var(--border);cursor:pointer;}
+.inv-item:last-child{border-bottom:none;}
+.inv-item:hover{background:var(--bg);}
+.inv-folio{font-size:13px;font-weight:500;}
+.inv-info{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Responsive */
+@media(max-width:700px){
+  .summary-bar{grid-template-columns:1fr 1fr;}
+  .locales-grid{grid-template-columns:1fr;}
+  .main{padding:16px;}
+  .header-inner{padding:14px 16px;}
+}
+
+/* Spinner */
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:40px auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+    </div>
+    <div class="login-title">Dashboard Maestro</div>
+    <div class="login-sub">Ferretería Higuerillas · Vista global</div>
+    <input class="login-input" id="login-clave" type="password" placeholder="Clave de acceso"
+           onkeydown="if(event.key==='Enter')ingresar()" />
+    <button class="login-btn" onclick="ingresar()">Ingresar</button>
+    <div class="login-error" id="login-error">Clave incorrecta</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="header-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <div>
+          <div class="header-name">Dashboard Maestro</div>
+          <div class="header-sub">Ferretería Higuerillas · Vista global en tiempo real</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="poll-badge"><div class="poll-dot"></div><span>Actualizando cada 15s</span></div>
+        <button class="logout-btn" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Summary -->
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="summary-val" id="sum-activos" style="color:var(--blue)">—</div>
+        <div class="summary-lbl">Inventarios activos</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-val" id="sum-contados" style="color:var(--green-mid)">—</div>
+        <div class="summary-lbl">Productos contados</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-val" id="sum-pendientes" style="color:var(--amber)">—</div>
+        <div class="summary-lbl">Productos pendientes</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-val" id="sum-diffs" style="color:var(--danger)">—</div>
+        <div class="summary-lbl">Con diferencias</div>
+      </div>
+    </div>
+
+    <!-- Locales -->
+    <div class="locales-grid" id="locales-grid">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var WORKER_URL = 'https://inventario-api.cmaturana.workers.dev';
+var CLAVE_KEY  = 'ipro_maestro_clave';
+var pollTimer  = null;
+
+var LOCALES = [
+  'LA LIGUA',
+  'MAITENCILLO',
+  'PUCHUNCAVÍ',
+  'QUINTERO',
+  'CON CON NORTE',
+  'MATRIZ',
+  'REÑACA',
+];
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  var clave = sessionStorage.getItem(CLAVE_KEY);
+  if (clave) { verificarClave(clave); }
+});
+
+function ingresar() {
+  var clave = document.getElementById('login-clave').value.trim();
+  if (!clave) return;
+  verificarClave(clave);
+}
+
+function verificarClave(clave) {
+  fetch(WORKER_URL + '/maestro?clave=' + encodeURIComponent(clave))
+    .then(function(r) {
+      if (r.ok) {
+        sessionStorage.setItem(CLAVE_KEY, clave);
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        cargarDatos();
+        pollTimer = setInterval(cargarDatos, 15000);
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+        sessionStorage.removeItem(CLAVE_KEY);
+      }
+    })
+    .catch(function() {
+      document.getElementById('login-error').textContent = 'Error de conexión';
+      document.getElementById('login-error').style.display = 'block';
+    });
+}
+
+function cerrarSesion() {
+  sessionStorage.removeItem(CLAVE_KEY);
+  if (pollTimer) clearInterval(pollTimer);
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-clave').value = '';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+// ── DATOS ──────────────────────────────────────────────────────────────────
+function cargarDatos() {
+  var clave = sessionStorage.getItem(CLAVE_KEY);
+  if (!clave) return;
+  fetch(WORKER_URL + '/maestro?clave=' + encodeURIComponent(clave))
+    .then(function(r) { return r.json(); })
+    .then(function(registro) { renderDashboard(registro); })
+    .catch(function() { showToast('⚠ Error al actualizar'); });
+}
+
+function renderDashboard(registro) {
+  // Agrupar inventarios por tienda
+  var porLocal = {};
+  LOCALES.forEach(function(l) { porLocal[l] = []; });
+
+  Object.values(registro).forEach(function(inv) {
+    var tienda = (inv.tienda || '').toUpperCase().trim();
+    // Buscar el local que coincida
+    var match = LOCALES.find(function(l) {
+      return tienda.indexOf(l) !== -1 || l.indexOf(tienda) !== -1;
+    });
+    if (match) porLocal[match].push(inv);
+    // Si no coincide con ningún local conocido, lo ponemos igual bajo su tienda
+  });
+
+  // Stats globales
+  var totalActivos   = 0, totalContados = 0, totalPendientes = 0, totalDiffs = 0;
+  Object.values(registro).forEach(function(inv) {
+    if (inv.estado === 'activo') {
+      totalActivos++;
+      totalContados   += inv.contados    || 0;
+      totalDiffs      += inv.diferencias || 0;
+      var pendientes   = (inv.productos  || 0) - (inv.contados || 0);
+      totalPendientes += Math.max(0, pendientes);
+    }
+  });
+  document.getElementById('sum-activos').textContent    = totalActivos;
+  document.getElementById('sum-contados').textContent   = totalContados;
+  document.getElementById('sum-pendientes').textContent = totalPendientes;
+  document.getElementById('sum-diffs').textContent      = totalDiffs;
+
+  // Render cards
+  var grid = document.getElementById('locales-grid');
+  grid.innerHTML = LOCALES.map(function(local) {
+    var invs = porLocal[local] || [];
+    var activos = invs.filter(function(i) { return i.estado === 'activo'; });
+    var finalizados = invs.filter(function(i) { return i.estado === 'finalizado'; });
+
+    var totalProds    = activos.reduce(function(a,i){return a+(i.productos||0);},0);
+    var totalCont     = activos.reduce(function(a,i){return a+(i.contados||0);},0);
+    var totalDif      = activos.reduce(function(a,i){return a+(i.diferencias||0);},0);
+    var pctGlobal     = totalProds ? Math.round(totalCont/totalProds*100) : 0;
+    var barColor      = pctGlobal===100?'var(--green-mid)':pctGlobal>50?'var(--blue-mid)':'var(--amber)';
+
+    var estadoBadge = activos.length > 0
+      ? '<span class="badge badge-activo">● En inventario</span>'
+      : '<span class="badge badge-libre">Sin inventario activo</span>';
+
+    var bodyHtml = '';
+    if (activos.length === 0 && finalizados.length === 0) {
+      bodyHtml = '<div class="local-empty">Sin inventarios registrados</div>';
+    } else {
+      if (activos.length > 0) {
+        bodyHtml += '<div class="local-body">';
+        bodyHtml += '<div class="prog-row"><span>'+totalCont+' de '+totalProds+' productos contados</span><strong>'+pctGlobal+'%</strong></div>';
+        bodyHtml += '<div class="prog-wrap"><div class="prog-fill" style="width:'+pctGlobal+'%;background:'+barColor+';"></div></div>';
+        bodyHtml += '<div class="local-stats">';
+        bodyHtml += '<div class="ls"><div class="ls-val" style="color:var(--green-mid)">'+totalCont+'</div><div class="ls-lbl">Contados</div></div>';
+        bodyHtml += '<div class="ls"><div class="ls-val" style="color:var(--amber)">'+(totalProds-totalCont)+'</div><div class="ls-lbl">Pendientes</div></div>';
+        bodyHtml += '<div class="ls"><div class="ls-val" style="color:'+(totalDif>0?'var(--danger)':'var(--green-mid)')+'">'+totalDif+'</div><div class="ls-lbl">Diferencias</div></div>';
+        bodyHtml += '</div></div>';
+
+        // Lista de inventarios activos
+        bodyHtml += '<div class="inv-list">';
+        activos.forEach(function(inv) {
+          var sync = inv.ultimaSync ? new Date(inv.ultimaSync).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '—';
+          bodyHtml += '<div class="inv-item">'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+            + '<div><div class="inv-folio">Folio '+inv.folio+' · '+inv.categoria+'</div>'
+            + '<div class="inv-info">Contador: '+(inv.contador||'—')+' · Sync: '+sync+'</div></div>'
+            + '<div style="text-align:right;font-size:12px;font-weight:600;">'+inv.pct+'%</div>'
+            + '</div></div>';
+        });
+        bodyHtml += '</div>';
+      }
+
+      if (finalizados.length > 0) {
+        bodyHtml += '<div style="padding:10px 20px;border-top:1px solid var(--border);">';
+        bodyHtml += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Finalizados hoy</div>';
+        finalizados.slice(0,3).forEach(function(inv) {
+          bodyHtml += '<div style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between;">'
+            + '<span style="color:var(--blue-mid);font-weight:500;">Folio '+inv.folio+' · '+inv.categoria+'</span>'
+            + '<span class="badge badge-finalizado">✓ Finalizado</span>'
+            + '</div>';
+        });
+        bodyHtml += '</div>';
+      }
+    }
+
+    return '<div class="local-card">'
+      + '<div class="local-header">'
+      + '<div><div class="local-name">'+local+'</div>'
+      + '<div class="local-meta">'+activos.length+' activo'+(activos.length!==1?'s':'')+' · '+finalizados.length+' finalizado'+(finalizados.length!==1?'s':'')+'</div></div>'
+      + estadoBadge
+      + '</div>'
+      + bodyHtml
+      + '</div>';
+  }).join('');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+</script>
+</body>
+</html>
